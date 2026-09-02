@@ -1,0 +1,335 @@
+{
+  "_meta": {
+    "generated": "2026-09-02",
+    "patch": "26.17",
+    "purpose": "시뮬레이터(docs/js/draft.js) eligibility 개선용 기계가독 초안. 근거 없는 항목은 수록하지 않음 — 모든 항목에 confidence 필수.",
+    "apiNameSource": "docs/data/augments.json (kiwi.bin.json 기반 apiName)과 전수 대조 완료. 대조 불일치·미등재는 _unresolved로 분리.",
+    "confidenceLevels": {
+      "official": "라이엇 공식(패치 노트/dev 블로그/공개 강연 보도/공식 위키 원문)",
+      "datamined": "게임 파일 실측(kiwi.bin.json 등 CommunityDragon 원본 파싱)",
+      "empirical": "통계 사이트 역추적 실측(arammayhem.net + op.gg 2계열 교차, 챔피언 6명 표본)",
+      "community": "커뮤니티/팬사이트/나무위키 서술(교차 검증 안 된 것)"
+    },
+    "sources": {
+      "03": "research/raw/03-champion-augment-pools.md",
+      "09": "research/raw/09-ability-augments.md",
+      "10": "research/raw/10-eligibility-datamine.md",
+      "11": "research/raw/11-empirical-pools.md",
+      "12": "research/raw/12-class-weighting.md",
+      "13": "research/raw/13-kr-pools-community.md"
+    },
+    "propsVocab": {
+      "compatible": ["projectile", "targeted", "knockback", "shield", "dash", "spin", "heal"],
+      "newProps": ["immobilize", "terrain", "empoweredAttack", "durationEffect"],
+      "note": "compatible은 champions.json abilityProps에 이미 존재. newProps는 champions.json에 아직 없는 속성 — 시뮬레이터 반영 시 챔피언 데이터에 추가 필요. requiredProps는 '같은 스킬 하나'가 모두 만족해야 하는 조건(스킬 단위 AND)."
+    },
+    "caveats": [
+      "챔피언×증강 매핑·가중치(Optimal/Viable/Average/Invalid)는 100% 서버 전용 — 클라이언트/CDN 어디에도 없음(10 §1.2). 여기 수록된 것은 게이트의 '존재 근거'이며 정확한 판정 로직 재현은 불가능.",
+      "empirical 항목은 챔피언 6명(징크스/브랜드/말파이트/제드/소라카/다리우스) 표본의 역추적 — 역할군 내 일반화는 추가 확인 필요(11 §6).",
+      "tier는 docs/data/augments.json(게임 파일 kiwi.bin 우선) 기준. Terror/BONK!/Pursuit of Power는 소스 3원 상충 — _unresolved 참조."
+    ]
+  },
+  "abilityAugments": {
+    "tierSystem": "스킬 증강(Ability Augments)은 별도 티어가 아니라 실버/골드/프리즘 3등급을 가로지르는 '카테고리'다. 게임 데이터 플래그({e3a02eac}=true) 기준 30종 = 실버 7/골드 17/프리즘 6(슬롯 고정형 빵 3종·비활성 4종 포함, 10 §1.6). 위키 모듈 기준 27종(스킬 강화형 24 + 스킬 지정 퀘스트형 3, 09 §3). 일반 증강과 같은 화면·같은 티어 규칙으로 섞여 나오며, 강화 대상 스킬은 플레이어가 고르는 게 아니라 시스템이 '증강×스킬 조합'을 사전 생성해 카드에 챔피언 초상화+스킬 아이콘으로 표시한다(09 §5). 궁극기도 대상 가능(Chain Reaction 250%/Terrain'd 300%). 진행 트랙 레벨 9 보상이 등장 확률을 올린다(수치 비공개). 26.13 이전엔 3·4번째 화면 등장률이 크게 낮은 버그가 있었다(공식 수정).",
+    "augments": [
+      { "apiName": "ARAM_SustainingStrike", "nameEn": "Siphon", "nameKo": "흡수", "tier": "silver", "requiredProps": [] },
+      { "apiName": "WardingWeapon", "nameEn": "Adaptive Ward", "nameKo": "적응형 와드", "tier": "silver", "requiredProps": [], "notes": "26.15: 아크샨 E 부적격 제시 버그 수정(스킬 슬롯 단위 게이트)" },
+      { "apiName": "TitansPulse", "nameEn": "Stay Resolute", "nameKo": "확고한 의지로", "tier": "silver", "requiredProps": [], "notes": "실측: 근접 3인(말파이트/제드/다리우스)에만 등재 — 클래스 게이트 추정(11 §3-8)" },
+      { "apiName": "TrustyWeapon", "nameEn": "Trusty Weapon", "nameKo": "믿음직한 무기", "tier": "silver", "requiredProps": [] },
+      { "apiName": "ItsGoTime", "nameEn": "It's Go Time", "nameKo": "출발할 시간", "tier": "silver", "requiredProps": ["durationEffect"] },
+      { "apiName": "DoubleDefense", "nameEn": "Bolstered", "nameKo": "보강", "tier": "silver", "requiredProps": ["shield"] },
+      { "apiName": "DoubleStrike", "nameEn": "Double Strike", "nameKo": "2연속 공격", "tier": "silver", "requiredProps": ["empoweredAttack"], "enabled": false },
+      { "apiName": "Bonk", "nameEn": "BONK!", "nameKo": "꽁!", "tier": "gold", "requiredProps": ["empoweredAttack"], "notes": "티어 상충(위키 실버/26.12노트·게임데이터 골드). 실측: 6명 중 다리우스만(강화 평타 W)" },
+      { "apiName": "ARAM_Terror", "nameEn": "Terror", "nameKo": "공포", "tier": "gold", "requiredProps": [], "notes": "티어 3원 상충(26.12노트 프리즘/위키 실버/게임데이터 골드) — _unresolved 참조" },
+      { "apiName": "MercysStrike", "nameEn": "Mercy's Strike", "nameKo": "자비의 일격", "tier": "gold", "requiredProps": [], "notes": "서포트 전용 클래스 게이트(26.15 공식 버그픽스로 확인) — classBias 참조" },
+      { "apiName": "ARAM_RabbleRousing", "nameEn": "Rejuvenation", "nameKo": "원기 회복", "tier": "gold", "requiredProps": [] },
+      { "apiName": "ARAM_Quickstep", "nameEn": "Quickstep", "nameKo": "날쌘걸음", "tier": "gold", "requiredProps": [], "notes": "26.12 발표 조건은 '자가 대상 AoE 스킬'(가렌 E, 케넨 R) — 현재 조건 미확인. 26.13 프리즘→골드. 실측: 근접 3인만" },
+      { "apiName": "ChainReaction", "nameEn": "Chain Reaction", "nameKo": "연쇄 반응", "tier": "gold", "requiredProps": ["knockback"], "notes": "궁극기 대상이면 피해 250%. 26.16 프리즘→골드" },
+      { "apiName": "DarkWind", "nameEn": "Ravenous Bind", "nameKo": "굶주린 속박", "tier": "gold", "requiredProps": ["immobilize"], "notes": "속박/그라운딩 스킬 필요. 챔피언마다 다른 스킬에 바인딩(빅토르 W/레넥톤 W — 게임플 실측)" },
+      { "apiName": "Terraind", "nameEn": "Terrain'd", "nameKo": "지형 생성됨", "tier": "gold", "requiredProps": ["terrain"], "notes": "지형 생성 스킬 필요. 궁극기면 피해 3배" },
+      { "apiName": "LittleExtraHelp", "nameEn": "Lil' Extra Help", "nameKo": "작은 도움", "tier": "gold", "requiredProps": ["empoweredAttack", "durationEffect"], "notes": "일정 시간 기본 공격을 강화하는 스킬 필요" },
+      { "apiName": "SpecializedEmpowerment", "nameEn": "Pursuit of Power", "nameKo": "위력 추구", "tier": "gold", "requiredProps": [], "quest": true, "notes": "티어 상충(26.12노트 실버/위키·게임데이터 골드). 26.15: Akshan E/Draven Q/Illaoi E/Malphite W 부적격 확정" },
+      { "apiName": "ARAM_SpecializedRecursion", "nameEn": "Pursuit of Haste", "nameKo": "가속 추구", "tier": "gold", "requiredProps": [], "quest": true, "notes": "2단계 퀘스트(10/30적중→가속 80/160). 26.14: Yasuo E 부적격 확정" },
+      { "apiName": "ARAM_BreadAndButter", "nameEn": "Bread And Butter", "nameKo": "빵과 버터", "tier": "gold", "requiredProps": [], "slot": "Q", "notes": "슬롯 고정형(스킬 지정 불필요한 전신). 실측: 토글 Q 징크스만 제외 — 스킬 단위 dead draw 필터(11 §4-2)" },
+      { "apiName": "ARAM_BreadAndJam", "nameEn": "Bread And Jam", "nameKo": "빵과 잼", "tier": "gold", "requiredProps": [], "slot": "W" },
+      { "apiName": "ARAM_BreadAndCheese", "nameEn": "Bread And Cheese", "nameKo": "빵과 치즈", "tier": "gold", "requiredProps": [], "slot": "E" },
+      { "apiName": "VoidDash", "nameEn": "Void Dash", "nameKo": "공허 돌진", "tier": "gold", "requiredProps": ["dash"], "enabled": false, "notes": "26.12 핫픽스 이후 비활성" },
+      { "apiName": "KeepGoing", "nameEn": "Reload", "nameKo": "재장전", "tier": "gold", "requiredProps": ["durationEffect"], "enabled": false },
+      { "apiName": "SnapBack", "nameEn": "Snap Back", "nameKo": "원상복구", "tier": "gold", "requiredProps": [], "enabled": false },
+      { "apiName": "Ability_SelfAOE_DoubleCast", "nameEn": "Echo Cast", "nameKo": "메아리 시전", "tier": "prismatic", "requiredProps": [], "notes": "실측: 징크스·브랜드 제외(11 §3-9) — 큐레이션 게이트 추정" },
+      { "apiName": "Overloaded", "nameEn": "Overloaded", "nameKo": "과충전", "tier": "prismatic", "requiredProps": [], "notes": "26.15: Katarina E/Shaco E 부적격 확정" },
+      { "apiName": "Overkill", "nameEn": "Pin Cushion", "nameKo": "바늘꽂이", "tier": "prismatic", "requiredProps": ["durationEffect"] },
+      { "apiName": "Missile_Split", "nameEn": "Spell Split", "nameKo": "주문 분산", "tier": "prismatic", "requiredProps": ["projectile"], "notes": "실측: 6명 중 브랜드·제드만(11 §3-9)" },
+      { "apiName": "SpellVolley", "nameEn": "Tripleshot", "nameKo": "3연발", "tier": "prismatic", "requiredProps": ["targeted", "projectile"], "notes": "같은 스킬 하나가 대상 지정+투사체여야 함(AND). 실측: 브랜드 R·말파이트 Q만(위키 적격 목록과 일치)" },
+      { "apiName": "ARAM_Multishot", "nameEn": "Multishot", "nameKo": "다중 공격", "tier": "prismatic", "requiredProps": ["projectile"], "quest": true, "notes": "6단계 퀘스트(필요 적중=50~8000÷기본쿨). 벨코즈 전용 예외 스펠 존재(datamined). 실측: 브랜드·제드만 — 징크스는 W/R 투사체인데도 부재(450+ 제거 추정)" }
+    ]
+  },
+  "classBias": [
+    {
+      "augmentTag": "ALL",
+      "favoredClasses": [],
+      "excludedClasses": [],
+      "confidence": "official",
+      "source": "게임스컴 데브 2026 강연(Noor Amin): 각 클래스(인챈터/마크스맨/메이지/탱커…)의 전체 증강 풀을 Optimal(드묾)/Viable(자주)/Average(자주·무난)/Invalid(완전 제외) 4단계로 분류. 수치 비공개. — 12 §0·§3, 03 §2-4",
+      "notes": "모든 편향의 상위 프레임. Invalid=완전 제외(실측으로 확인), Optimal/Viable/Average=가중치(통계로 분리 측정 불가)."
+    },
+    {
+      "augmentTag": "mana",
+      "augments": ["ARAM_Overflow", "ARAM_Juiced", "ARAM_MindtoMatter", "ARAM_OceanSoul"],
+      "favoredClasses": [],
+      "excludedClasses": ["manaless(기력·무자원 챔피언)"],
+      "confidence": "empirical",
+      "source": "제드(기력)에게만 3종(Overflow/Juiced/MindtoMatter) 정확히 부재 — 양 소스 일치(11 §3-3). kiwi.bin mAugmentTags=8이 정확히 이 4종(10 §1.3). 아레나에는 공식 명문화(03 §3-2).",
+      "notes": "OceanSoul은 태그상 마나 계열이나 6명 실측에서는 전원 등재(원소 영혼 공통 풀) — 제외 대상은 마나 '소모' 연동 3종만일 가능성. 무자원(가렌 등) 일반화는 미확인."
+    },
+    {
+      "augmentTag": "adCrit",
+      "augments": ["ARAM_BluntForce", "ARAM_Upgrade_Collector", "Quest_UltraHydra", "Upgrade_DeathDance", "Upgrade_Ravenous", "Upgrade_SunderedSky", "ARAM_Upgrade_IE", "CriticalMissile", "CriticalRhythm", "ARAM_escAPADe", "ARAM_DrawYourSword", "ARAM_Typhoon"],
+      "favoredClasses": ["marksman", "fighter", "assassin"],
+      "excludedClasses": ["mage", "enchanter", "tank(주문형)"],
+      "confidence": "empirical",
+      "source": "브랜드·말파이트·소라카에 구조적 부재(Critical Missile은 징크스 픽률 28.65%인데 말/제/다 0건) — 11 §3-1. kiwi.bin mAugmentTags=4(AD/치명타)와 합치(10 §1.3). 아레나 AD 예외 72명 리스트와 합치(03 §3-2)."
+    },
+    {
+      "augmentTag": "ap",
+      "augments": ["ARAM_ADAPt", "ARAM_Eureka", "ARAM_BigBrain", "ARAM_MasterofDuality", "OminousPact", "ARAM_Quest_WoogletsWitchcap", "ARAM_WitchfulThinking", "ARAM_Upgrade_ZH", "ARAM_PhenomenalEvil"],
+      "favoredClasses": ["mage", "enchanter", "tank(AP)"],
+      "excludedClasses": ["marksman(AD)", "assassin(AD)", "fighter(AD)"],
+      "confidence": "empirical",
+      "source": "징크스·제드·다리우스에 구조적 부재(패턴 011010 양 소스 일치) — 11 §3-2. kiwi.bin mAugmentTags=2(AP)와 합치(10 §1.3). 아레나 AP 예외 49명과 합치.",
+      "notes": "예외: Phenomenal Evil은 징크스 포함(AD 근접만 제외) — 개별 게이트가 계열과 다를 수 있음."
+    },
+    {
+      "augmentTag": "dash",
+      "augments": ["ARAM_Dashing", "ARAM_Earthwake", "ARAM_OutlawsGrit", "ARAM_ShadowRunner", "SwiftAndSafe"],
+      "favoredClasses": [],
+      "excludedClasses": ["대시/점멸 스킬 미보유 챔피언 전부"],
+      "confidence": "empirical",
+      "source": "5종이 완벽히 동일 패턴(001100)으로 대시 보유자 말파이트 R·제드 W만 등재, 양 소스 일치 — 11 §3-5. kiwi.bin mAugmentTags=32(대시 요구, Flashbang·Nightstalking·Quickstep 포함 8종)와 합치(10 §1.3). 아레나 이동기 예외 73명과 합치."
+    },
+    {
+      "augmentTag": "allyHealShield",
+      "augments": ["ARAM_SonicBoom", "ARAM_WeeWooWeeWoo", "ARAM_EmpoweredByTheFaithful", "MercysStrike", "ARAM_AllForYou", "ARAM_SpiritBomb", "EmpyreanPromise"],
+      "favoredClasses": ["enchanter", "support"],
+      "excludedClasses": ["아군 힐/실드 미보유 챔피언"],
+      "confidence": "empirical",
+      "source": "6명 중 소라카 전용으로만 관측(Sonic Boom 소라카 픽률 14.8%, 나머지 5명 0건) — 11 §3-4. kiwi.bin mAugmentTags=4096(아군 대상)과 합치(10 §1.3). 아레나 27명 화이트리스트 방식 계승 정황."
+    },
+    {
+      "augmentApiName": "MercysStrike",
+      "favoredClasses": ["support"],
+      "excludedClasses": ["non-support 전부"],
+      "confidence": "official",
+      "source": "공식 26.15 패치노트: 'Fixed a bug where Mercy Strike could be offered to non-support champions in Mayhem like Vladimir' — 서포트 전용 게이트가 게임 코드에 실존(위키 미문서화) — 12 §0-4."
+    },
+    {
+      "augmentTag": "immobilize",
+      "augments": ["ARAM_Cruelty", "ARAM_SlapAround", "SoulEater", "ARAM_Impassable", "ARAM_CourageoftheColossus"],
+      "favoredClasses": [],
+      "excludedClasses": ["하드 CC(속박/접지) 미보유 챔피언"],
+      "confidence": "empirical",
+      "source": "제드(하드 CC 없음)만 양 소스 부재 — 11 §3-6. kiwi.bin mAugmentTags=16과 합치(10 §1.3). 아레나 Immobilize 예외 37명과 합치.",
+      "notes": "반례: 속박 E 보유 징크스가 Cruelty에서 양 소스 부재 — 클래스 기반 오버라이드 존재 가능성(11 §4-4, 미확인)."
+    },
+    {
+      "augmentTag": "sniper",
+      "augments": ["ARAM_SkilledSniper", "ARAM_BangBang"],
+      "favoredClasses": ["장거리 스킬샷 보유(징크스·브랜드·소라카 관측)"],
+      "excludedClasses": ["말파이트", "제드", "다리우스(관측)"],
+      "confidence": "empirical",
+      "source": "600+ 사거리 저격 계열이 장거리 3인에게만 등재(110010 양 소스 일치) — 11 §3-7. kiwi.bin mAugmentTags=128과 합치(10 §1.3)."
+    },
+    {
+      "augmentApiName": "ARAM_DrawYourSword",
+      "favoredClasses": ["marksman(평타 원거리)"],
+      "excludedClasses": ["melee 전부(공식)", "mage", "enchanter(실측 — 원거리라도 제외)"],
+      "confidence": "empirical",
+      "source": "공식 위키: 원거리 전용 + 루난 보유 시 미제시(official). 실측: 원거리인 브랜드·소라카에도 양 소스 0건 — 실제 필터는 명문 조건보다 좁은 클래스 기반 — 11 §4-1.",
+      "notes": "confidence는 '명문 조건보다 좁다'는 주장 기준. 원거리 전용 자체는 official."
+    },
+    {
+      "augmentTag": "critStats",
+      "augments": ["ARAM_Deft", "ARAM_Vulnerability", "ARAM_TapDancer", "ARAM_DoubleTap", "ARAM_ItsCritical", "ARAM_LightemUp", "ARAM_TankItOrLeaveIt"],
+      "favoredClasses": ["marksman"],
+      "excludedClasses": [],
+      "confidence": "empirical",
+      "source": "op.gg에선 6명 전원 등재이나 실픽은 징크스 집중 — 완전 제외(Invalid)가 아니라 가중치·선호 층위 — 11 §3-1. 시뮬레이터에선 제외가 아닌 가중치로 다뤄야 함."
+    },
+    {
+      "augmentTag": "selfHealCircle",
+      "augments": ["ARAM_WindspeakersBlessing", "ARAM_CircleofDeath"],
+      "favoredClasses": ["킷에 회복(셀프힐 포함) 보유"],
+      "excludedClasses": ["회복 미보유 챔피언"],
+      "confidence": "empirical",
+      "source": "소라카+다리우스(셀프힐 Q)에게만 등재(000011 양 소스 일치) — 필터 조건이 '아군 힐'이 아니라 '킷 내 회복'으로 추정 — 11 §4-3. 조건 해석은 추정."
+    },
+    {
+      "augmentTag": "meleeCluster",
+      "augments": ["TitansPulse", "ARAM_Quickstep", "ARAM_Upgrade_Immolate", "ARAM_StuckInHereWithMe"],
+      "favoredClasses": ["melee(전사/탱커/암살자)"],
+      "excludedClasses": ["징크스", "브랜드", "소라카(관측)"],
+      "confidence": "empirical",
+      "source": "TitansPulse/Quickstep/Upgrade_Immolate는 양 소스 공통으로 징·브·소 부재(근접 3인만 등재) — 11 §3-8.",
+      "notes": "예외: StuckInHereWithMe는 양 소스 공통 부재가 브랜드·소라카뿐(징크스는 op.gg 등재, 신뢰도 '중간' — 11 §3-8). 징크스 제외 규칙은 이 1종에 한해 불확실."
+    },
+    {
+      "augmentTag": "buildTags(mBuildTags)",
+      "favoredClasses": ["비트 8=서포터", "비트 32=메이지", "비트 64=원딜/평타", "비트 256=탱커", "비트 512=치명타"],
+      "excludedClasses": [],
+      "confidence": "datamined",
+      "source": "kiwi.bin.json mBuildTags 비트마스크(117종 보유) — 역할군 축 태그가 클라이언트에 증강별로 존재. 단 챔피언과 잇는 매핑·가중치는 클라이언트에 없음(서버 전용). 실제 드로우 계산에 쓰이는지는 미확증 — 10 §1.4."
+    }
+  ],
+  "championSpecific": [
+    {
+      "augmentApiName": "BloodMoneyBurn",
+      "champion": "Smolder",
+      "rule": "exclude",
+      "confidence": "official",
+      "source": "공식 26.14 패치노트: 'Fixed a bug where Smolder could be offered Combusting Interest' — 12 §5"
+    },
+    {
+      "augmentApiName": "ARAM_SpecializedRecursion",
+      "champion": "Yasuo",
+      "spell": "E",
+      "rule": "excludeSpell",
+      "confidence": "official",
+      "source": "공식 26.14: 'Pursuit of Haste was offered to Yasuo E' 버그 수정 — 09 §5, 12 §5"
+    },
+    {
+      "augmentApiName": "ARAM_SpecializedRecursion",
+      "champion": "Akshan",
+      "spell": "E",
+      "rule": "excludeSpell",
+      "confidence": "official",
+      "source": "공식 26.15 버그픽스 — 12 §5"
+    },
+    {
+      "augmentApiName": "SpecializedEmpowerment",
+      "champion": ["Akshan(E)", "Draven(Q)", "Illaoi(E)", "Malphite(W)"],
+      "rule": "excludeSpell",
+      "confidence": "official",
+      "source": "공식 26.15: 'Pursuit of Power is offered to Akshan's (E), Draven's (Q), Illaoi's (E), and Malphite's (W)' 버그 수정 — 12 §5"
+    },
+    {
+      "augmentApiName": "Overloaded",
+      "champion": ["Katarina(E)", "Shaco(E)"],
+      "rule": "excludeSpell",
+      "confidence": "official",
+      "source": "공식 26.15 버그픽스 — 12 §5"
+    },
+    {
+      "augmentApiName": "WardingWeapon",
+      "champion": "Akshan",
+      "spell": "E",
+      "rule": "excludeSpell",
+      "confidence": "official",
+      "source": "공식 26.15 버그픽스(Trusty Weapon도 동일) — 12 §5"
+    },
+    {
+      "augmentApiName": "TrustyWeapon",
+      "champion": "Akshan",
+      "spell": "E",
+      "rule": "excludeSpell",
+      "confidence": "official",
+      "source": "공식 26.15 버그픽스 — 12 §5"
+    },
+    {
+      "augmentApiName": "ARAM_BreadAndButter",
+      "champion": "Jinx",
+      "rule": "exclude",
+      "confidence": "empirical",
+      "source": "토글 Q(쿨다운 없음) → Q 가속 dead draw 필터. 6명 중 징크스만 양 소스 부재, W/E 버전은 전원 등재 — 11 §4-2"
+    },
+    {
+      "augmentApiName": "ARAM_Multishot",
+      "champion": "Velkoz",
+      "rule": "specialSpell",
+      "confidence": "datamined",
+      "source": "kiwi.bin AdditionalSpells에 Augment_ARAM_Multishot_Velkoz — 클라이언트 데이터에서 발견되는 유일한 챔피언 이름 지정형 예외(제외가 아니라 전용 처리) — 10 §1.7"
+    },
+    {
+      "augmentApiName": "ARAM_Dashing",
+      "champion": "Kalista",
+      "rule": "effectReplace",
+      "confidence": "community",
+      "source": "위키 노트(출처 bilibili 실측 영상): 칼리스타는 스킬 가속 대신 공속 125%로 효과 치환 — 03 §1"
+    }
+  ],
+  "otherRestrictions": [
+    {
+      "augmentApiName": "ARAM_DrawYourSword",
+      "rule": "itemExclude",
+      "condition": "루난의 허리케인 보유 시 미제시",
+      "confidence": "official",
+      "source": "위키 모듈 notes 원문 — 03 §1"
+    },
+    {
+      "augmentApiName": "Vampirism",
+      "rule": "itemExclude + mutualExclude",
+      "condition": "워모그 보유 시 미제시. ARAM_Perseverance와 상호배제(V26.06 추가). 현재 양쪽 모두 비활성",
+      "confidence": "official",
+      "source": "위키 모듈 + 위키 패치 히스토리 V26.06 raw — 12 §5"
+    },
+    {
+      "augmentApiName": "ARAM_Earthwake",
+      "rule": "teamLimit",
+      "condition": "팀당 최대 2명에게만 제시(추가 시점 V25.24부터)",
+      "confidence": "official",
+      "source": "위키 모듈 원문 — 03 §1, 12 §5"
+    },
+    {
+      "augmentApiName": "Dropybara_Active",
+      "rule": "teamLimit",
+      "condition": "팀당 최대 1명(현재 비활성)",
+      "confidence": "official",
+      "source": "위키 모듈 원문 — 03 §1"
+    },
+    {
+      "augmentApiName": "Overextender",
+      "rule": "mapOnly",
+      "condition": "도살자의 다리 맵 전용",
+      "confidence": "official",
+      "source": "위키 모듈 원문 — 03 §1"
+    },
+    {
+      "augmentApiName": "ARAM_SpinToWin",
+      "rule": "kitRequired",
+      "condition": "회전(spin) 속성 스킬 보유 챔피언만. 위키에 적격 스킬 목록 명시(아리 W·R, 다리우스 Q, 가렌 E, 제드 E 등 22명+)",
+      "confidence": "official",
+      "source": "위키 모듈 notes 적격 목록 — 03 §1. 실측: 6명 중 제드 E·다리우스 Q만 등재(11 §3-1)와 일치"
+    }
+  ],
+  "_unresolved": [
+    {
+      "item": "Executioner × Gangplank 제외(V26.01 핫픽스, official)",
+      "reason": "augments.json 225종에 Executioner apiName 미등재(제거/개명 추정) — 대조 불가",
+      "source": "12 §5 (위키 패치 히스토리 원문)"
+    },
+    {
+      "item": "Quest: Support Main (서포터 전용 퀘스트, 26.12 신규→6/18 비활성)",
+      "reason": "augments.json·현 위키 모듈 모두 미등재(제거 추정, 시점 미확인). 활성 당시 소라카만 관측(empirical)",
+      "source": "09 §4, 11 §3-4"
+    },
+    {
+      "item": "One Trick Pony (26.12 프리즘 신규)",
+      "reason": "현 위키 모듈·augments.json 미등재 — 제거 추정, 패치노트 무기록",
+      "source": "09 §7-2"
+    },
+    {
+      "item": "Terror/BONK!/Pursuit of Power 티어 3원 상충",
+      "reason": "26.12 공식노트(프리즘/골드/실버) vs 위키 모듈(실버/실버/골드) vs 게임데이터(골드/골드/골드). 본 JSON은 게임데이터(augments.json) 티어 채택 — 인게임 확인 필요",
+      "source": "09 §7-1, 10 §1.6"
+    },
+    {
+      "item": "op.gg 신규 '???' 증강",
+      "reason": "2026-09-02 재fetch에서 징/브/말/제 목록에 신규 등재된 정체불명 증강 — apiName 대조 불가",
+      "source": "11 §4-5 검증 노트"
+    },
+    {
+      "item": "ARAM_Quickstep 현재 적격 조건",
+      "reason": "26.12 발표문은 '자가 대상 AoE'였으나 현 위키 서술엔 조건 없음 — 변경 여부 미확인이라 requiredProps 미기재",
+      "source": "09 §3-1"
+    }
+  ]
+}

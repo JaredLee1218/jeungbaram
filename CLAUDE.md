@@ -56,5 +56,7 @@ node scripts/test-draft.mjs && node scripts/test-recommend.mjs && node scripts/t
 ## Current Status
 
 - 2026-09-02: 스터디 완료(`research/STUDY.md`) → v1 구현 완료. 테스트 5종 전부 통과(몬테카를로 30게임 규칙 위반 0). 로컬 검증 완료.
-- 다음 단계: 사용자가 GitHub 저장소 생성·push 후 Pages 활성화(README 배포 섹션). 이후 후보: 실기기 모바일 확인, 비활성 증강 콤보 1건 정리, 등급 확률 사용자 조정 UI.
+- 2026-09-02: GitHub 배포 완료 — https://jaredlee1218.github.io/jeungbaram/ (JaredLee1218/jeungbaram, Pages main /docs)
+- 2026-09-02: 2차 심층 스터디 완료 — 역할군별 증강 풀·능력 증강 티어 (`research/AUGMENT-POOLS-STUDY.md` + `research/raw/09~13` + 기계가독 `research/data/eligibility-notes.json`)
+- 다음 단계: eligibility-notes.json을 draft.js 필터/가중치에 반영 (STUDY §3의 6단계 작업 순서 참조 — champions.json에 immobilize 등 속성 추가 필요). 미커밋 상태.
 <!-- 진행 상황이 생기면 완료 / 진행 중 / 다음 단계를 여기에 갱신 -->
