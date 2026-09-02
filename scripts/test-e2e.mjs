@@ -51,6 +51,31 @@ ok(badAug === 0, '무결성: combos 증강 apiName 전부 augments.json에 존�
 ok(badItem === 0, '무결성: 시너지 아이템 id 전부 items.json에 존재 (불일치 ' + badItem + '건)');
 ok(badChamp === 0, '무결성: combos 챔피언 id 전부 champions.json에 존재 (불일치 ' + badChamp + '건)');
 
+// ---- 2.6) funrank.json 로드 + 참조 무결성 (선택 데이터지만 저장소에 있는 한 계약 준수) ----
+{
+  const funData = loadJson('funrank.json');
+  ok(funData && Array.isArray(funData.ranks), 'funrank: ranks 배열 로드');
+  const ranks = funData.ranks || [];
+  ok(ranks.length === champData.champions.length,
+    'funrank: 항목 수(' + ranks.length + ') = 챔피언 수(' + champData.champions.length + ')');
+
+  const rankIds = new Set(ranks.map((r) => r.id));
+  let missing = 0, badId = 0, badSig = 0, badTier = 0, badScore = 0;
+  const tierVocab = new Set(['S+', 'S', 'A', 'B', 'C']);
+  for (const c of champData.champions) if (!rankIds.has(c.id)) missing++;
+  for (const r of ranks) {
+    if (!champIds.has(r.id)) badId++;
+    if (!tierVocab.has(r.tier)) badTier++;
+    if (typeof r.funScore !== 'number' || r.funScore < 0 || r.funScore > 100) badScore++;
+    for (const s of r.signatureAugments || []) if (!augNames.has(s)) badSig++;
+  }
+  ok(missing === 0, 'funrank: 챔피언 173명 전원 존재 (누락 ' + missing + '명)');
+  ok(badId === 0, 'funrank: id 전부 champions.json에 존재 (불일치 ' + badId + '건)');
+  ok(badSig === 0, 'funrank: signatureAugments 전부 augments.json에 존재 (불일치 ' + badSig + '건)');
+  ok(badTier === 0, 'funrank: tier 어휘 준수 (위반 ' + badTier + '건)');
+  ok(badScore === 0, 'funrank: funScore 0~100 (위반 ' + badScore + '건)');
+}
+
 // ---- 2.5) 실데이터 풀 게이트 검증 (2차 스터디 실측 패턴 재현 — AUGMENT-POOLS-STUDY.md §3) ----
 {
   const byId = (id) => champData.champions.find((c) => c.id === id);

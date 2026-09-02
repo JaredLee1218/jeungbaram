@@ -311,6 +311,149 @@ button {
   text-align: center;
 }
 
+/* ---------- 꿀잼 랭킹 (funrank.json — 부재 시 아래 요소들은 렌더되지 않음) ---------- */
+
+/* 꿀잼 티어 배지: S+ 금 그라데이션 / S 금 / A 은 / B 회 / C 어두운 회 */
+.fun-tier-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  padding: 1px 6px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+.fun-tier-splus {
+  background: linear-gradient(135deg, #ffe9a8 0%, #c8aa6e 45%, #ffd76e 100%);
+  border-color: var(--gold-bright);
+  color: #2b1f06;
+  box-shadow: 0 0 8px rgba(255, 215, 110, 0.55);
+}
+.fun-tier-s {
+  background: rgba(200, 170, 110, 0.18);
+  border-color: var(--gold);
+  color: var(--gold-bright);
+}
+.fun-tier-a {
+  background: rgba(149, 161, 173, 0.16);
+  border-color: var(--silver);
+  color: #cdd6de;
+}
+.fun-tier-b {
+  background: rgba(138, 163, 194, 0.10);
+  border-color: var(--line);
+  color: var(--muted);
+}
+.fun-tier-c {
+  background: rgba(20, 33, 54, 0.6);
+  border-color: #22344f;
+  color: #5c7290;
+}
+
+/* 챔피언 셀 우상단에 작게 (터치 방해 금지: pointer-events 차단) */
+.champ-cell { position: relative; }
+.champ-cell .fun-tier-badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 1;
+  pointer-events: none;
+}
+.champ-cell.selected {
+  background: var(--panel);
+  border-color: var(--gold);
+}
+.champ-cell.selected .champ-icon { border-color: var(--gold); }
+
+/* 챔피언 미리보기 패널 (탭 → oneLiner + 시그니처 증강 → 드래프트 시작) */
+.champ-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+  border: 1px solid var(--gold-dim);
+  border-radius: var(--radius);
+  background:
+    radial-gradient(ellipse 80% 120% at 50% 0%, rgba(200, 170, 110, 0.08), transparent 70%),
+    var(--panel);
+  animation: fade-in 0.2s ease;
+}
+.champ-preview-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.champ-preview-head img {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid var(--gold-dim);
+  flex-shrink: 0;
+}
+.champ-preview-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+.champ-preview-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--gold-bright);
+}
+.champ-preview-close {
+  flex-shrink: 0;
+  text-decoration: none;
+  min-width: 44px;
+}
+.champ-oneliner {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--text);
+}
+
+/* 시그니처 증강 칩 (아이콘 + 이름, 작게) */
+.sig-augs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sig-aug {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px 4px 5px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel-2);
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+.sig-aug img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.champ-preview-actions { display: flex; }
+.champ-preview-actions .btn { width: 100%; }
+
+/* 결과 화면: "이 챔피언 꿀잼 티어: S+" 한 줄 */
+.result-fun-tier {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
 /* ---------- ② 드래프트 ---------- */
 
 .progress {
@@ -736,6 +879,8 @@ button {
 
   .result-actions { flex-direction: row; justify-content: center; }
   .result-actions .btn { width: auto; }
+
+  .champ-preview-actions .btn { width: auto; min-width: 260px; }
 }
 
 @media (min-width: 1024px) {

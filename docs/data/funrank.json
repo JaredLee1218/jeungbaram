@@ -1,0 +1,1685 @@
+{
+  "_meta": {
+    "generated": "2026-09-02",
+    "method": "funScore = 15 + KR통계(증바람.com OP=2/T1=1)*9 + EN통계(arammayhem.com 26.17 S+=4/S=3/A=2/B=1)*4.5 + KR커뮤니티 꿀잼 언급(0~4, 밈 주인공=4; 펨코·칼갤·인벤·나무위키 = research/raw/06·13)*11 + EN 콤보·가이드 언급(0~2, arammayhem combo 666·EloFactory 등 = research/raw/07)*5.5 + synergies.json combos 보유 수(최대 3)*3, 상한 99. 한국 커뮤니티 가중을 최상위로 두어 승률만 높은 무난 챔프보다 증강으로 변신하는 챔프(제이스·갱플·코그모류)가 위로 오게 설계. 티어 구간: S+>=72, S>=52, A>=38, B>=22, C<22. signatureAugments는 연구 파일에 챔피언x증강 근거가 있고 augments.json에 enabled로 실존하는 것만 수록 — 천천히 꾸준히(천꾸)·광대 대학·양자 연산·깊은 상처·미카엘·처형자 등 26.12 삭제/비활성 증강은 oneLiner의 밈 서술로만 남김(synergies.json _unresolved 참조).",
+    "tierVocab": [
+      "S+",
+      "S",
+      "A",
+      "B",
+      "C"
+    ],
+    "caveat": "재미는 주관적, 커뮤니티+통계 기반 근사"
+  },
+  "ranks": [
+    {
+      "id": "Brand",
+      "tier": "S+",
+      "funScore": 99,
+      "oneLiner": "지옥의 전도체 압도적 0티어, 온몸에 화상",
+      "signatureAugments": [
+        "ARAM_InfernalConduit"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Hecarim",
+      "tier": "S+",
+      "funScore": 99,
+      "oneLiner": "환무+신주 무한 Q 말, 너무 유명한 그 조합",
+      "signatureAugments": [
+        "ARAM_EtherealWeapon",
+        "ARAM_MysticPunch"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Vayne",
+      "tier": "S+",
+      "funScore": 93,
+      "oneLiner": "양잡 촉베인, 탱커 세상에서 개꿀 날먹",
+      "signatureAugments": [
+        "ARAM_DualWield",
+        "ARAM_FanTheHammer",
+        "ARAM_TapDancer"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Ryze",
+      "tier": "S+",
+      "funScore": 90,
+      "oneLiner": "스탯 루프 돌면 혼자 1:5, 망할 수가 없음",
+      "signatureAugments": [
+        "ARAM_BacktoBasics",
+        "ARAM_MindtoMatter",
+        "ARAM_Overflow"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "AurelionSol",
+      "tier": "S+",
+      "funScore": 85,
+      "oneLiner": "차냉+다단중첩 궤도 폭격, KR OP",
+      "signatureAugments": [
+        "ARAM_IceCold",
+        "ARAM_StackosaurusRex",
+        "ShrinkEngine"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "DrMundo",
+      "tier": "S+",
+      "funScore": 80,
+      "oneLiner": "최종형태 문도는 걸어다니는 재앙",
+      "signatureAugments": [
+        "FinalForm",
+        "ARAM_TankEngine",
+        "ARAM_Goliath"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Gangplank",
+      "tier": "S+",
+      "funScore": 80,
+      "oneLiner": "기돌 3연통 풀피 원킬, 블루투스 불칼",
+      "signatureAugments": [
+        "ARAM_EtherealWeapon",
+        "ARAM_BacktoBasics"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Senna",
+      "tier": "S+",
+      "funScore": 80,
+      "oneLiner": "태풍은 GOAT, 실버인데 프리즘급",
+      "signatureAugments": [
+        "ARAM_Typhoon",
+        "ARAM_EtherealWeapon",
+        "ARAM_ScopiestWeapons"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Ekko",
+      "tier": "S+",
+      "funScore": 78,
+      "oneLiner": "환무 EQ에 패시브 3타, KR OP 1순위",
+      "signatureAugments": [
+        "ARAM_EtherealWeapon"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Nasus",
+      "tier": "S+",
+      "funScore": 74,
+      "oneLiner": "AP 처형시간 나서스, 뜨면 개사기",
+      "signatureAugments": [
+        "ARAM_ItsKillingTime"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Sona",
+      "tier": "S+",
+      "funScore": 74,
+      "oneLiner": "바람전달자 소나, 죽고 싶어도 못 죽음",
+      "signatureAugments": [
+        "ARAM_WindspeakersBlessing",
+        "ARAM_WeeWooWeeWoo"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Zac",
+      "tier": "S+",
+      "funScore": 74,
+      "oneLiner": "프로틴+죽순, 회복이 곧 1대5 딜",
+      "signatureAugments": [
+        "ARAM_ProteinShake",
+        "ARAM_TankEngine",
+        "ARAM_Quest_SteelYourHeart"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Jayce",
+      "tier": "S+",
+      "funScore": 73,
+      "oneLiner": "'천꾸 뜨면 오픈' 그 주인공, 빵 포킹 장인",
+      "signatureAugments": [
+        "ARAM_BreadAndButter",
+        "ARAM_BreadAndCheese"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Jinx",
+      "tier": "S+",
+      "funScore": 72,
+      "oneLiner": "탭댄서 발밑 모터, 패시브 연쇄 폭주",
+      "signatureAugments": [
+        "ARAM_TapDancer"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Singed",
+      "tier": "S+",
+      "funScore": 72,
+      "oneLiner": "가스에 몰왕 묻는 소문난 신지드",
+      "signatureAugments": [
+        "ARAM_EtherealWeapon",
+        "OminousPact"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Yasuo",
+      "tier": "S",
+      "funScore": 69,
+      "oneLiner": "신주 무한 Q, 승률 1위 야요 형",
+      "signatureAugments": [
+        "ARAM_MysticPunch",
+        "ARAM_SoulSiphon"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Kassadin",
+      "tier": "S",
+      "funScore": 68,
+      "oneLiner": "증강 안 떠도 사기, 뜨면 재앙",
+      "signatureAugments": [
+        "ARAM_MindtoMatter",
+        "ARAM_Overflow",
+        "ARAM_Eureka"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "MissFortune",
+      "tier": "S",
+      "funScore": 68,
+      "oneLiner": "대마법사 탄막 쌍권총, AP 미포도 꿀",
+      "signatureAugments": [
+        "ARAM_SkilledSniper",
+        "ARAM_Archmage"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Teemo",
+      "tier": "S",
+      "funScore": 67,
+      "oneLiner": "버섯밭 사장님, 양 진영 통계 S+",
+      "signatureAugments": [
+        "BrushPower",
+        "Nightstalking"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "KogMaw",
+      "tier": "S",
+      "funScore": 65,
+      "oneLiner": "처형시간 코그모, 좌절감 GOAT",
+      "signatureAugments": [
+        "ARAM_DualWield",
+        "ARAM_ItsKillingTime"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "MasterYi",
+      "tier": "S",
+      "funScore": 65,
+      "oneLiner": "신주+돌진 무한 알파, 못 잡는다",
+      "signatureAugments": [
+        "ARAM_MysticPunch",
+        "ARAM_Dashing"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Seraphine",
+      "tier": "S",
+      "funScore": 64,
+      "oneLiner": "대지의 영혼 노래방, KR OP",
+      "signatureAugments": [
+        "ARAM_MountainSoul",
+        "Sonata",
+        "ARAM_SonicBoom"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Aurora",
+      "tier": "S",
+      "funScore": 63,
+      "oneLiner": "돌진 사기급, 환무로 최대체력 증발",
+      "signatureAugments": [
+        "ARAM_MagicMissile",
+        "ARAM_EtherealWeapon"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Smolder",
+      "tier": "S",
+      "funScore": 62,
+      "oneLiner": "보건+다단중첩, Q가 2.5배 뻥튀기",
+      "signatureAugments": [
+        "ARAM_JeweledGauntlet",
+        "ARAM_StackosaurusRex",
+        "ARAM_PhenomenalEvil"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Veigar",
+      "tier": "S",
+      "funScore": 60,
+      "oneLiner": "다단중첩 무한 AP, 쉴 새 없이 스킬 난사",
+      "signatureAugments": [
+        "ARAM_StackosaurusRex",
+        "ARAM_PhenomenalEvil"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Katarina",
+      "tier": "S",
+      "funScore": 59,
+      "oneLiner": "궁면역+강심히드라몰왕 회전 재앙",
+      "signatureAugments": [
+        "ARAM_Firebrand",
+        "ARAM_SpinToWin",
+        "ARAM_BladeWaltz"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Yunara",
+      "tier": "S",
+      "funScore": 57,
+      "oneLiner": "결대+양잡, 평타가 소나기",
+      "signatureAugments": [
+        "ARAM_TapDancer",
+        "ARAM_MasterofDuality",
+        "ARAM_DualWield"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Poppy",
+      "tier": "S",
+      "funScore": 55,
+      "oneLiner": "커뮤니티 공인 역대급 사기캐",
+      "signatureAugments": [],
+      "evidence": "both"
+    },
+    {
+      "id": "Zaahen",
+      "tier": "S",
+      "funScore": 55,
+      "oneLiner": "증강 안 떠도 사기 소리 듣는 체급",
+      "signatureAugments": [],
+      "evidence": "both"
+    },
+    {
+      "id": "Graves",
+      "tier": "S",
+      "funScore": 54,
+      "oneLiner": "검뽑 그브, 사거리 200의 광전사",
+      "signatureAugments": [
+        "ARAM_DrawYourSword"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Yone",
+      "tier": "S",
+      "funScore": 54,
+      "oneLiner": "신주 무한 Q, 야요형제 동생",
+      "signatureAugments": [
+        "ARAM_MysticPunch",
+        "ARAM_SoulSiphon"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Caitlyn",
+      "tier": "S",
+      "funScore": 53,
+      "oneLiner": "최상급 조준경 우물 저격, 통계 S+",
+      "signatureAugments": [
+        "ARAM_ScopiestWeapons",
+        "ARAM_StackosaurusRex"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Jhin",
+      "tier": "S",
+      "funScore": 52,
+      "oneLiner": "거학 실 진, 네 발째가 두 배로 아프다",
+      "signatureAugments": [
+        "ARAM_JeweledGauntlet",
+        "ARAM_GiantSlayer"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Leona",
+      "tier": "S",
+      "funScore": 52,
+      "oneLiner": "이케시아 태양, 잔혹행위 CC 폭격",
+      "signatureAugments": [
+        "ARAM_Cruelty",
+        "ARAM_Quest_VoidImmolation",
+        "ARAM_UltimateRevolution"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Rell",
+      "tier": "S",
+      "funScore": 52,
+      "oneLiner": "잔혹행위+탱크엔진 1v5 철마",
+      "signatureAugments": [
+        "ARAM_Cruelty",
+        "ARAM_TankEngine"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Lucian",
+      "tier": "A",
+      "funScore": 51,
+      "oneLiner": "보건+취약 풀궁 화면 청소",
+      "signatureAugments": [
+        "ARAM_JeweledGauntlet",
+        "ARAM_Vulnerability"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Pantheon",
+      "tier": "A",
+      "funScore": 51,
+      "oneLiner": "강철심장 W 원버튼 처형 날먹",
+      "signatureAugments": [
+        "ARAM_Quest_SteelYourHeart"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Blitzcrank",
+      "tier": "A",
+      "funScore": 49,
+      "oneLiner": "빵버터 무한 그랩, 번개 루프",
+      "signatureAugments": [
+        "ARAM_BreadAndButter",
+        "ARAM_EtherealWeapon"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Chogath",
+      "tier": "A",
+      "funScore": 49,
+      "oneLiner": "피돼지 물리 마법사, 걸어다니는 재난",
+      "signatureAugments": [
+        "ARAM_escAPADe",
+        "ARAM_ProteinShake",
+        "ARAM_HeavyHitter"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Gragas",
+      "tier": "A",
+      "funScore": 49,
+      "oneLiner": "환무 술통 원격 핵 투척",
+      "signatureAugments": [
+        "ARAM_EtherealWeapon",
+        "ARAM_ADAPt"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Hwei",
+      "tier": "A",
+      "funScore": 49,
+      "oneLiner": "전도체+보건 흐웨이, 아다리 맞으면 예술",
+      "signatureAugments": [
+        "ARAM_InfernalConduit"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Karthus",
+      "tier": "A",
+      "funScore": 49,
+      "oneLiner": "대변혁 카서스, 죽어도 궁 두 번",
+      "signatureAugments": [
+        "ARAM_UltimateRevolution"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Swain",
+      "tier": "A",
+      "funScore": 49,
+      "oneLiner": "안 죽는 대장군, 잔혹행위 찰떡",
+      "signatureAugments": [
+        "OminousPact"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Lillia",
+      "tier": "A",
+      "funScore": 48,
+      "oneLiner": "전도체 몽롱 사슴, 온 맵이 화상",
+      "signatureAugments": [
+        "ARAM_InfernalConduit"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Varus",
+      "tier": "A",
+      "funScore": 48,
+      "oneLiner": "환무 3중첩이면 체력 100% 삭제",
+      "signatureAugments": [
+        "ARAM_SkilledSniper",
+        "ARAM_EtherealWeapon"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Morgana",
+      "tier": "A",
+      "funScore": 47,
+      "oneLiner": "노련한 저격수 속박 스나이퍼",
+      "signatureAugments": [
+        "ARAM_SkilledSniper"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Ambessa",
+      "tier": "A",
+      "funScore": 46,
+      "oneLiner": "증강 안 떠도 좋은 3대장",
+      "signatureAugments": [],
+      "evidence": "both"
+    },
+    {
+      "id": "Vladimir",
+      "tier": "A",
+      "funScore": 46,
+      "oneLiner": "기돌·거학 블라디, 무한 W 피바다",
+      "signatureAugments": [
+        "ARAM_GiantSlayer",
+        "ARAM_Eureka",
+        "ARAM_Quest_WoogletsWitchcap"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Ezreal",
+      "tier": "A",
+      "funScore": 45,
+      "oneLiner": "광휘 업글+보건 딸깍 원장님",
+      "signatureAugments": [
+        "ARAM_Upgrade_Sheen",
+        "ARAM_JeweledGauntlet"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Alistar",
+      "tier": "A",
+      "funScore": 44,
+      "oneLiner": "KR 1티어 소, CC탱 도트 궁합",
+      "signatureAugments": [],
+      "evidence": "both"
+    },
+    {
+      "id": "Galio",
+      "tier": "A",
+      "funScore": 44,
+      "oneLiner": "영혼의 포식자 무적 도발 조각상",
+      "signatureAugments": [
+        "SoulEater",
+        "ARAM_Cruelty",
+        "PressureCooker"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Twitch",
+      "tier": "A",
+      "funScore": 44,
+      "oneLiner": "KR 1티어 쥐, 탭댄서 기관총",
+      "signatureAugments": [
+        "ARAM_TapDancer"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Aatrox",
+      "tier": "A",
+      "funScore": 43,
+      "oneLiner": "최종형태+우당탕탕 부활 낫질",
+      "signatureAugments": [
+        "FinalForm",
+        "ARAM_SlapAround"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Amumu",
+      "tier": "A",
+      "funScore": 43,
+      "oneLiner": "더블 궁+눈덩이 이니시 울보",
+      "signatureAugments": [
+        "ARAM_Cruelty",
+        "ARAM_UltimateRevolution",
+        "BiggestSnowballEver"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Aphelios",
+      "tier": "A",
+      "funScore": 43,
+      "oneLiner": "검뽑 200 사거리 광전사, KR 1티어",
+      "signatureAugments": [
+        "ARAM_DrawYourSword"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "KSante",
+      "tier": "A",
+      "funScore": 43,
+      "oneLiner": "프로틴 크산테 실드는 못 뚫는다",
+      "signatureAugments": [
+        "ARAM_ProteinShake",
+        "ARAM_TankEngine",
+        "ARAM_Quest_SteelYourHeart"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Riven",
+      "tier": "A",
+      "funScore": 43,
+      "oneLiner": "환무 QQQ 패시브 폭발",
+      "signatureAugments": [
+        "ARAM_EtherealWeapon"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Udyr",
+      "tier": "A",
+      "funScore": 43,
+      "oneLiner": "환무 우디르, 스킬이 온힛 폭탄",
+      "signatureAugments": [
+        "ARAM_EtherealWeapon",
+        "ARAM_ScopiestWeapons"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Fiora",
+      "tier": "A",
+      "funScore": 41,
+      "oneLiner": "강심 스택이 AD로, 급소 한 방 처형",
+      "signatureAugments": [
+        "ARAM_Quest_SteelYourHeart",
+        "ARAM_TankEngine",
+        "ARAM_MysticPunch"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Tristana",
+      "tier": "A",
+      "funScore": 41,
+      "oneLiner": "양잡 대포, 검뽑도 소화",
+      "signatureAugments": [
+        "ARAM_DualWield",
+        "ARAM_DrawYourSword"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Garen",
+      "tier": "A",
+      "funScore": 40,
+      "oneLiner": "검무 회전 무적 믹서기",
+      "signatureAugments": [
+        "ARAM_SpinToWin",
+        "ARAM_BladeWaltz"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Ivern",
+      "tier": "A",
+      "funScore": 40,
+      "oneLiner": "소환술사 아이번, 구경만 해도 이김",
+      "signatureAugments": [
+        "ARAM_Minionmancer"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Sett",
+      "tier": "A",
+      "funScore": 40,
+      "oneLiner": "주먹맛 브루저, 통계 상위권",
+      "signatureAugments": [],
+      "evidence": "both"
+    },
+    {
+      "id": "TahmKench",
+      "tier": "A",
+      "funScore": 39,
+      "oneLiner": "강타자 메기, 통계 S+ 단단함",
+      "signatureAugments": [
+        "ARAM_HeavyHitter"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Ahri",
+      "tier": "A",
+      "funScore": 38,
+      "oneLiner": "궁각 구미호, 세 번 더 넘어온다",
+      "signatureAugments": [
+        "UltimateAwakening"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Corki",
+      "tier": "A",
+      "funScore": 38,
+      "oneLiner": "보건 폭격기, 스킬 치명타 2.5배",
+      "signatureAugments": [
+        "ARAM_JeweledGauntlet"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Malzahar",
+      "tier": "A",
+      "funScore": 38,
+      "oneLiner": "전도체 도트 패밀리 장남",
+      "signatureAugments": [
+        "ARAM_InfernalConduit"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "TwistedFate",
+      "tier": "A",
+      "funScore": 38,
+      "oneLiner": "KR 1티어, 카드가 계속 아프다",
+      "signatureAugments": [],
+      "evidence": "stats"
+    },
+    {
+      "id": "Shaco",
+      "tier": "B",
+      "funScore": 37,
+      "oneLiner": "광대 자폭 뒷빵 원킬의 낭만",
+      "signatureAugments": [],
+      "evidence": "community"
+    },
+    {
+      "id": "Fiddlesticks",
+      "tier": "B",
+      "funScore": 35,
+      "oneLiner": "적능 허수아비, 공포 Q 체력 증발",
+      "signatureAugments": [
+        "ARAM_ADAPt"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Malphite",
+      "tier": "B",
+      "funScore": 35,
+      "oneLiner": "대변혁 더블 궁 낙하",
+      "signatureAugments": [
+        "ARAM_UltimateRevolution",
+        "BiggestSnowballEver"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Mordekaiser",
+      "tier": "B",
+      "funScore": 35,
+      "oneLiner": "죽순 모데, W 회복 한 방에 삭제",
+      "signatureAugments": [
+        "ARAM_CircleofDeath"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Syndra",
+      "tier": "B",
+      "funScore": 35,
+      "oneLiner": "잔혹행위 구슬 저글링",
+      "signatureAugments": [],
+      "evidence": "both"
+    },
+    {
+      "id": "Tryndamere",
+      "tier": "B",
+      "funScore": 35,
+      "oneLiner": "죽순 트린, 힐이 핵폭탄",
+      "signatureAugments": [
+        "ARAM_CircleofDeath"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Vi",
+      "tier": "B",
+      "funScore": 35,
+      "oneLiner": "탄환 세례 주먹, 궁각 두 번",
+      "signatureAugments": [
+        "ARAM_FanTheHammer",
+        "UltimateAwakening"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Yuumi",
+      "tier": "B",
+      "funScore": 35,
+      "oneLiner": "죽순 유미, 붙어만 있어도 딜이 됨",
+      "signatureAugments": [
+        "ARAM_CircleofDeath"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Zed",
+      "tier": "B",
+      "funScore": 35,
+      "oneLiner": "광대 시절 그림자 순삭 낭만",
+      "signatureAugments": [],
+      "evidence": "both"
+    },
+    {
+      "id": "Fizz",
+      "tier": "B",
+      "funScore": 34,
+      "oneLiner": "돌진 물고기, 나갔다가 또 들어온다",
+      "signatureAugments": [
+        "ARAM_Dashing"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Maokai",
+      "tier": "B",
+      "funScore": 34,
+      "oneLiner": "죽순 나무, 회복할 때마다 쿵",
+      "signatureAugments": [
+        "ARAM_CircleofDeath"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Velkoz",
+      "tier": "B",
+      "funScore": 34,
+      "oneLiner": "노련한 저격수 레이저 포킹",
+      "signatureAugments": [
+        "ARAM_SkilledSniper"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Zilean",
+      "tier": "B",
+      "funScore": 34,
+      "oneLiner": "대마법사 무한 폭탄 시계공",
+      "signatureAugments": [
+        "ARAM_Archmage"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Gwen",
+      "tier": "B",
+      "funScore": 33,
+      "oneLiner": "KR 1티어 가위손 유지력",
+      "signatureAugments": [],
+      "evidence": "stats"
+    },
+    {
+      "id": "Anivia",
+      "tier": "B",
+      "funScore": 32,
+      "oneLiner": "요정마법 얼음 새, 처형시간도 찰떡",
+      "signatureAugments": [
+        "ARAM_ItsKillingTime",
+        "ARAM_FeyMagic"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Milio",
+      "tier": "B",
+      "funScore": 32,
+      "oneLiner": "바람전달자 밀리오, 구급차 풀가동",
+      "signatureAugments": [
+        "ARAM_WindspeakersBlessing",
+        "ARAM_WeeWooWeeWoo",
+        "ARAM_AllForYou"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Thresh",
+      "tier": "B",
+      "funScore": 32,
+      "oneLiner": "빵과 버터 그랩 장인, 우당탕탕 재벌",
+      "signatureAugments": [
+        "ARAM_BreadAndButter",
+        "ARAM_SlapAround"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Belveth",
+      "tier": "B",
+      "funScore": 31,
+      "oneLiner": "깊은 상처 시절 폭풍 칼춤",
+      "signatureAugments": [],
+      "evidence": "both"
+    },
+    {
+      "id": "Annie",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "소환술사 티버 곰 두 마리",
+      "signatureAugments": [
+        "ARAM_Minionmancer"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Ashe",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "차냉 애쉬, 화살이 냉동고",
+      "signatureAugments": [
+        "ARAM_IceCold",
+        "ARAM_StackosaurusRex"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Azir",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "마법 미사일 병정 황제",
+      "signatureAugments": [
+        "ARAM_MagicMissile"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Camille",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "양자연산 시절 갈고리 다이브",
+      "signatureAugments": [],
+      "evidence": "community"
+    },
+    {
+      "id": "Darius",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "승리 회전 도끼 믹서기",
+      "signatureAugments": [
+        "ARAM_SpinToWin",
+        "ARAM_BladeWaltz"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Irelia",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "우르프의 챔피언 그 자체",
+      "signatureAugments": [
+        "ARAM_Quest_UrfsChampion"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "JarvanIV",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "양자연산 시절 깃창 콤보",
+      "signatureAugments": [],
+      "evidence": "community"
+    },
+    {
+      "id": "Kalista",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "돌진 쿨감으로 창 무한 투척",
+      "signatureAugments": [
+        "ARAM_Dashing"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Karma",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "바람전달자 카르마, 팀이 안 죽는다",
+      "signatureAugments": [
+        "ARAM_WindspeakersBlessing"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Kayle",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "후반 레이저 천사, 통계 상위",
+      "signatureAugments": [],
+      "evidence": "stats"
+    },
+    {
+      "id": "Kayn",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "변신 골라 먹는 낫질, 통계 상위",
+      "signatureAugments": [],
+      "evidence": "stats"
+    },
+    {
+      "id": "Lissandra",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "잔혹행위 CC 연쇄 얼음",
+      "signatureAugments": [
+        "ARAM_Cruelty"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Mel",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "스탠딩 메이지의 유일한 예외",
+      "signatureAugments": [
+        "ARAM_SkilledSniper"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "MonkeyKing",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "승리 회전 분신 믹서기",
+      "signatureAugments": [
+        "ARAM_SpinToWin",
+        "ARAM_BladeWaltz"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Naafiri",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "전도체 개떼, 물면 계속 탄다",
+      "signatureAugments": [
+        "ARAM_InfernalConduit"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Nami",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "소나타 파도 오케스트라",
+      "signatureAugments": [
+        "Sonata",
+        "ARAM_SonicBoom",
+        "ARAM_WindspeakersBlessing"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Nautilus",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "잔혹행위 닻 그랩 연타",
+      "signatureAugments": [
+        "ARAM_Cruelty"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Nocturne",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "양자연산 시절 개틀링, 궁 암전",
+      "signatureAugments": [],
+      "evidence": "community"
+    },
+    {
+      "id": "Ornn",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "요정마법 대장장이",
+      "signatureAugments": [
+        "ARAM_FeyMagic"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Qiyana",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "돌진 키아나, 진입각이 곧 킬각",
+      "signatureAugments": [
+        "ARAM_Dashing"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Samira",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "검뽑 사미라, 난전이 무대",
+      "signatureAugments": [
+        "ARAM_DrawYourSword"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Shyvana",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "KR 1티어 용, 변신 화력",
+      "signatureAugments": [],
+      "evidence": "stats"
+    },
+    {
+      "id": "Taliyah",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "잔혹행위 돌맹이 폭격",
+      "signatureAugments": [
+        "ARAM_Cruelty"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Trundle",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "통계는 S, 승률로 말하는 트롤",
+      "signatureAugments": [],
+      "evidence": "stats"
+    },
+    {
+      "id": "Urgot",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "검뽑 전차, 갈아버린다",
+      "signatureAugments": [
+        "ARAM_DrawYourSword"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Viego",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "보건 비에고, 궁이 두 배로",
+      "signatureAugments": [
+        "ARAM_JeweledGauntlet"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Warwick",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "죽순 워윅, 흡혈이 곧 폭딜",
+      "signatureAugments": [
+        "ARAM_CircleofDeath"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "XinZhao",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "통계 상위 창기병",
+      "signatureAugments": [],
+      "evidence": "stats"
+    },
+    {
+      "id": "Zyra",
+      "tier": "B",
+      "funScore": 29,
+      "oneLiner": "소환술사 자이라, 식물원 자동 딜",
+      "signatureAugments": [
+        "ARAM_Minionmancer"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Jax",
+      "tier": "B",
+      "funScore": 28,
+      "oneLiner": "신주 잭스, 반격이 꺼지지 않는다",
+      "signatureAugments": [
+        "ARAM_MysticPunch"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Diana",
+      "tier": "B",
+      "funScore": 26,
+      "oneLiner": "광대 시절 달빛 다이브",
+      "signatureAugments": [],
+      "evidence": "community"
+    },
+    {
+      "id": "Draven",
+      "tier": "B",
+      "funScore": 26,
+      "oneLiner": "천꾸 시절 학살자, 도끼 맛은 여전",
+      "signatureAugments": [],
+      "evidence": "community"
+    },
+    {
+      "id": "Janna",
+      "tier": "B",
+      "funScore": 26,
+      "oneLiner": "바람 실드로 팀을 살리는 유틸 끝판왕",
+      "signatureAugments": [],
+      "evidence": "community"
+    },
+    {
+      "id": "Kennen",
+      "tier": "B",
+      "funScore": 26,
+      "oneLiner": "광대 시절 자폭 요다, 궁 한타 여전",
+      "signatureAugments": [],
+      "evidence": "community"
+    },
+    {
+      "id": "Khazix",
+      "tier": "B",
+      "funScore": 26,
+      "oneLiner": "광대 시절 고립 순삭 벌레",
+      "signatureAugments": [],
+      "evidence": "community"
+    },
+    {
+      "id": "Leblanc",
+      "tier": "B",
+      "funScore": 26,
+      "oneLiner": "처형시간 각인 순간 폭사",
+      "signatureAugments": [
+        "ARAM_ItsKillingTime"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Lulu",
+      "tier": "B",
+      "funScore": 26,
+      "oneLiner": "룰루뽕 버프 맞은 아군이 캐리",
+      "signatureAugments": [],
+      "evidence": "community"
+    },
+    {
+      "id": "Neeko",
+      "tier": "B",
+      "funScore": 26,
+      "oneLiner": "광대 시절 변신 기습 개화",
+      "signatureAugments": [],
+      "evidence": "community"
+    },
+    {
+      "id": "Nilah",
+      "tier": "B",
+      "funScore": 26,
+      "oneLiner": "보건 닐라, 스킬 치명타 물결",
+      "signatureAugments": [
+        "ARAM_JeweledGauntlet"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Rammus",
+      "tier": "B",
+      "funScore": 26,
+      "oneLiner": "OK. 가시 반사 굴렁쇠",
+      "signatureAugments": [],
+      "evidence": "community"
+    },
+    {
+      "id": "Soraka",
+      "tier": "B",
+      "funScore": 26,
+      "oneLiner": "회복량 하나로 사건 났던 힐러",
+      "signatureAugments": [],
+      "evidence": "community"
+    },
+    {
+      "id": "Vex",
+      "tier": "B",
+      "funScore": 26,
+      "oneLiner": "잔혹행위 우울 폭발",
+      "signatureAugments": [
+        "ARAM_Cruelty"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Zeri",
+      "tier": "B",
+      "funScore": 26,
+      "oneLiner": "천꾸 시절 폭주 기관차",
+      "signatureAugments": [],
+      "evidence": "community"
+    },
+    {
+      "id": "Zoe",
+      "tier": "B",
+      "funScore": 26,
+      "oneLiner": "처형시간 조이, 별똥별 두 번",
+      "signatureAugments": [
+        "ARAM_ItsKillingTime"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Xayah",
+      "tier": "B",
+      "funScore": 25,
+      "oneLiner": "양잡+한발두놈 깃털 샷건",
+      "signatureAugments": [
+        "ARAM_DualWield",
+        "ARAM_DoubleTap"
+      ],
+      "evidence": "both"
+    },
+    {
+      "id": "Gnar",
+      "tier": "B",
+      "funScore": 24,
+      "oneLiner": "탄환 세례 W 다중 프록 한 방",
+      "signatureAugments": [
+        "ARAM_FanTheHammer",
+        "ARAM_DualWield",
+        "ARAM_TapDancer"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Sion",
+      "tier": "B",
+      "funScore": 24,
+      "oneLiner": "죽어도 안 끝나는 돌진, 통계 상위",
+      "signatureAugments": [],
+      "evidence": "stats"
+    },
+    {
+      "id": "Viktor",
+      "tier": "B",
+      "funScore": 24,
+      "oneLiner": "통계 상위 레이저 진화",
+      "signatureAugments": [],
+      "evidence": "stats"
+    },
+    {
+      "id": "Cassiopeia",
+      "tier": "C",
+      "funScore": 21,
+      "oneLiner": "전도체 독사, 도트가 도트를 부른다",
+      "signatureAugments": [
+        "ARAM_InfernalConduit"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Lux",
+      "tier": "C",
+      "funScore": 21,
+      "oneLiner": "보건 럭스, 궁 치명타 한 줄 삭제",
+      "signatureAugments": [
+        "ARAM_JeweledGauntlet"
+      ],
+      "evidence": "community"
+    },
+    {
+      "id": "Rumble",
+      "tier": "C",
+      "funScore": 20,
+      "oneLiner": "브루저 증강으로 묵직해지는 전사",
+      "signatureAugments": [],
+      "evidence": "stats"
+    },
+    {
+      "id": "Shen",
+      "tier": "C",
+      "funScore": 20,
+      "oneLiner": "탱킹 증강 먹고 단단해지는 앞라인",
+      "signatureAugments": [],
+      "evidence": "stats"
+    },
+    {
+      "id": "Xerath",
+      "tier": "C",
+      "funScore": 20,
+      "oneLiner": "포킹·광역 증강이 잘 붙는 메이지",
+      "signatureAugments": [],
+      "evidence": "stats"
+    },
+    {
+      "id": "Akali",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "한 방 증강 노리는 암살자",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Akshan",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "평타 증강 몰아 받는 무난한 원딜",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Bard",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "유틸 증강으로 팀을 받치는 서포터",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Braum",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "탱킹 증강 먹고 단단해지는 앞라인",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Briar",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "브루저 증강으로 묵직해지는 전사",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Elise",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "한 방 증강 노리는 암살자",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Evelynn",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "한 방 증강 노리는 암살자",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Heimerdinger",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "포킹·광역 증강이 잘 붙는 메이지",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Illaoi",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "브루저 증강으로 묵직해지는 전사",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Kaisa",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "평타 증강 몰아 받는 무난한 원딜",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Kindred",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "평타 증강 몰아 받는 무난한 원딜",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Kled",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "브루저 증강으로 묵직해지는 전사",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "LeeSin",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "브루저 증강으로 묵직해지는 전사",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Locke",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "한 방 증강 노리는 암살자",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Nidalee",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "한 방 증강 노리는 암살자",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Nunu",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "탱킹 증강 먹고 단단해지는 앞라인",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Olaf",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "브루저 증강으로 묵직해지는 전사",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Orianna",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "포킹·광역 증강이 잘 붙는 메이지",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Pyke",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "유틸 증강으로 팀을 받치는 서포터",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Quinn",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "평타 증강 몰아 받는 무난한 원딜",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Rakan",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "유틸 증강으로 팀을 받치는 서포터",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "RekSai",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "브루저 증강으로 묵직해지는 전사",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Renata",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "유틸 증강으로 팀을 받치는 서포터",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Renekton",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "브루저 증강으로 묵직해지는 전사",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Rengar",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "한 방 증강 노리는 암살자",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Sejuani",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "탱킹 증강 먹고 단단해지는 앞라인",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Sivir",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "평타 증강 몰아 받는 무난한 원딜",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Skarner",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "탱킹 증강 먹고 단단해지는 앞라인",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Sylas",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "포킹·광역 증강이 잘 붙는 메이지",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Talon",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "한 방 증강 노리는 암살자",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Taric",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "유틸 증강으로 팀을 받치는 서포터",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Volibear",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "브루저 증강으로 묵직해지는 전사",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Yorick",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "브루저 증강으로 묵직해지는 전사",
+      "signatureAugments": [],
+      "evidence": "default"
+    },
+    {
+      "id": "Ziggs",
+      "tier": "C",
+      "funScore": 15,
+      "oneLiner": "포킹·광역 증강이 잘 붙는 메이지",
+      "signatureAugments": [],
+      "evidence": "default"
+    }
+  ]
+}

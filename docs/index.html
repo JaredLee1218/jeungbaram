@@ -37,12 +37,16 @@
                placeholder="챔피언 이름 검색 (예: 아리)" autocomplete="off"
                aria-label="챔피언 이름 검색">
         <div id="role-chips" class="chips" role="group" aria-label="역할 필터"></div>
+        <!-- funrank.json이 있을 때만 JS가 채우고 보여준다 (없으면 hidden 유지) -->
+        <div id="sort-chips" class="chips sort-chips" role="group" aria-label="정렬" hidden></div>
         <label class="setting-toggle" for="toggle-l9"
                title="진행 트랙 레벨 9 보상: 스킬 증강 등장 확률 증가 (증가 폭 비공개 — 근사)">
           <input id="toggle-l9" type="checkbox">
           <span>진행도 트랙 Lv9 보정 <span class="setting-sub">(스킬 증강 확률 ↑)</span></span>
         </label>
       </div>
+      <!-- 챔피언 탭 시 미리보기 (funrank 항목이 있을 때만 — 없으면 탭 즉시 드래프트 시작) -->
+      <div id="champ-preview" class="champ-preview" aria-live="polite" hidden></div>
       <div id="champ-grid" class="champ-grid"></div>
       <p id="champ-empty" class="empty-msg" hidden>검색 결과가 없습니다.</p>
     </section>

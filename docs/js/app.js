@@ -5,6 +5,10 @@
  * draft.js / recommend.js / data/*.json 은 공용 인터페이스 계약을
  * 그대로 신뢰하고 import 한다 (병렬 제작 — 통합은 C1 담당).
  *
+ * data/funrank.json 은 선택 데이터 (꿀잼 티어·정렬·oneLiner):
+ * 부재/파싱 실패 시 관련 UI(배지·정렬 칩·미리보기·결과 티어 줄)를
+ * 전부 생략하고 기존 4종 데이터만으로 동일하게 동작한다 (방어적).
+ *
  * 공유 URL 형식: ?champ=<id>&seed=<정수>&picks=<라운드별 액션>-...&l9=1(선택)
  *   - 액션 2글자: p<슬롯>=선택, r<슬롯>=일반 리롤, g<슬롯>=황금 리롤
  *   - 예: picks=p2-r0p1-g2p0-p1
@@ -44,10 +48,20 @@ var TIER_LABEL = { silver: "실버", gold: "골드", prismatic: "프리즘" };
 var ROUND_LEVELS = [3, 7, 11, 15];
 var TOTAL_ROUNDS = 4;
 
+/* 꿀잼 티어(funrank.json) → CSS 클래스 접미사.
+ * 어휘 밖 티어는 매핑 실패 → 배지를 그리지 않는다 (방어적).
+ * "S+"를 클래스명에 그대로 넣지 않기 위한 화이트리스트이기도 하다. */
+var FUN_TIER_CLASS = { "S+": "splus", "S": "s", "A": "a", "B": "b", "C": "c" };
+
+var SORT_CHIPS = [
+  { key: "name", label: "이름순" },
+  { key: "fun", label: "꿀잼순" },
+];
+
 /* ---------------- 상태 ---------------- */
 
 var state = {
-  data: null, // { augments, champions, items, synergies }
+  data: null, // { augments, champions, items, synergies, funrank(옵션: id→항목 맵 | null) }
   champion: null, // 선택한 챔피언 객체
   seed: null, // 이번 게임 시드
   game: null, // draft.js 게임 상태 (plain object)
@@ -57,6 +71,8 @@ var state = {
   actions: [], // 라운드별 액션 로그 [["p2"], ["r0","p1"], ...]
   search: "",
   roleFilter: null,
+  sortMode: "name", // "name"(기존 순서) | "fun"(funScore 내림차순) — 새로고침 시 초기화돼도 무방
+  previewChampId: null, // 선택 화면 미리보기 중인 챔피언 id (funrank 있을 때만 사용)
   trackL9: false, // 진행도 트랙 Lv9 보정 (기본 off — 근사: research/AUGMENT-POOLS-STUDY.md §3-2)
 };
 
@@ -125,19 +141,63 @@ function fetchJson(path) {
 }
 
 function loadData() {
+  /* funrank.json은 선택 데이터 (병렬 제작 중) — 개별 catch로 감싸
+   * 파일 부재/파싱 실패여도 나머지 4종만으로 앱이 뜬다 (방어적). */
+  var funrankPromise = fetchJson("./data/funrank.json").catch(function (err) {
+    console.warn("funrank.json 로드 실패 — 꿀잼 랭킹 기능 없이 동작합니다.", err);
+    return null;
+  });
   return Promise.all([
     fetchJson("./data/augments.json"),
     fetchJson("./data/champions.json"),
     fetchJson("./data/items.json"),
     fetchJson("./data/synergies.json"),
+    funrankPromise,
   ]).then(function (results) {
     return {
       augments: results[0].augments || [],
       champions: results[1].champions || [],
       items: results[2].items || [],
       synergies: results[3] || { combos: [], tagRules: [] },
+      funrank: buildFunrank(results[4]),
     };
   });
+}
+
+/* funrank.json 원본 → id→항목 맵. 스키마가 어긋나면 null (기능 통째로 off) */
+function buildFunrank(raw) {
+  if (!raw || !Array.isArray(raw.ranks) || raw.ranks.length === 0) return null;
+  var map = {};
+  var count = 0;
+  raw.ranks.forEach(function (r) {
+    if (!r || typeof r !== "object" || !r.id) return;
+    map[r.id] = r;
+    count++;
+  });
+  return count > 0 ? map : null;
+}
+
+/* 챔피언 id → funrank 항목 (없으면 null — 호출부는 전부 null 허용) */
+function funEntry(champId) {
+  var fr = state.data && state.data.funrank;
+  if (!fr) return null;
+  var e = fr[champId];
+  return e && typeof e === "object" ? e : null;
+}
+
+function funScoreOf(champ) {
+  var e = funEntry(champ.id);
+  var n = e ? Number(e.funScore) : NaN;
+  return isFinite(n) ? n : -1; // 점수 없는 챔피언은 꿀잼순에서 맨 뒤
+}
+
+/* 꿀잼 티어 배지 HTML ("" = 배지 없음) */
+function funTierBadgeHtml(entry) {
+  var cls = entry && FUN_TIER_CLASS[entry.tier];
+  if (!cls) return "";
+  return (
+    '<span class="fun-tier-badge fun-tier-' + cls + '">' + esc(entry.tier) + "</span>"
+  );
 }
 
 /* ---------------- draft.js 반환 형태 방어 ----------------
@@ -433,9 +493,35 @@ function renderRoleChips() {
   });
 }
 
+/* 정렬 칩 — funrank가 없으면 통째로 숨긴다 (기존 동작 유지) */
+function renderSortChips() {
+  var wrap = $("#sort-chips");
+  if (!wrap) return;
+  if (!(state.data && state.data.funrank)) {
+    wrap.hidden = true;
+    wrap.innerHTML = "";
+    return;
+  }
+  wrap.hidden = false;
+  wrap.innerHTML = "";
+  SORT_CHIPS.forEach(function (chip) {
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "chip" + (state.sortMode === chip.key ? " active" : "");
+    btn.textContent = chip.label;
+    btn.addEventListener("click", function () {
+      if (state.sortMode === chip.key) return;
+      state.sortMode = chip.key;
+      renderSortChips();
+      renderChampGrid();
+    });
+    wrap.appendChild(btn);
+  });
+}
+
 function filteredChampions() {
   var q = state.search.trim().toLowerCase();
-  return state.data.champions.filter(function (c) {
+  var list = state.data.champions.filter(function (c) {
     if (state.roleFilter) {
       var tags = c.tags || [];
       if (tags.indexOf(state.roleFilter) === -1) return false;
@@ -447,6 +533,15 @@ function filteredChampions() {
     }
     return true;
   });
+  /* 꿀잼순: funScore 내림차순, 동점은 한글 이름순 (funrank 없으면 도달 불가) */
+  if (state.sortMode === "fun" && state.data.funrank) {
+    list.sort(function (a, b) {
+      var d = funScoreOf(b) - funScoreOf(a);
+      if (d !== 0) return d;
+      return String(a.nameKo || "").localeCompare(String(b.nameKo || ""), "ko");
+    });
+  }
+  return list;
 }
 
 function renderChampGrid() {
@@ -456,12 +551,16 @@ function renderChampGrid() {
 
   var html = champs
     .map(function (c) {
+      var entry = funEntry(c.id);
       return (
-        '<button type="button" class="champ-cell" data-id="' +
+        '<button type="button" class="champ-cell' +
+        (state.previewChampId === c.id ? " selected" : "") +
+        '" data-id="' +
         esc(c.id) +
         '" aria-label="' +
         esc(c.nameKo) +
         ' 선택">' +
+        funTierBadgeHtml(entry) +
         '<img class="champ-icon" src="' +
         esc(c.icon) +
         '" alt="" loading="lazy" decoding="async" width="56" height="56">' +
@@ -474,17 +573,113 @@ function renderChampGrid() {
   grid.innerHTML = html;
 }
 
+function champById(id) {
+  return state.data.champions.filter(function (c) {
+    return c.id === id;
+  })[0];
+}
+
+/* 시그니처 증강 칩들 — augments.json에 실존하는 apiName만 그린다 (방어적) */
+function sigAugsHtml(entry) {
+  var list =
+    entry && Array.isArray(entry.signatureAugments) ? entry.signatureAugments : [];
+  if (!list.length) return "";
+  var augments = state.data.augments;
+  var rows = [];
+  list.slice(0, 3).forEach(function (apiName) {
+    var a = augments.filter(function (x) {
+      return x.apiName === apiName;
+    })[0];
+    if (!a) return;
+    rows.push(
+      '<span class="sig-aug">' +
+        '<img src="' + esc(a.icon) +
+        '" alt="" loading="lazy" decoding="async" width="24" height="24">' +
+        "<span>" + esc(a.nameKo) + "</span></span>"
+    );
+  });
+  if (!rows.length) return "";
+  return '<div class="sig-augs" aria-label="시그니처 증강">' + rows.join("") + "</div>";
+}
+
+/* 챔피언 미리보기 패널 (드래프트 시작 전 oneLiner + 시그니처 증강) */
+function renderChampPreview() {
+  var panel = $("#champ-preview");
+  if (!panel) return;
+  var champion = state.previewChampId ? champById(state.previewChampId) : null;
+  var entry = champion ? funEntry(champion.id) : null;
+  if (!champion || !entry) {
+    panel.hidden = true;
+    panel.innerHTML = "";
+    return;
+  }
+  panel.innerHTML =
+    '<div class="champ-preview-head">' +
+    '<img src="' + esc(champion.icon) +
+    '" alt="" loading="lazy" decoding="async" width="44" height="44">' +
+    '<div class="champ-preview-title">' +
+    '<span class="champ-preview-name">' + esc(champion.nameKo) + "</span>" +
+    funTierBadgeHtml(entry) +
+    "</div>" +
+    '<button type="button" class="link-btn champ-preview-close" data-action="close"' +
+    ' aria-label="미리보기 닫기">✕</button>' +
+    "</div>" +
+    (entry.oneLiner
+      ? '<p class="champ-oneliner">' + esc(entry.oneLiner) + "</p>"
+      : "") +
+    sigAugsHtml(entry) +
+    '<div class="champ-preview-actions">' +
+    '<button type="button" class="btn btn-primary" data-action="start">' +
+    "이 챔피언으로 드래프트 시작</button></div>";
+  panel.hidden = false;
+}
+
 function onChampGridClick(e) {
   var cell = e.target.closest ? e.target.closest(".champ-cell") : null;
   if (!cell) return;
   var id = cell.getAttribute("data-id");
-  var champion = state.data.champions.filter(function (c) {
-    return c.id === id;
-  })[0];
+  var champion = champById(id);
   if (!champion) return;
+  /* funrank 항목이 있으면 탭 → 미리보기(oneLiner) 먼저,
+   * 없으면 기존처럼 즉시 드래프트 시작 (방어적 폴백) */
+  var entry = funEntry(champion.id);
+  if (entry) {
+    state.previewChampId = champion.id;
+    renderChampPreview();
+    renderChampGrid();
+    var panel = $("#champ-preview");
+    if (panel && panel.scrollIntoView) {
+      try {
+        panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      } catch (err) {
+        /* 구형 브라우저: 옵션 객체 미지원이어도 치명적이지 않음 */
+      }
+    }
+    return;
+  }
   if (startGame(champion, newSeed())) {
     clearUrl();
     renderDraft();
+  }
+}
+
+function onChampPreviewClick(e) {
+  var btn = e.target.closest ? e.target.closest("[data-action]") : null;
+  if (!btn) return;
+  var action = btn.getAttribute("data-action");
+  if (action === "close") {
+    state.previewChampId = null;
+    renderChampPreview();
+    renderChampGrid();
+    return;
+  }
+  if (action === "start") {
+    var champion = state.previewChampId ? champById(state.previewChampId) : null;
+    if (!champion) return;
+    if (startGame(champion, newSeed())) {
+      clearUrl();
+      renderDraft();
+    }
   }
 }
 
@@ -495,8 +690,11 @@ function syncL9Toggle() {
 
 function showSelectScreen() {
   state.goldenArmed = false;
+  state.previewChampId = null;
   renderRoleChips();
+  renderSortChips();
   renderChampGrid();
+  renderChampPreview();
   syncL9Toggle();
   showScreen("select");
 }
@@ -666,12 +864,23 @@ function renderResult() {
   var picks = resolvedPicks();
   var c = state.champion;
 
-  /* 요약: 챔피언 + 4증강 */
+  /* 꿀잼 티어 한 줄 — funrank 항목이 없으면 아예 그리지 않는다 (방어적) */
+  var funEntryForChamp = funEntry(c.id);
+  var funTierLine = "";
+  if (funEntryForChamp && FUN_TIER_CLASS[funEntryForChamp.tier]) {
+    funTierLine =
+      '<div class="result-fun-tier">이 챔피언 꿀잼 티어: ' +
+      funTierBadgeHtml(funEntryForChamp) +
+      "</div>";
+  }
+
+  /* 요약: 챔피언 + 꿀잼 티어 + 4증강 */
   $("#result-summary").innerHTML =
     '<div class="result-champ">' +
     '<img src="' + esc(c.icon) + '" alt="" loading="lazy" decoding="async">' +
     '<div class="result-champ-name">' + esc(c.nameKo) +
     '<span class="result-champ-title">' + esc(c.title || "") + "</span></div></div>" +
+    funTierLine +
     '<div class="result-augs">' +
     picks
       .map(function (p) {
@@ -804,6 +1013,8 @@ function bindEvents() {
   }
 
   $("#champ-grid").addEventListener("click", onChampGridClick);
+  var previewPanel = $("#champ-preview");
+  if (previewPanel) previewPanel.addEventListener("click", onChampPreviewClick);
   $("#aug-cards").addEventListener("click", onAugCardsClick);
   $("#btn-golden").addEventListener("click", toggleGoldenArmed);
   $("#btn-golden-cancel").addEventListener("click", function () {

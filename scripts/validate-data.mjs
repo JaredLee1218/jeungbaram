@@ -227,6 +227,80 @@ for (const a of augments) {
   if (!anyChamp) issues.push(`augment ${a.apiName}: abilityPropsAll ${JSON.stringify(req)} 충족 챔피언 0명 (dead gate)`);
 }
 
+// ===== 6. funrank.json 검증 (꿀잼 티어 — 위반 시 exit 1) =====
+log('\n=== funrank.json ===');
+const funData = load('funrank.json');
+const ranks = funData.ranks;
+log('ranks count: ' + ranks.length);
+
+const TIER_VOCAB = ['S+', 'S', 'A', 'B', 'C'];
+const EVIDENCE_VOCAB = new Set(['stats', 'community', 'both', 'default']);
+if (!funData._meta || JSON.stringify(funData._meta.tierVocab) !== JSON.stringify(TIER_VOCAB)) {
+  issues.push('funrank _meta.tierVocab이 계약 어휘 ' + JSON.stringify(TIER_VOCAB) + '과 불일치');
+}
+
+// 6-1. 173명 전원 존재 + id 참조 무결성 (champions.json 전수 대조)
+const rankIds = new Set();
+for (const r of ranks) {
+  if (!champIdSet.has(r.id)) issues.push(`funrank ${r.id}: champions.json에 없는 id`);
+  if (rankIds.has(r.id)) issues.push(`funrank ${r.id}: 중복 항목`);
+  rankIds.add(r.id);
+}
+for (const c of champions) {
+  if (!rankIds.has(c.id)) issues.push(`funrank: 챔피언 ${c.id} 항목 누락`);
+}
+
+// 6-2. 필드 어휘·형식 + signatureAugments apiName 전수 대조
+const tierSet = new Set(TIER_VOCAB);
+for (const r of ranks) {
+  if (!tierSet.has(r.tier)) issues.push(`funrank ${r.id}: tier 어휘 위반 "${r.tier}"`);
+  if (typeof r.funScore !== 'number' || r.funScore < 0 || r.funScore > 100) {
+    issues.push(`funrank ${r.id}: funScore 범위 위반 (${r.funScore})`);
+  }
+  if (typeof r.oneLiner !== 'string' || !r.oneLiner.trim()) issues.push(`funrank ${r.id}: oneLiner 누락`);
+  if (!EVIDENCE_VOCAB.has(r.evidence)) issues.push(`funrank ${r.id}: evidence 어휘 위반 "${r.evidence}"`);
+  if (!Array.isArray(r.signatureAugments) || r.signatureAugments.length > 3) {
+    issues.push(`funrank ${r.id}: signatureAugments는 배열(최대 3개)이어야 함`);
+  } else {
+    for (const s of r.signatureAugments) {
+      if (!augSet.has(s)) issues.push(`funrank ${r.id}: 미실존 증강 apiName "${s}"`);
+    }
+  }
+  // evidence=default인데 구체 조합(signatureAugments)이 있으면 모순
+  if (r.evidence === 'default' && Array.isArray(r.signatureAugments) && r.signatureAugments.length > 0) {
+    issues.push(`funrank ${r.id}: evidence=default인데 signatureAugments 존재 (모순)`);
+  }
+}
+
+// 6-3. funScore-tier 정합: 티어 구간 역전(겹침) 없음
+{
+  const range = {};
+  for (const r of ranks) {
+    if (!tierSet.has(r.tier) || typeof r.funScore !== 'number') continue;
+    if (!range[r.tier]) range[r.tier] = { min: Infinity, max: -Infinity };
+    range[r.tier].min = Math.min(range[r.tier].min, r.funScore);
+    range[r.tier].max = Math.max(range[r.tier].max, r.funScore);
+  }
+  for (let i = 0; i < TIER_VOCAB.length - 1; i++) {
+    const hi = range[TIER_VOCAB[i]];
+    const lo = range[TIER_VOCAB[i + 1]];
+    if (hi && lo && lo.max >= hi.min) {
+      issues.push(`funrank: 티어 구간 역전 — ${TIER_VOCAB[i + 1]} 최대(${lo.max}) >= ${TIER_VOCAB[i]} 최소(${hi.min})`);
+    }
+  }
+  log('tier ranges: ' + JSON.stringify(range));
+}
+
+// 6-4. 티어 분포 위생: 상위 티어(S+·S)가 과반이면 티어 인플레
+{
+  const dist = {};
+  for (const r of ranks) dist[r.tier] = (dist[r.tier] || 0) + 1;
+  log('tier 분포: ' + JSON.stringify(dist));
+  const top = (dist['S+'] || 0) + (dist['S'] || 0);
+  if (top > ranks.length / 2) issues.push(`funrank: S+·S 합계 ${top}명 > 절반 (티어 인플레)`);
+  for (const t of TIER_VOCAB) if (!dist[t]) issues.push(`funrank: 티어 ${t} 사용 0건 (분포 붕괴)`);
+}
+
 log('신규 스키마 위반: ' + issues.length + '건');
 for (const s of issues) log('  ISSUE: ' + s);
 if (issues.length > 0) {
