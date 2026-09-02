@@ -97,6 +97,24 @@ function hasDurationEffect(text) {
   return false;
 }
 
+// ---------- dmg (피해 유형) ----------
+// 근사: dmg = DDragon championFull info.attack/info.magic 비교로 산출한 주 피해 유형.
+//   attack - magic >= 3 → 'ad', magic - attack >= 3 → 'ap', 그 외 → 'mixed'
+//   (class-fit 계약 기준. info는 라이엇의 1~10 지표라 실제 빌드 성향과 다를 수 있음)
+function computeDmg(info) {
+  if (!info || typeof info.attack !== 'number' || typeof info.magic !== 'number') return 'mixed';
+  if (info.attack - info.magic >= 3) return 'ad';
+  if (info.magic - info.attack >= 3) return 'ap';
+  return 'mixed';
+}
+// dmg 수동 보정 — info 격차 3 미만이라 mixed로 떨어지지만 실제 피해 유형이 명백한 챔피언만.
+// (계약 표본 검증 기준. 근거 주석 필수)
+const DMG_OVERRIDES = {
+  // 에코: info attack 5/magic 7 → 격차 2로 mixed 판정되지만 전 스킬이 AP 계수인
+  // AP 암살자 — 계약 표본이 ap를 요구 (class-fit 계약 표본 검증표)
+  Ekko: 'ap',
+};
+
 // ---------- 수동 보정 (표본 대조로 확정한 항목만. add/remove 모두 근거 주석 필수) ----------
 // key: "챔피언id.스킬키" → { add: [...], remove: [...] }
 const OVERRIDES = {
@@ -141,6 +159,9 @@ const OVERRIDES = {
   // 진 E: "은신 상태에 있다가"는 함정의 비가시성 서술 — 챔피언 은신이 아니므로 제거
   'Jhin.E': { remove: ['stealth'] },
   // 스킬 텍스트가 다른 스킬/소환수/구체를 서술해 dash로 오탐된 것들 제거
+  // 다리우스 R: "뛰어올라"로 dash 오탐 — 실측 대시 게이트 패턴 001100(말파이트 R·제드 W만)에서
+  // 다리우스 R은 부적격 (근거: research/raw/11-empirical-pools.md §3-5, test-fidelity 기준2)
+  'Darius.R': { remove: ['dash'] },
   'Jax.W': { remove: ['dash'] },      // "도약 공격 시" — Q 참조
   'Orianna.Q': { remove: ['dash'] },  // 구체가 돌진 — 챔피언 이동 아님
   'Teemo.W': { remove: ['dash'] },    // "전력으로 질주" — 이동 속도 증가일 뿐
@@ -160,6 +181,7 @@ let missing = [];
 for (const champ of out.champions) {
   const src = full.data[champ.id];
   if (!src) { missing.push(champ.id); continue; }
+  champ.dmg = DMG_OVERRIDES[champ.id] || computeDmg(src.info);
   const union = [];
   champ.spells.forEach(function (spell, i) {
     const s = src.spells[i];
@@ -196,7 +218,7 @@ if (missing.length) {
   process.exit(1);
 }
 
-out._note = 'spells[i].props와 abilityProps(=전 스킬 props 합집합, 패시브 미포함)는 DDragon ko_KR 스킬 설명(description+tooltip) 한국어 키워드 매칭으로 판정한 근사치이며 실제 게임 메커니즘과 다를 수 있음(생성: scripts/enrich-champions.cjs — 판정 규칙·수동 보정 주석 참조). immobilize는 하드 CC만(둔화·침묵 제외)이며 조건부 CC(진 W 속박 등)도 포함. short/passiveKo는 설명 요약 발췌.';
+out._note = 'spells[i].props와 abilityProps(=전 스킬 props 합집합, 패시브 미포함)는 DDragon ko_KR 스킬 설명(description+tooltip) 한국어 키워드 매칭으로 판정한 근사치이며 실제 게임 메커니즘과 다를 수 있음(생성: scripts/enrich-champions.cjs — 판정 규칙·수동 보정 주석 참조). immobilize는 하드 CC만(둔화·침묵 제외)이며 조건부 CC(진 W 속박 등)도 포함. short/passiveKo는 설명 요약 발췌. dmg(ad/ap/mixed)는 DDragon info.attack/magic 격차 3 기준으로 산출한 주 피해 유형 근사치(수동 보정: 에코=ap).';
 
 if (AUDIT) {
   for (const p of VOCAB) {
@@ -219,6 +241,9 @@ console.log('champions: ' + out.champions.length);
 console.log('prop\tspells\tchampions');
 VOCAB.forEach(function (p) { console.log(p + '\t' + dist[p].spells + '\t' + dist[p].champions); });
 console.log('abilityProps 빈 챔피언: ' + (noProps.length ? noProps.join(', ') : '없음'));
+const dmgDist = {};
+out.champions.forEach(function (c) { dmgDist[c.dmg] = (dmgDist[c.dmg] || 0) + 1; });
+console.log('dmg 분포: ' + JSON.stringify(dmgDist));
 
 if (!DRY) {
   fs.writeFileSync(OUT, JSON.stringify(out, null, 1), 'utf8');

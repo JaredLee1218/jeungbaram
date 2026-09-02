@@ -108,6 +108,70 @@ const TAG_RULES = [
 
 const SYNERGIES = { combos: [COMBO_OTHER_CHAMP, COMBO_ALL_MISSING, COMBO_JAYCE, COMBO_ANYCHAMP], tagRules: TAG_RULES };
 
+// ------------------------------------------------------------ class-fit 전용 fixture
+// dmg("ad"|"ap"|"mixed")는 champions.json 신규 필드(병렬 제작 중) — 여기서는 합성으로 명시.
+// 실데이터에 dmg가 없으면 recommend.js가 mixed로 취급하는 방어 동작도 아래에서 검증한다.
+
+const CHAMP_ASHE_AD = {
+  id: "Ashe", key: 22, nameKo: "애쉬", tags: ["Marksman"], dmg: "ad",
+  ranged: true, attackRange: 600,
+};
+const CHAMP_BRAND = {
+  id: "Brand", key: 63, nameKo: "브랜드", tags: ["Mage"], dmg: "ap",
+  ranged: true, attackRange: 550,
+};
+const CHAMP_MALPHITE = {
+  id: "Malphite", key: 54, nameKo: "말파이트", tags: ["Tank", "Fighter"], dmg: "mixed",
+  ranged: false, attackRange: 125,
+};
+const CHAMP_NASUS = {
+  id: "Nasus", key: 75, nameKo: "나서스", tags: ["Fighter", "Tank"], dmg: "ad",
+  ranged: false, attackRange: 125,
+};
+const CHAMP_NODMG = { // dmg 필드 누락 → mixed 취급 방어 확인용
+  id: "NoDmg", key: 999, nameKo: "무유형", tags: ["Marksman"], ranged: true,
+};
+
+const AUG_HEAL = { apiName: "ARAM_HealBloom", nameKo: "회복 만개", tier: "gold", enabled: true, tags: ["heal", "shield"] };
+const AUG_AD = { apiName: "ARAM_BladeWaltz", nameKo: "칼춤", tier: "gold", enabled: true, tags: ["ad"] };
+const AUG_AP2 = { apiName: "ARAM_ArcaneSurge", nameKo: "비전 쇄도", tier: "gold", enabled: true, tags: ["ap"] };
+const AUGMENTS_FIT = { patch: "26.17", augments: [AUG_HEAL, AUG_AD, AUG_AP2, AUG_C, AUG_B] };
+
+// 실제 items.json의 태그 조합을 본뜬 합성 아이템 (heal 단독 판정 금지 검증용 조합 포함)
+const ITEMS_FIT = {
+  version: "16.17.1",
+  items: [
+    { id: 2001, nameKo: "워모그의 갑옷", tags: ["tank", "heal"], icon: "" },
+    { id: 2002, nameKo: "가고일 돌갑옷", tags: ["tank", "shield"], icon: "" },
+    { id: 2003, nameKo: "구원", tags: ["ap", "heal", "shield", "mana", "support"], icon: "" },
+    { id: 2004, nameKo: "피바라기", tags: ["ad", "heal", "shield"], icon: "" },
+    { id: 2005, nameKo: "라바돈의 죽음모자", tags: ["ap"], icon: "" },
+    { id: 2006, nameKo: "무한의 대검", tags: ["crit", "ad"], icon: "" },
+    { id: 2007, nameKo: "몰락한 왕의 검", tags: ["onhit", "as", "ad", "heal", "cc"], icon: "" },
+    { id: 2008, nameKo: "존야의 모래시계", tags: ["ap", "tank"], icon: "" },
+    { id: 2009, nameKo: "정령의 형상", tags: ["tank", "heal", "move"], icon: "" },
+  ],
+};
+
+const RULE_HEAL = { ifAugmentTags: ["heal"], ifChampTags: [], playstyle: "회복 증강을 살려 유지력을 극대화하세요.", items: [2001, 2003, 2004], priority: 5 };
+const RULE_AD = { ifAugmentTags: ["ad"], ifChampTags: [], playstyle: "공격력 증강으로 화력을 끌어올리세요.", items: [2006, 2007, 2004], priority: 5 };
+const RULE_CRIT = { ifAugmentTags: ["crit"], ifChampTags: [], playstyle: "치명타를 계속 굴리세요.", items: [2006], priority: 6 };
+const RULE_AP = { ifAugmentTags: ["ap"], ifChampTags: [], playstyle: "주문력을 쌓으세요.", items: [2005, 2007], priority: 4 };
+
+const COMBO_AP_NASUS = { // 챔피언 명시 combo — 큐레이션 신뢰(fitScore 무시) 검증용
+  title: "AP 나서스", champions: ["Nasus"],
+  augments: ["ARAM_UltRush"], matchType: "any",
+  whyFun: "Q 대신 E와 R로 마법 피해를 쏟아붓는 변신 컨셉입니다.",
+  items: [2005, 2008], skills: "E 선마 후 R 킨 상태로 E-평타 반복.",
+  styleTags: ["주문력"], source: "kr",
+};
+const COMBO_ANY_AP = { // champions 빈 combo — fitScore 적용 대상 검증용
+  title: "모두의 라바돈", champions: [],
+  augments: ["ARAM_UltRush"], matchType: "any",
+  whyFun: "궁 한 방이 커집니다.", items: [2005], skills: "궁 쿨마다 한 방.",
+  styleTags: ["궁연발"], source: "en",
+};
+
 // ------------------------------------------------------------ 공통 반환 형태 검사
 
 function checkShape(r, label) {
@@ -218,6 +282,133 @@ async function main() {
   const r3c = recommend({ champion: CHAMP_ASHE, picked: [], synergies: null, items: null, augments: null });
   checkShape(r3c, "case3-널데이터");
   ok(r3c.matchedCombos.length === 0, "case3: 널 데이터에서 매칭 0건");
+
+  // --- 케이스 4: class-fit(fitScore) 레이어 ---
+  console.log("\n[케이스 4] class-fit(fitScore) 레이어");
+
+  // 4a. 애쉬(ad/Marksman) + heal 증강 → 탱단독·support템 미추천, ad+heal(피바라기)은 추천
+  //     (heal 태그 단독 판정 금지: 규칙 ②와 폴백 ③ 양쪽에서 걸러지는지 확인)
+  const r4a = recommend({
+    champion: CHAMP_ASHE_AD,
+    picked: [AUG_HEAL],
+    synergies: { combos: [], tagRules: [RULE_HEAL] },
+    items: ITEMS_FIT,
+    augments: AUGMENTS_FIT,
+  });
+  checkShape(r4a, "case4a");
+  const ids4a = r4a.items.map((i) => i.id);
+  ok(ids4a.includes(2004), "case4a: ad+heal(피바라기)은 ad 원딜에게 추천", ids4a);
+  ok(!ids4a.includes(2001), "case4a: tank+heal(워모그) 미추천 — 규칙 ②에서 제외", ids4a);
+  ok(!ids4a.includes(2002), "case4a: tank 단독(가고일) 미추천 — 폴백 ③에서 제외", ids4a);
+  ok(!ids4a.includes(2003), "case4a: support(구원) 미추천", ids4a);
+
+  // 4b. 브랜드(ap/Mage) + ad 증강 → ad 코어템 전부 미추천, ap 코어템은 역할 폴백으로 등장
+  const r4b = recommend({
+    champion: CHAMP_BRAND,
+    picked: [AUG_AD],
+    synergies: { combos: [], tagRules: [RULE_AD] },
+    items: ITEMS_FIT,
+    augments: AUGMENTS_FIT,
+  });
+  checkShape(r4b, "case4b");
+  const ids4b = r4b.items.map((i) => i.id);
+  ok(!ids4b.includes(2006), "case4b: crit+ad(무한의 대검) 미추천", ids4b);
+  ok(!ids4b.includes(2007), "case4b: onhit 코어(몰락한 왕의 검) 미추천", ids4b);
+  ok(!ids4b.includes(2004), "case4b: ad+heal(피바라기) 미추천", ids4b);
+  ok(ids4b.includes(2005), "case4b: ap 코어(라바돈)는 추천됨", ids4b);
+
+  // 4c. 말파이트(mixed/Tank·Fighter) + crit 증강 → crit 코어템 미추천, 탱템은 정상 추천
+  //     (근사: crit은 Marksman/Assassin 또는 탱커가 아닌 Fighter 전용)
+  const r4c = recommend({
+    champion: CHAMP_MALPHITE,
+    picked: [AUG_C],
+    synergies: { combos: [], tagRules: [RULE_CRIT] },
+    items: ITEMS_FIT,
+    augments: AUGMENTS_FIT,
+  });
+  const ids4c = r4c.items.map((i) => i.id);
+  ok(!ids4c.includes(2006), "case4c: crit 코어(무한의 대검)는 탱커에게 미추천", ids4c);
+  ok(ids4c.includes(2001), "case4c: 탱커에게 워모그는 정상 추천", ids4c);
+
+  // 4d. 챔피언 명시 combo는 fitScore 무시 — AP 나서스(dmg ad인데 AP 코어템 큐레이션)
+  const r4d = recommend({
+    champion: CHAMP_NASUS,
+    picked: [AUG_B],
+    synergies: { combos: [COMBO_AP_NASUS], tagRules: [] },
+    items: ITEMS_FIT,
+    augments: AUGMENTS_FIT,
+  });
+  checkShape(r4d, "case4d");
+  const ids4d = r4d.items.map((i) => i.id);
+  ok(r4d.matchedCombos.length === 1, "case4d: AP 나서스 combo 매칭", r4d.matchedCombos.length);
+  ok(ids4d.includes(2005), "case4d: 명시 combo의 라바돈은 dmg ad여도 추천(큐레이션 신뢰)", ids4d);
+  ok(ids4d.includes(2008), "case4d: 명시 combo의 존야도 추천", ids4d);
+
+  // 4e. champions 빈(전 챔피언용) combo의 아이템에는 fitScore 적용 — ad 나서스에게 라바돈 제외
+  const r4e = recommend({
+    champion: CHAMP_NASUS,
+    picked: [AUG_B],
+    synergies: { combos: [COMBO_ANY_AP], tagRules: [] },
+    items: ITEMS_FIT,
+    augments: AUGMENTS_FIT,
+  });
+  ok(r4e.matchedCombos.length === 1, "case4e: 전 챔피언용 combo 자체는 매칭됨", r4e.matchedCombos.length);
+  ok(!r4e.items.map((i) => i.id).includes(2005), "case4e: 빈 champions combo의 라바돈은 dmg ad라 제외", r4e.items.map((i) => i.id));
+
+  // 4f. dmg 필드 누락 → mixed 취급(방어): ap 아이템 하드 배제 없이 후순위(0.5 가중)로만 민다
+  const r4f = recommend({
+    champion: CHAMP_NODMG,
+    picked: [AUG_AP2],
+    synergies: { combos: [], tagRules: [RULE_AP] },
+    items: ITEMS_FIT,
+    augments: AUGMENTS_FIT,
+  });
+  const ids4f = r4f.items.map((i) => i.id);
+  ok(ids4f.includes(2005), "case4f: dmg 없으면 mixed 취급 — ap 아이템 하드 배제 안 함", ids4f);
+  ok(ids4f.indexOf(2007) < ids4f.indexOf(2005), "case4f: 어중간(0.5) 아이템은 적합(1) 아이템보다 후순위", ids4f);
+
+  // 4g. 같은 규칙이라도 dmg가 ad로 명시되면 ap 코어는 하드 미스매치로 제외
+  const r4g = recommend({
+    champion: CHAMP_ASHE_AD,
+    picked: [AUG_AP2],
+    synergies: { combos: [], tagRules: [RULE_AP] },
+    items: ITEMS_FIT,
+    augments: AUGMENTS_FIT,
+  });
+  const ids4g = r4g.items.map((i) => i.id);
+  ok(!ids4g.includes(2005), "case4g: dmg ad 명시 시 ap 코어(라바돈) 제외", ids4g);
+  ok(ids4g.includes(2007), "case4g: 같은 규칙의 ad 계열 아이템은 유지", ids4g);
+
+  // 4h. [검증자 회귀] 실데이터 애쉬는 tags가 ["Marksman","Support"] — 부 역할 Support여도
+  //     원딜에게 support템·tank단독템은 하드 미스매치(0)여야 한다 (Marksman 우선 판정).
+  //     스위프 감사에서 미카엘·구원·향로·태양불꽃 누출로 발견된 케이스의 고정 회귀.
+  const CHAMP_ASHE_REAL = {
+    id: "Ashe", key: 22, nameKo: "애쉬", tags: ["Marksman", "Support"], dmg: "ad",
+    ranged: true, attackRange: 600,
+  };
+  //     역할 폴백 ④도 검증 대상: 부 역할 Support의 역할 태그(support/heal/shield)가
+  //     미스매치 후보를 끌어와도, fit>0 후보가 있는 한 그쪽을 먼저 채워야 한다.
+  const ITEMS_FIT_4H = {
+    version: ITEMS_FIT.version,
+    items: ITEMS_FIT.items.concat([
+      { id: 2101, nameKo: "크라켄 학살자", tags: ["onhit", "as"], icon: "" },
+      { id: 2102, nameKo: "유령 무희", tags: ["as", "crit", "move"], icon: "" },
+      { id: 2103, nameKo: "징수의 총", tags: ["ad", "gold"], icon: "" },
+    ]),
+  };
+  const r4h = recommend({
+    champion: CHAMP_ASHE_REAL,
+    picked: [AUG_HEAL],
+    synergies: { combos: [], tagRules: [RULE_HEAL] },
+    items: ITEMS_FIT_4H,
+    augments: AUGMENTS_FIT,
+  });
+  const ids4h = r4h.items.map((i) => i.id);
+  ok(!ids4h.includes(2003), "case4h: 부역할 Support 원딜에게도 support(구원) 미추천", ids4h);
+  ok(!ids4h.includes(2001), "case4h: 부역할 Support 원딜에게도 tank단독(워모그) 미추천", ids4h);
+  ok(!ids4h.includes(2002), "case4h: 부역할 Support 원딜에게도 tank단독(가고일) 미추천", ids4h);
+  ok(!ids4h.includes(2009), "case4h: 부역할 Support 원딜에게도 tank단독(정령의 형상) 미추천", ids4h);
+  ok(ids4h.includes(2004), "case4h: ad+heal(피바라기)은 그대로 추천", ids4h);
 
   // --- 결과 ---
   console.log(`\n${pass} passed, ${fail} failed`);

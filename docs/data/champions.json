@@ -1,5 +1,5 @@
 {
- "_note": "spells[i].props와 abilityProps(=전 스킬 props 합집합, 패시브 미포함)는 DDragon ko_KR 스킬 설명(description+tooltip) 한국어 키워드 매칭으로 판정한 근사치이며 실제 게임 메커니즘과 다를 수 있음(생성: scripts/enrich-champions.cjs — 판정 규칙·수동 보정 주석 참조). immobilize는 하드 CC만(둔화·침묵 제외)이며 조건부 CC(진 W 속박 등)도 포함. short/passiveKo는 설명 요약 발췌.",
+ "_note": "spells[i].props와 abilityProps(=전 스킬 props 합집합, 패시브 미포함)는 DDragon ko_KR 스킬 설명(description+tooltip) 한국어 키워드 매칭으로 판정한 근사치이며 실제 게임 메커니즘과 다를 수 있음(생성: scripts/enrich-champions.cjs — 판정 규칙·수동 보정 주석 참조). immobilize는 하드 CC만(둔화·침묵 제외)이며 조건부 CC(진 W 속박 등)도 포함. short/passiveKo는 설명 요약 발췌. dmg(ad/ap/mixed)는 DDragon info.attack/magic 격차 3 기준으로 산출한 주 피해 유형 근사치(수동 보정: 에코=ap).",
  "version": "16.17.1",
  "champions": [
   {
@@ -62,7 +62,8 @@
     "heal",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Ahri",
@@ -127,7 +128,8 @@
     "spin",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Akali",
@@ -186,7 +188,8 @@
     "aoe",
     "stealth",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Akshan",
@@ -242,7 +245,8 @@
     "projectile",
     "stealth",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Alistar",
@@ -300,7 +304,8 @@
     "aoe",
     "immobilize",
     "empoweredAttack"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Ambessa",
@@ -360,7 +365,8 @@
     "heal",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Amumu",
@@ -421,7 +427,8 @@
     "aoe",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Anivia",
@@ -479,7 +486,8 @@
     "immobilize",
     "terrain",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Annie",
@@ -538,7 +546,8 @@
     "shield",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Aphelios",
@@ -591,7 +600,8 @@
     "projectile",
     "aoe",
     "immobilize"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Ashe",
@@ -652,7 +662,8 @@
     "global",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "AurelionSol",
@@ -710,7 +721,8 @@
     "aoe",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Aurora",
@@ -776,7 +788,8 @@
     "stealth",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Azir",
@@ -836,7 +849,8 @@
     "aoe",
     "shield",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Bard",
@@ -890,7 +904,8 @@
     "projectile",
     "heal",
     "immobilize"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Belveth",
@@ -951,7 +966,8 @@
     "heal",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Blitzcrank",
@@ -1015,7 +1031,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Brand",
@@ -1072,7 +1089,8 @@
     "targeted",
     "aoe",
     "immobilize"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Braum",
@@ -1130,7 +1148,8 @@
     "knockback",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Briar",
@@ -1200,7 +1219,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Caitlyn",
@@ -1253,7 +1273,8 @@
     "projectile",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Camille",
@@ -1317,7 +1338,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Cassiopeia",
@@ -1376,7 +1398,8 @@
     "heal",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Chogath",
@@ -1428,7 +1451,8 @@
     "projectile",
     "knockback",
     "immobilize"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Corki",
@@ -1482,7 +1506,8 @@
    "abilityProps": [
     "projectile",
     "aoe"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Darius",
@@ -1541,7 +1566,8 @@
     "spin",
     "immobilize",
     "empoweredAttack"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Diana",
@@ -1602,7 +1628,8 @@
     "shield",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "DrMundo",
@@ -1660,7 +1687,8 @@
     "aoe",
     "heal",
     "empoweredAttack"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Draven",
@@ -1722,7 +1750,8 @@
     "spin",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Ekko",
@@ -1786,7 +1815,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Elise",
@@ -1835,7 +1865,8 @@
    "abilityProps": [
     "projectile",
     "immobilize"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Evelynn",
@@ -1895,7 +1926,8 @@
     "aoe",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Ezreal",
@@ -1954,7 +1986,8 @@
     "dash",
     "aoe",
     "global"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Fiddlesticks",
@@ -2009,7 +2042,8 @@
     "aoe",
     "heal",
     "immobilize"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Fiora",
@@ -2064,7 +2098,8 @@
     "aoe",
     "heal",
     "immobilize"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Fizz",
@@ -2125,7 +2160,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Galio",
@@ -2190,7 +2226,8 @@
     "shield",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Gangplank",
@@ -2248,7 +2285,8 @@
     "heal",
     "global",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Garen",
@@ -2306,7 +2344,8 @@
     "spin",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Gnar",
@@ -2366,7 +2405,8 @@
     "aoe",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Gragas",
@@ -2431,7 +2471,8 @@
     "aoe",
     "immobilize",
     "empoweredAttack"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Graves",
@@ -2490,7 +2531,8 @@
     "dash",
     "aoe",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Gwen",
@@ -2545,7 +2587,8 @@
     "dash",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Hecarim",
@@ -2607,7 +2650,8 @@
     "heal",
     "immobilize",
     "empoweredAttack"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Heimerdinger",
@@ -2666,7 +2710,8 @@
     "aoe",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Hwei",
@@ -2723,7 +2768,8 @@
     "shield",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Illaoi",
@@ -2775,7 +2821,8 @@
     "dash",
     "aoe",
     "empoweredAttack"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Irelia",
@@ -2837,7 +2884,8 @@
     "heal",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Ivern",
@@ -2903,7 +2951,8 @@
     "shield",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Janna",
@@ -2966,7 +3015,8 @@
     "heal",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "JarvanIV",
@@ -3033,7 +3083,8 @@
     "immobilize",
     "terrain",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Jax",
@@ -3091,7 +3142,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Jayce",
@@ -3153,7 +3205,8 @@
     "aoe",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Jhin",
@@ -3212,7 +3265,8 @@
     "aoe",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Jinx",
@@ -3275,7 +3329,8 @@
     "global",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "KSante",
@@ -3345,7 +3400,8 @@
     "heal",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Kaisa",
@@ -3408,7 +3464,8 @@
     "shield",
     "stealth",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Kalista",
@@ -3466,7 +3523,8 @@
     "knockback",
     "aoe",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Karma",
@@ -3530,7 +3588,8 @@
     "heal",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Karthus",
@@ -3585,7 +3644,8 @@
     "aoe",
     "global",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Kassadin",
@@ -3648,7 +3708,8 @@
     "heal",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Katarina",
@@ -3706,7 +3767,8 @@
     "dash",
     "aoe",
     "spin"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Kayle",
@@ -3766,7 +3828,8 @@
     "heal",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Kayn",
@@ -3827,7 +3890,8 @@
     "heal",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Kennen",
@@ -3885,7 +3949,8 @@
     "aoe",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Khazix",
@@ -3949,7 +4014,8 @@
     "stealth",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Kindred",
@@ -4010,7 +4076,8 @@
     "heal",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Kled",
@@ -4077,7 +4144,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "KogMaw",
@@ -4134,7 +4202,8 @@
     "projectile",
     "aoe",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Leblanc",
@@ -4193,7 +4262,8 @@
     "dash",
     "aoe",
     "immobilize"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "LeeSin",
@@ -4260,7 +4330,8 @@
     "heal",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Leona",
@@ -4324,7 +4395,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Lillia",
@@ -4381,7 +4453,8 @@
     "aoe",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Lissandra",
@@ -4445,7 +4518,8 @@
     "heal",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Locke",
@@ -4507,7 +4581,8 @@
     "heal",
     "immobilize",
     "empoweredAttack"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Lucian",
@@ -4563,7 +4638,8 @@
     "dash",
     "aoe",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Lulu",
@@ -4625,7 +4701,8 @@
     "shield",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Lux",
@@ -4685,7 +4762,8 @@
     "shield",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Malphite",
@@ -4749,7 +4827,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Malzahar",
@@ -4806,7 +4885,8 @@
     "aoe",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Maokai",
@@ -4867,7 +4947,8 @@
     "aoe",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "MasterYi",
@@ -4922,7 +5003,8 @@
     "aoe",
     "heal",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Mel",
@@ -4983,7 +5065,8 @@
     "global",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Milio",
@@ -5044,7 +5127,8 @@
     "shield",
     "heal",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "MissFortune",
@@ -5096,7 +5180,8 @@
    "abilityProps": [
     "projectile",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "MonkeyKing",
@@ -5164,7 +5249,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Mordekaiser",
@@ -5218,7 +5304,8 @@
     "heal",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Morgana",
@@ -5279,7 +5366,8 @@
     "heal",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Naafiri",
@@ -5344,7 +5432,8 @@
     "shield",
     "heal",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Nami",
@@ -5408,7 +5497,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Nasus",
@@ -5462,7 +5552,8 @@
     "aoe",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Nautilus",
@@ -5526,7 +5617,8 @@
     "shield",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Neeko",
@@ -5592,7 +5684,8 @@
     "stealth",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Nidalee",
@@ -5652,7 +5745,8 @@
     "stealth",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Nilah",
@@ -5714,7 +5808,8 @@
     "heal",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Nocturne",
@@ -5774,7 +5869,8 @@
     "global",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Nunu",
@@ -5840,7 +5936,8 @@
     "spin",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Olaf",
@@ -5897,7 +5994,8 @@
     "shield",
     "heal",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Orianna",
@@ -5957,7 +6055,8 @@
     "shield",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Ornn",
@@ -6022,7 +6121,8 @@
     "immobilize",
     "terrain",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Pantheon",
@@ -6087,7 +6187,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Poppy",
@@ -6152,7 +6253,8 @@
     "aoe",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Pyke",
@@ -6210,7 +6312,8 @@
     "dash",
     "stealth",
     "immobilize"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Qiyana",
@@ -6274,7 +6377,8 @@
     "stealth",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Quinn",
@@ -6328,7 +6432,8 @@
     "dash",
     "knockback",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Rakan",
@@ -6393,7 +6498,8 @@
     "heal",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Rammus",
@@ -6453,7 +6559,8 @@
     "spin",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "RekSai",
@@ -6507,7 +6614,8 @@
     "projectile",
     "dash",
     "aoe"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Rell",
@@ -6574,7 +6682,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Renata",
@@ -6636,7 +6745,8 @@
     "heal",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Renekton",
@@ -6698,7 +6808,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Rengar",
@@ -6764,7 +6875,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Riven",
@@ -6829,7 +6941,8 @@
     "shield",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Rumble",
@@ -6884,7 +6997,8 @@
     "projectile",
     "shield",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Ryze",
@@ -6943,7 +7057,8 @@
     "aoe",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Samira",
@@ -7000,7 +7115,8 @@
     "dash",
     "heal",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Sejuani",
@@ -7059,7 +7175,8 @@
     "knockback",
     "aoe",
     "immobilize"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Senna",
@@ -7121,7 +7238,8 @@
     "stealth",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Seraphine",
@@ -7182,7 +7300,8 @@
     "heal",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Sett",
@@ -7243,7 +7362,8 @@
     "shield",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Shaco",
@@ -7307,7 +7427,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Shen",
@@ -7368,7 +7489,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Shyvana",
@@ -7433,7 +7555,8 @@
     "heal",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Singed",
@@ -7490,7 +7613,8 @@
     "projectile",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Sion",
@@ -7558,7 +7682,8 @@
     "shield",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Sivir",
@@ -7618,7 +7743,8 @@
     "heal",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Skarner",
@@ -7683,7 +7809,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Smolder",
@@ -7739,7 +7866,8 @@
     "projectile",
     "heal",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Sona",
@@ -7800,7 +7928,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Soraka",
@@ -7860,7 +7989,8 @@
     "global",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Swain",
@@ -7917,7 +8047,8 @@
     "aoe",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Sylas",
@@ -7974,7 +8105,8 @@
     "knockback",
     "heal",
     "immobilize"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Syndra",
@@ -8032,7 +8164,8 @@
     "knockback",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "TahmKench",
@@ -8094,7 +8227,8 @@
     "heal",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Taliyah",
@@ -8154,7 +8288,8 @@
     "aoe",
     "immobilize",
     "terrain"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Talon",
@@ -8213,7 +8348,8 @@
     "heal",
     "stealth",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Taric",
@@ -8270,7 +8406,8 @@
     "heal",
     "immobilize",
     "empoweredAttack"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Teemo",
@@ -8325,7 +8462,8 @@
     "projectile",
     "stealth",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Thresh",
@@ -8388,7 +8526,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Tristana",
@@ -8449,7 +8588,8 @@
     "aoe",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Trundle",
@@ -8513,7 +8653,8 @@
     "terrain",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Tryndamere",
@@ -8566,7 +8707,8 @@
     "heal",
     "spin",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "TwistedFate",
@@ -8627,7 +8769,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Twitch",
@@ -8687,7 +8830,8 @@
     "aoe",
     "stealth",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Udyr",
@@ -8749,7 +8893,8 @@
     "heal",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Urgot",
@@ -8816,7 +8961,8 @@
     "shield",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Varus",
@@ -8873,7 +9019,8 @@
     "aoe",
     "heal",
     "immobilize"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Vayne",
@@ -8930,7 +9077,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Veigar",
@@ -8983,7 +9131,8 @@
     "projectile",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Velkoz",
@@ -9040,7 +9189,8 @@
     "knockback",
     "aoe",
     "immobilize"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Vex",
@@ -9098,7 +9248,8 @@
     "aoe",
     "shield",
     "durationEffect"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Vi",
@@ -9161,7 +9312,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Viego",
@@ -9226,7 +9378,8 @@
     "stealth",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Viktor",
@@ -9285,7 +9438,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Vladimir",
@@ -9346,7 +9500,8 @@
     "aoe",
     "heal",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Volibear",
@@ -9410,7 +9565,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Warwick",
@@ -9466,7 +9622,8 @@
     "dash",
     "heal",
     "immobilize"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Xayah",
@@ -9523,7 +9680,8 @@
     "dash",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Xerath",
@@ -9579,7 +9737,8 @@
     "projectile",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "XinZhao",
@@ -9639,7 +9798,8 @@
     "aoe",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Yasuo",
@@ -9702,7 +9862,8 @@
     "knockback",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Yone",
@@ -9768,7 +9929,8 @@
     "shield",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Yorick",
@@ -9823,7 +9985,8 @@
     "heal",
     "terrain",
     "empoweredAttack"
-   ]
+   ],
+   "dmg": "mixed"
   },
   {
    "id": "Yunara",
@@ -9883,7 +10046,8 @@
     "aoe",
     "spin",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Yuumi",
@@ -9946,7 +10110,8 @@
     "shield",
     "heal",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Zaahen",
@@ -10007,7 +10172,8 @@
     "heal",
     "immobilize",
     "empoweredAttack"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Zac",
@@ -10072,7 +10238,8 @@
     "immobilize",
     "empoweredAttack",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Zed",
@@ -10131,7 +10298,8 @@
     "aoe",
     "spin",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Zeri",
@@ -10191,7 +10359,8 @@
     "aoe",
     "heal",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ad"
   },
   {
    "id": "Ziggs",
@@ -10246,7 +10415,8 @@
     "projectile",
     "knockback",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Zilean",
@@ -10300,7 +10470,8 @@
     "aoe",
     "heal",
     "immobilize"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Zoe",
@@ -10359,7 +10530,8 @@
     "aoe",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   },
   {
    "id": "Zyra",
@@ -10422,7 +10594,8 @@
     "aoe",
     "immobilize",
     "durationEffect"
-   ]
+   ],
+   "dmg": "ap"
   }
  ]
 }

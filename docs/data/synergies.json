@@ -797,7 +797,7 @@
       "ifAugmentTags": ["as"],
       "ifChampTags": ["Marksman"],
       "playstyle": "공속을 딜로 바꾸는 정석 원딜 — 2코어 전엔 사리고 완성되면 DPS 기계.",
-      "items": [3124, 3046, 3115],
+      "items": [3124, 3046, 6672],
       "priority": 7
     },
     {
@@ -895,14 +895,14 @@
       "ifAugmentTags": ["move"],
       "ifChampTags": ["Assassin", "Fighter"],
       "playstyle": "이속으로 사이드 각을 잡고 급습 — 도주기 없는 적부터 문다.",
-      "items": [3142, 3078],
+      "items": [3142, 3078, 3152],
       "priority": 5
     },
     {
       "ifAugmentTags": ["cc"],
       "ifChampTags": ["Tank", "Support"],
       "playstyle": "CC 연계 이니시 — 하나 물면 팀이 끝낸다. CC 보상 증강이면 CC를 아끼지 마라.",
-      "items": [3068, 3110, 8020],
+      "items": [3068, 3110, 8020, 4005],
       "priority": 8
     },
     {
@@ -916,14 +916,28 @@
       "ifAugmentTags": ["dash"],
       "ifChampTags": ["Assassin"],
       "playstyle": "돌진 쿨감 암살 — 진입·처치·재진입 무한 루프. 이동기가 평타가 된다.",
-      "items": [3142, 6694],
+      "items": [3142, 6694, 3152],
       "priority": 7
     },
     {
       "ifAugmentTags": ["ult"],
-      "ifChampTags": [],
-      "playstyle": "궁극기 중심 운영 — 궁 쿨마다 한타를 강제해라. 궁이 두 배로 일하는 증강이다.",
+      "ifChampTags": ["Mage"],
+      "playstyle": "궁극기 중심 운영 — 궁 쿨마다 한타를 강제해라. 존야로 궁 쿨을 벌고 라바돈으로 한 방을 키운다.",
       "items": [3157, 3089],
+      "priority": 6
+    },
+    {
+      "ifAugmentTags": ["ult"],
+      "ifChampTags": ["Marksman", "Fighter", "Assassin"],
+      "playstyle": "궁극기 중심 운영 — 궁 쿨마다 한타를 강제해라. 쇼진·요우무의 스킬 가속으로 궁 회전을 앞당긴다.",
+      "items": [3161, 3142],
+      "priority": 6
+    },
+    {
+      "ifAugmentTags": ["ult"],
+      "ifChampTags": ["Tank", "Support"],
+      "playstyle": "궁극기 중심 운영 — 궁 쿨마다 이니시를 강제해라. 스킬 가속 붙은 방템으로 궁 회전을 앞당긴다.",
+      "items": [3065, 3110],
       "priority": 6
     },
     {
@@ -942,23 +956,51 @@
     },
     {
       "ifAugmentTags": ["gold"],
-      "ifChampTags": [],
+      "ifChampTags": ["Marksman", "Fighter", "Assassin"],
+      "playstyle": "골드 불리기 — 징수의 총으로 킬 골드를 두 배로. 남보다 빠른 코어템 타이밍으로 스노볼.",
+      "items": [6676, 3031],
+      "priority": 5
+    },
+    {
+      "ifAugmentTags": ["gold"],
+      "ifChampTags": ["Mage"],
+      "playstyle": "골드 불리기 — 폭풍 쇄도의 현상금과 빠른 라바돈 타이밍으로 스노볼.",
+      "items": [4646, 3089],
+      "priority": 5
+    },
+    {
+      "ifAugmentTags": ["gold"],
+      "ifChampTags": ["Tank", "Support"],
       "playstyle": "골드 불리기 — 남보다 빠른 코어템 타이밍으로 스노볼. 킬·포탑 골드를 우선 챙겨라.",
-      "items": [3031, 3089],
+      "items": [],
       "priority": 5
     },
     {
       "ifAugmentTags": ["onkill"],
       "ifChampTags": ["Assassin", "Marksman"],
       "playstyle": "킬 스노볼 — 한 킬이 다음 킬을 부른다. 앞서기 시작하면 끝까지 밟아라.",
-      "items": [3142, 4646],
+      "items": [3142, 6676],
       "priority": 7
     },
     {
       "ifAugmentTags": ["execute"],
-      "ifChampTags": [],
-      "playstyle": "마무리 일격 — 빈사 적부터 정리해 연쇄 이득. 처형선 밑으로 내리는 게 콤보의 목표.",
+      "ifChampTags": ["Marksman", "Fighter", "Assassin"],
+      "playstyle": "마무리 일격 — 빈사 적부터 정리해 연쇄 이득. 징수의 총이면 처형이 곧 돈이다.",
       "items": [6676, 3036],
+      "priority": 6
+    },
+    {
+      "ifAugmentTags": ["execute"],
+      "ifChampTags": ["Mage"],
+      "playstyle": "마무리 일격 — 그림자불꽃 치명타로 빈사 적을 지운다. 처형선 밑으로 내리는 게 콤보의 목표.",
+      "items": [4645, 3135],
+      "priority": 6
+    },
+    {
+      "ifAugmentTags": ["execute"],
+      "ifChampTags": ["Tank", "Support"],
+      "playstyle": "마무리 일격 — 빈사 적부터 물어 연쇄 이득. 처형선 밑으로 내리는 CC 연계가 목표다.",
+      "items": [],
       "priority": 6
     },
     {

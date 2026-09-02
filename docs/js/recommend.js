@@ -9,6 +9,9 @@
 //     — 매칭 combo의 whyFun/items/skills 최우선 반영, 여러 개면 styleTags 겹침 순 정렬
 //  ② synergies.tagRules: picked 증강 tags 합집합 × champion.tags 교집합으로 점수화(priority 가중)
 //  ③ 아이템 병합: combo 아이템 우선 → 규칙 아이템 → 태그 교집합 폴백. 최대 6개, 중복 제거, 각 reason 한 줄
+//     — 규칙/폴백 아이템에는 class-fit 판정(fitScore) 적용: 챔피언 클래스·피해 유형과
+//       하드 미스매치(0)인 아이템은 제외, 어중간(0.5)은 정렬 점수에 곱해 후순위로 민다.
+//       champions에 챔피언이 명시된 combo 아이템만 큐레이션을 신뢰해 판정을 건너뛴다.
 //  ④ funScore: 정확 매칭 수 + 태그 시너지 밀도 기반 0~100
 //  ⑤ headline: styleTags 조합으로 한 줄 컨셉 생성. 매칭 0건이어도 champion tags 기반 기본 추천 반환.
 //
@@ -186,9 +189,75 @@ function matchRules(rules, pickedTagSet, tagCounts, champTagSet) {
   return matched;
 }
 
+// ---------------------------------------------------------------- ③-0 class-fit 판정
+
+// fitScore(item, champ) — 아이템이 챔피언 클래스·피해 유형에 맞는지 3단계 판정.
+//   1 = 적합 / 0.5 = 어중간(포함하되 정렬 점수에 곱해 후순위) / 0 = 하드 미스매치(추천 제외)
+// 근거 축 두 가지:
+//   · 역할: champion.tags (DDragon Marksman/Mage/Assassin/Fighter/Tank/Support)
+//   · 피해 유형: champion.dmg ("ad"|"ap"|"mixed") — champions.json 신규 필드(병렬 제작 중).
+//     방어: dmg가 없거나 형식이 다르면 mixed로 취급해 하드 배제를 만들지 않는다.
+// 근사: 아이템 태그 기반 휴리스틱이며 실제 게임의 빌드 다양성(AP 나서스류 변신 컨셉)은
+//       챔피언 명시 combo 예외(buildItems ①)로 보호한다. mixed 챔피언과 Fighter는
+//       관대하게 판정해 0을 최소화한다. heal 태그는 단독 판정 금지 —
+//       ad+heal(피바라기)은 ad 코어로, tank+heal(워모그)은 tank 단독으로 묶어서 본다.
+function fitScore(item, champ) {
+  const tags = new Set(toArray(item && item.tags).filter(isStr));
+  const roles = champ ? toArray(champ.tags).filter(isStr) : [];
+  const roleSet = new Set(roles);
+  const dmg = champ && (champ.dmg === "ad" || champ.dmg === "ap") ? champ.dmg : "mixed";
+  if (!tags.size) return 0.5; // 태그 없는 아이템은 판정 불가 — 어중간 (병렬 제작 중 방어)
+  if (!roles.length) return 0.5; // 역할 정보 없는 챔피언은 하드 배제하지 않는다 (방어)
+
+  const hasAP = tags.has("ap");
+  // 근사: ad·crit·onhit(공속 동반 포함)을 "AD 계열 코어"로 묶는다
+  const adSide = tags.has("ad") || tags.has("crit") || tags.has("onhit");
+
+  // 1) support 계열(향로·구원류) → 주 역할이 Support인 챔피언 전용
+  //    근사: DDragon tags[0]을 주 역할로 본다. 원딜(Marksman)은 애쉬(Marksman/Support)처럼
+  //    부 역할이 Support여도 하드 미스매치(0) — "원딜에 support템"은 계약상 금지.
+  //    그 외 부 역할 Support(브랜드/럭스류)는 어중간(0.5)으로 낮춘다.
+  if (tags.has("support")) {
+    if (roles[0] === "Support") return 1;
+    if (roleSet.has("Marksman")) return 0;
+    return roleSet.has("Support") ? 0.5 : 0;
+  }
+  // 2) tank 단독(워모그·가고일류: 피해 코어 태그가 전혀 없는 방어템) → Tank/Fighter만 적합
+  //    Support(기사의 맹세류 제외분)는 어중간, 원딜/메이지/암살자는 하드 미스매치
+  //    근사: 원딜은 부 역할 Support(애쉬)여도 탱단독템은 0 — Marksman이 우선한다.
+  if (tags.has("tank") && !hasAP && !adSide) {
+    if (roleSet.has("Tank") || roleSet.has("Fighter")) return 1;
+    if (roleSet.has("Marksman")) return 0;
+    return roleSet.has("Support") ? 0.5 : 0;
+  }
+  // 3) ap 코어(라바돈·존야류) → dmg가 ad 단독인 챔피언에게 하드 미스매치
+  if (hasAP && !adSide) {
+    if (dmg === "ad") return 0;
+    return dmg === "ap" ? 1 : 0.5; // mixed는 어중간으로 살려 둔다
+  }
+  // 4) ad·crit·onhit 코어(피바라기·무한의 대검류) → dmg가 ap 단독이면 하드 미스매치
+  if (adSide && !hasAP) {
+    if (dmg === "ap") return 0;
+    // 근사: crit은 평타 캐리 계열 전용 — Marksman/Assassin, 또는 탱커가 아닌 Fighter만.
+    //       말파이트(Tank/Fighter) 같은 탱커 겸 전사에게는 치명타 코어를 주지 않는다.
+    if (tags.has("crit")) {
+      const critOk = roleSet.has("Marksman") || roleSet.has("Assassin") ||
+        (roleSet.has("Fighter") && !roleSet.has("Tank"));
+      if (!critOk) return 0;
+    }
+    if (dmg === "ad") return 1;
+    // mixed: 평타/AD 계열 역할이면 적합, 그 외(순수 탱커·메이지·서폿)는 어중간
+    return roleSet.has("Marksman") || roleSet.has("Assassin") || roleSet.has("Fighter")
+      ? 1 : 0.5;
+  }
+  // 5) 그 외 — ad+ap 하이브리드(구인수류)와 move/mana/heal·shield 순수 유틸은 관대하게 통과.
+  //    heal 태그 단독 판정 금지 계약이 여기서 지켜진다.
+  return 1;
+}
+
 // ---------------------------------------------------------------- ③ 아이템 병합
 
-function buildItems(matchedCombos, matchedRules, itemList, pickedTagSet, champTags, champName) {
+function buildItems(matchedCombos, matchedRules, itemList, pickedTagSet, champ, champTags, champName) {
   const byId = new Map();
   for (const it of itemList) {
     if (it && it.id != null) byId.set(it.id, it);
@@ -209,36 +278,53 @@ function buildItems(matchedCombos, matchedRules, itemList, pickedTagSet, champTa
   };
 
   // 1) combo 아이템 최우선 (매칭 순위대로)
+  //    챔피언이 명시된 combo(m.specific)는 큐레이션을 신뢰해 fitScore를 무시한다
+  //    (AP 나서스 같은 변신 컨셉 보호). champions가 빈(전 챔피언용) combo의
+  //    아이템에만 class-fit 필터를 적용해 하드 미스매치(0)를 거른다.
   for (const m of matchedCombos) {
     const title = isStr(m.combo.title) ? m.combo.title : "시너지";
     for (const id of toArray(m.combo.items)) {
+      if (!m.specific && fitScore(byId.get(id), champ) === 0) continue;
       add(id, `"${title}" 조합의 핵심 아이템`);
     }
   }
-  // 2) 태그 규칙 아이템 (점수 순)
-  for (const m of matchedRules) {
+  // 2) 태그 규칙 아이템 — 규칙 점수 × fitScore 순으로 정렬해 채운다.
+  //    fitScore 0은 하드 미스매치로 제외, 0.5는 점수에 곱해 후순위로 민다.
+  const ruleEntries = [];
+  matchedRules.forEach((m, ord) => {
     const why = m.aHit.length
       ? m.aHit.map((t) => TAG_KO[t] || t).join("·") + " 시너지와 맞물리는 아이템"
       : "증강 조합과 두루 어울리는 아이템";
     for (const id of toArray(m.rule.items)) {
-      add(id, why);
+      const fit = fitScore(byId.get(id), champ);
+      if (fit === 0) continue;
+      ruleEntries.push({ id, why, score: m.score * fit, ord });
     }
-  }
-  // 3) 폴백: 아이템 tags × picked 태그 교집합 큰 순
+  });
+  ruleEntries.sort((a, b) => (b.score - a.score) || (a.ord - b.ord));
+  for (const e of ruleEntries) add(e.id, e.why);
+  // 3) 폴백: (아이템 tags × picked 태그 교집합 수) × fitScore 큰 순 — 0은 제외
   if (out.length < MAX_ITEMS && pickedTagSet.size) {
     const scored = [];
     itemList.forEach((it, idx) => {
       if (!it || it.id == null || seen.has(it.id)) return;
       const shared = toArray(it.tags).filter((t) => pickedTagSet.has(t));
-      if (shared.length) scored.push({ it, idx, shared });
+      if (!shared.length) return;
+      const fit = fitScore(it, champ);
+      if (fit === 0) return; // 클래스 하드 미스매치는 폴백에서도 제외
+      scored.push({ it, idx, shared, w: shared.length * fit });
     });
-    scored.sort((a, b) => (b.shared.length - a.shared.length) || (a.idx - b.idx));
+    scored.sort((a, b) => (b.w - a.w) || (a.idx - b.idx));
     for (const s of scored) {
       if (out.length >= MAX_ITEMS) break;
       add(s.it.id, (TAG_KO[s.shared[0]] || s.shared[0]) + " 증강과 시너지가 나는 아이템");
     }
   }
   // 4) 그래도 부족하면 챔피언 역할 기반 기본 코어템
+  //    근사: 부 역할(애쉬의 Support 등)의 역할 태그가 support/tank 계열 후보를 끌어올 수
+  //    있으므로 여기서도 fitScore 0(하드 미스매치)은 최후순위로 민다. 다만 마지막
+  //    안전망까지 조이면 빈손이 될 수 있어 완전히 버리지는 않는다 — fit>0 후보가
+  //    모자랄 때만 fit 0 후보로 채운다(빈손 방지, 과잉 차단 없음).
   if (out.length < MAX_ITEMS && champTags.length) {
     const roleTags = new Set();
     for (const rt of champTags) {
@@ -248,9 +334,14 @@ function buildItems(matchedCombos, matchedRules, itemList, pickedTagSet, champTa
     itemList.forEach((it, idx) => {
       if (!it || it.id == null || seen.has(it.id)) return;
       const shared = toArray(it.tags).filter((t) => roleTags.has(t));
-      if (shared.length) scored.push({ it, idx, n: shared.length });
+      if (!shared.length) return;
+      const fit = fitScore(it, champ);
+      scored.push({ it, idx, n: shared.length, fit });
     });
-    scored.sort((a, b) => (b.n - a.n) || (a.idx - b.idx));
+    scored.sort((a, b) =>
+      ((a.fit === 0 ? 1 : 0) - (b.fit === 0 ? 1 : 0)) || // fit 0은 항상 뒤로
+      (b.n * (b.fit || 1) - a.n * (a.fit || 1)) ||
+      (a.idx - b.idx));
     for (const s of scored) {
       if (out.length >= MAX_ITEMS) break;
       add(s.it.id, `${champName}의 기본 코어 아이템`);
@@ -392,7 +483,7 @@ export function recommend(input) {
   const matchedRules = matchRules(tagRules, pickedTagSet, tagCounts, champTagSet);
 
   // ③~⑤ 산출물 조립
-  const items = buildItems(matchedCombos, matchedRules, itemList, pickedTagSet, champTags, champName);
+  const items = buildItems(matchedCombos, matchedRules, itemList, pickedTagSet, champ, champTags, champName);
   const funScore = calcFunScore(matchedCombos, matchedRules, tagCounts, picked.length);
   const styleTags = buildStyleTags(matchedCombos, champTags, tagCounts);
   const headline = buildHeadline(styleTags, champTags);

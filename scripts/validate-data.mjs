@@ -217,6 +217,28 @@ for (const c of champions) {
   }
 }
 
+// 5-4b. champions: dmg 어휘 (ad/ap/mixed) — 173명 전원 필수 (class-fit 계약)
+// 근사: dmg는 DDragon info.attack/magic 격차 3 기준 산출(생성: scripts/enrich-champions.cjs)
+{
+  const DMG_VOCAB = new Set(['ad', 'ap', 'mixed']);
+  const dmgDist = {};
+  for (const c of champions) {
+    if (!DMG_VOCAB.has(c.dmg)) {
+      issues.push(`champion ${c.id}: dmg 어휘 위반 (${JSON.stringify(c.dmg)}) — ad/ap/mixed 중 하나여야 함`);
+      continue;
+    }
+    dmgDist[c.dmg] = (dmgDist[c.dmg] || 0) + 1;
+  }
+  log('dmg 분포: ' + JSON.stringify(dmgDist));
+  // class-fit 계약 표본 7명 고정 검증 (에코는 enrich-champions.cjs DMG_OVERRIDES 근거)
+  const DMG_SAMPLES = { Ashe: 'ad', Brand: 'ap', Ekko: 'ap', Galio: 'ap', Jayce: 'ad', Amumu: 'ap', Trundle: 'ad' };
+  for (const [id, exp] of Object.entries(DMG_SAMPLES)) {
+    const c = champions.find(x => x.id === id);
+    if (!c) { issues.push(`champion 표본 ${id}: 항목 누락`); continue; }
+    if (c.dmg !== exp) issues.push(`champion 표본 ${id}: dmg=${JSON.stringify(c.dmg)} (계약 기대값 ${exp})`);
+  }
+}
+
 // 5-5. 게이트 위생: 각 abilityPropsAll 게이트를 충족하는 챔피언이 1명 이상 존재 (dead gate 방지)
 for (const a of augments) {
   const req = a.restrictions && a.restrictions.abilityPropsAll;
