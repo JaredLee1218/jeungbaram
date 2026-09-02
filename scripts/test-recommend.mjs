@@ -193,8 +193,9 @@ function checkShape(r, label) {
 async function main() {
   await fs.copyFile(srcPath, tmpPath);
   const mod = await import(pathToFileURL(tmpPath).href);
-  const { recommend } = mod;
+  const { recommend, previewAugment } = mod;
   ok(typeof recommend === "function", "recommend export 존재");
+  ok(typeof previewAugment === "function", "previewAugment export 존재");
 
   // --- 케이스 1: combo 정확 매칭 (matchType all/any, 챔피언 필터, 겹침 순 정렬) ---
   console.log("\n[케이스 1] combo 정확 매칭");
@@ -409,6 +410,108 @@ async function main() {
   ok(!ids4h.includes(2002), "case4h: 부역할 Support 원딜에게도 tank단독(가고일) 미추천", ids4h);
   ok(!ids4h.includes(2009), "case4h: 부역할 Support 원딜에게도 tank단독(정령의 형상) 미추천", ids4h);
   ok(ids4h.includes(2004), "case4h: ad+heal(피바라기)은 그대로 추천", ids4h);
+
+  // --- 케이스 5: previewAugment 카드 미리보기 ---
+  console.log("\n[케이스 5] previewAugment 카드 미리보기");
+
+  // 공통 형태 검사
+  function checkPreviewShape(p, label) {
+    ok(p && typeof p === "object", `${label}: 객체 반환`);
+    ok(typeof p.route === "string", `${label}: route 문자열`, p && p.route);
+    ok(Array.isArray(p.styleTags) && p.styleTags.length <= 2 &&
+      p.styleTags.every((t) => typeof t === "string"), `${label}: styleTags 최대 2개 문자열`, p && p.styleTags);
+    ok(Array.isArray(p.newCombos) && p.newCombos.length <= 2 &&
+      p.newCombos.every((c) => c && typeof c.title === "string" && typeof c.whyFun === "string"),
+      `${label}: newCombos 최대 2개 {title, whyFun}`, p && p.newCombos);
+    ok(Array.isArray(p.items) && p.items.length <= 3 &&
+      p.items.every((it) => it && it.id != null && typeof it.nameKo === "string" && typeof it.icon === "string"),
+      `${label}: items 최대 3개 {id, nameKo, icon}`, p && p.items);
+    ok(typeof p.funDelta === "number" && Number.isFinite(p.funDelta), `${label}: funDelta 숫자`, p && p.funDelta);
+  }
+
+  // 5a. 후보(AUG_C)로 인해 all-combo가 새로 매칭 → newCombos에 포함.
+  //     picked만으로 이미 매칭된 combo(온힛 폭풍·이미 발동)는 candidate가 augments에
+  //     들어 있어도 제외 — "새로" 매칭된 것만 잡는다.
+  const COMBO_ANY_BOTH = { // any인데 picked(AUG_A)만으로 이미 매칭 — candidate 포함이어도 신규 아님
+    title: "이미 발동", champions: [],
+    augments: ["ARAM_LightningStrikes", "ARAM_CritFrenzy"], matchType: "any",
+    whyFun: "이미 켜져 있던 조합입니다.", items: [1005], skills: "-", styleTags: ["온힛"], source: "kr",
+  };
+  const SYNERGIES_5 = { combos: [COMBO_OTHER_CHAMP, COMBO_ALL_MISSING, COMBO_JAYCE, COMBO_ANYCHAMP, COMBO_ANY_BOTH], tagRules: TAG_RULES };
+  const p5a = previewAugment({
+    champion: CHAMP_JAYCE, candidate: AUG_C, picked: [AUG_A],
+    synergies: SYNERGIES_5, items: ITEMS, augments: AUGMENTS,
+  });
+  checkPreviewShape(p5a, "case5a");
+  const titles5a = p5a.newCombos.map((c) => c.title);
+  ok(titles5a.includes("번개 대포 제이스"), "case5a: 후보로 완성되는 all-combo가 newCombos에 포함", titles5a);
+  ok(!titles5a.includes("온힛 폭풍"), "case5a: picked만으로 이미 매칭된 combo 제외(candidate 미포함형)", titles5a);
+  ok(!titles5a.includes("이미 발동"), "case5a: candidate가 augments에 있어도 이미 매칭이면 제외", titles5a);
+  ok(p5a.newCombos.every((c) => c.whyFun.length > 0), "case5a: newCombos에 whyFun 전달", p5a.newCombos);
+  ok(p5a.funDelta > 0, "case5a: 새 combo 발동이라 funDelta 양수", p5a.funDelta);
+  ok(typeof p5a.route === "string" && p5a.route.length > 0, "case5a: route 비어있지 않음", p5a.route);
+  // funDelta 정합: recommend 두 번 호출의 실제 차분과 일치
+  const fBefore5a = recommend({ champion: CHAMP_JAYCE, picked: [AUG_A], synergies: SYNERGIES_5, items: ITEMS, augments: AUGMENTS }).funScore;
+  const fAfter5a = recommend({ champion: CHAMP_JAYCE, picked: [AUG_A, AUG_C], synergies: SYNERGIES_5, items: ITEMS, augments: AUGMENTS }).funScore;
+  ok(p5a.funDelta === fAfter5a - fBefore5a, "case5a: funDelta = funScore(picked+후보) - funScore(picked)", [p5a.funDelta, fAfter5a - fBefore5a]);
+  // route·styleTags·items는 "후보 포함" 추천을 그대로 반영
+  const rAfter5a = recommend({ champion: CHAMP_JAYCE, picked: [AUG_A, AUG_C], synergies: SYNERGIES_5, items: ITEMS, augments: AUGMENTS });
+  ok(p5a.route === rAfter5a.headline, "case5a: route = 후보 포함 headline", [p5a.route, rAfter5a.headline]);
+  ok(JSON.stringify(p5a.styleTags) === JSON.stringify(rAfter5a.styleTags.slice(0, 2)), "case5a: styleTags = 후보 포함 상위 1~2개", p5a.styleTags);
+  ok(JSON.stringify(p5a.items.map((i) => i.id)) === JSON.stringify(rAfter5a.items.slice(0, 3).map((i) => i.id)),
+    "case5a: items = 후보 포함 추천 상위 3개 그대로", p5a.items.map((i) => i.id));
+
+  // 5b. funDelta 부호: 아무 시너지도 안 내는 무태그 후보 → funDelta 0 (음수 방어 겸)
+  const AUG_PLAIN = { apiName: "ARAM_Plain", nameKo: "맹물", tier: "silver", enabled: true, tags: [] };
+  const p5b = previewAugment({
+    champion: CHAMP_JAYCE, candidate: AUG_PLAIN, picked: [AUG_A],
+    synergies: SYNERGIES_5, items: ITEMS, augments: AUGMENTS,
+  });
+  checkPreviewShape(p5b, "case5b");
+  ok(p5b.funDelta === 0, "case5b: 시너지 없는 후보는 funDelta 0", p5b.funDelta);
+  ok(p5b.newCombos.length === 0, "case5b: 신규 combo 없음", p5b.newCombos);
+
+  // 5c. newCombos 최대 2개: 후보 하나로 any-combo 3개가 동시에 새로 매칭돼도 2개까지만
+  const mk5c = (n) => ({
+    title: `신규조합${n}`, champions: [], augments: ["ARAM_CritFrenzy"], matchType: "any",
+    whyFun: `조합 ${n}`, items: [], skills: "-", styleTags: ["치명타"], source: "kr",
+  });
+  const p5c = previewAugment({
+    champion: CHAMP_JAYCE, candidate: AUG_C, picked: [],
+    synergies: { combos: [mk5c(1), mk5c(2), mk5c(3)], tagRules: [] },
+    items: ITEMS, augments: AUGMENTS,
+  });
+  ok(p5c.newCombos.length === 2, "case5c: 신규 combo 3개여도 최대 2개", p5c.newCombos.map((c) => c.title));
+
+  // 5d. items ≤3 + fitScore 준수: 애쉬(Marksman·Support, dmg ad) 후보 미리보기에
+  //     탱단독템·support템이 없어야 한다 (case4h와 같은 계약을 미리보기 경로에서 재검증)
+  const p5d = previewAugment({
+    champion: CHAMP_ASHE_REAL, candidate: AUG_HEAL, picked: [],
+    synergies: { combos: [], tagRules: [RULE_HEAL] },
+    items: ITEMS_FIT_4H, augments: AUGMENTS_FIT,
+  });
+  checkPreviewShape(p5d, "case5d");
+  const ids5d = p5d.items.map((i) => i.id);
+  ok(ids5d.length > 0 && ids5d.length <= 3, "case5d: 아이템 1~3개", ids5d);
+  ok(!ids5d.includes(2001) && !ids5d.includes(2002) && !ids5d.includes(2009), "case5d: 애쉬 미리보기에 탱단독템 없음", ids5d);
+  ok(!ids5d.includes(2003), "case5d: 애쉬 미리보기에 support템 없음", ids5d);
+
+  // 5e. 빈 picked(1라운드)에서도 동작: 전 챔피언 any-combo가 후보만으로 새로 매칭
+  const p5e = previewAugment({
+    champion: CHAMP_JAYCE, candidate: AUG_A, picked: [],
+    synergies: SYNERGIES, items: ITEMS, augments: AUGMENTS,
+  });
+  checkPreviewShape(p5e, "case5e");
+  ok(p5e.newCombos.some((c) => c.title === "온힛 폭풍"), "case5e: 빈 picked에서 후보 단독 매칭 combo 포착", p5e.newCombos);
+  ok(p5e.funDelta > 0, "case5e: 빈 picked 대비 funDelta 양수", p5e.funDelta);
+
+  // 5f. 데이터 누락 방어: 무엇이 빠져도 throw 없이 형태 유지
+  checkPreviewShape(previewAugment({}), "case5f-빈입력");
+  checkPreviewShape(previewAugment(), "case5f-무인자");
+  checkPreviewShape(previewAugment({ champion: CHAMP_ASHE, candidate: AUG_A, picked: null, synergies: null, items: null, augments: null }), "case5f-널데이터");
+  const p5fNoCand = previewAugment({ champion: CHAMP_ASHE, picked: [AUG_A], synergies: SYNERGIES, items: ITEMS, augments: AUGMENTS });
+  checkPreviewShape(p5fNoCand, "case5f-후보없음");
+  ok(p5fNoCand.funDelta === 0 && p5fNoCand.newCombos.length === 0, "case5f: 후보 없으면 차분 0·신규 combo 없음", p5fNoCand.funDelta);
 
   // --- 결과 ---
   console.log(`\n${pass} passed, ${fail} failed`);

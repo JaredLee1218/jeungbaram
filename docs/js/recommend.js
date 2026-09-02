@@ -4,6 +4,15 @@
 // 반환: { headline, playstyle, matchedCombos, items:[{id,nameKo,icon,reason}](최대 6),
 //         skills, funScore(0~100), styleTags:[...] }
 //
+// export function previewAugment({champion, candidate, picked, synergies, items, augments})
+// 드래프트 카드 1장(candidate)에 대한 "이걸 고르면?" 미리보기.
+// 내부에서 recommend()를 (picked)와 (picked+[candidate]) 두 번 호출해 차분만 계산한다
+// (rng 미사용 — 결정론이라 두 호출이 항상 같은 입력에 같은 결과).
+// 반환: { route, styleTags(상위 1~2), newCombos:[{title,whyFun}](최대 2),
+//         items:[{id,nameKo,icon}](최대 3, fitScore 반영), funDelta }
+// newCombos = 후보를 포함해야 비로소 매칭되는 combo 중 candidate.apiName이
+// combo.augments에 포함된 것만 (picked만으로 이미 매칭된 combo는 제외).
+//
 // 로직 순서:
 //  ① synergies.combos에서 champion+picked 정확 매칭 (matchType any/all 준수)
 //     — 매칭 combo의 whyFun/items/skills 최우선 반영, 여러 개면 styleTags 겹침 순 정렬
@@ -499,4 +508,64 @@ export function recommend(input) {
     funScore,
     styleTags,
   };
+}
+
+// ---------------------------------------------------------------- 카드 미리보기
+
+// previewAugment — 드래프트 카드 1장에 대한 "이걸 고르면?" 차분 미리보기.
+// recommend()를 딱 두 번(before/after)만 호출해 조립한다 — 중복 구현 없음.
+// 방어: 어떤 입력에서도 throw 없이 항상 같은 형태를 반환한다
+// (route:"" 또는 recommend 폴백 문자열, 배열은 빈 배열, funDelta는 0).
+export function previewAugment(input) {
+  const empty = { route: "", styleTags: [], newCombos: [], items: [], funDelta: 0 };
+  try {
+    const opts = input && typeof input === "object" ? input : {};
+    const candidate = opts.candidate;
+    // candidate는 증강 객체가 정상이지만 apiName 문자열도 관대하게 허용 (picked와 동일 원칙)
+    const candidateName = candidate && typeof candidate === "object" && isStr(candidate.apiName)
+      ? candidate.apiName
+      : (isStr(candidate) ? candidate : "");
+    const picked = toArray(opts.picked);
+    const base = {
+      champion: opts.champion,
+      synergies: opts.synergies,
+      items: opts.items,
+      augments: opts.augments,
+    };
+
+    const before = recommend(Object.assign({}, base, { picked }));
+    const after = candidate == null
+      ? before
+      : recommend(Object.assign({}, base, { picked: picked.concat([candidate]) }));
+
+    // 매칭은 단조 증가(증강이 늘면 매칭도 늘기만 함) — before에 이미 있던 combo는 신규가 아니다.
+    // 두 호출이 같은 synergies 객체를 읽으므로 combo는 참조 동일성으로 비교할 수 있다.
+    const beforeCombos = new Set(toArray(before.matchedCombos));
+    const newCombos = [];
+    for (const combo of toArray(after.matchedCombos)) {
+      if (newCombos.length >= 2) break;
+      if (!combo || typeof combo !== "object") continue;
+      if (beforeCombos.has(combo)) continue; // picked만으로 이미 매칭 → 제외
+      if (!toArray(combo.augments).some((n) => isStr(n) && n === candidateName)) continue;
+      newCombos.push({
+        title: isStr(combo.title) ? combo.title : "시너지",
+        whyFun: isStr(combo.whyFun) ? combo.whyFun.trim() : "",
+      });
+    }
+
+    return {
+      route: isStr(after.headline) ? after.headline : "",
+      styleTags: toArray(after.styleTags).filter(isStr).slice(0, 2),
+      newCombos,
+      items: toArray(after.items).slice(0, 3).map((it) => ({
+        id: it && it.id != null ? it.id : null,
+        nameKo: it && isStr(it.nameKo) ? it.nameKo : "",
+        icon: it && isStr(it.icon) ? it.icon : "",
+      })),
+      funDelta: (typeof after.funScore === "number" ? after.funScore : 0) -
+        (typeof before.funScore === "number" ? before.funScore : 0),
+    };
+  } catch (_) {
+    return empty; // 미리보기는 부가 정보 — 어떤 오류도 UI를 깨뜨리지 않는다
+  }
 }

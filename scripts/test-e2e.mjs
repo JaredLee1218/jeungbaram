@@ -11,7 +11,7 @@ import {
   newGame, nextRound, rerollSlot, goldenReroll, pickAugment,
   eligibleAugments, ROUND_LEVELS,
 } from '../docs/js/draft.js';
-import { recommend } from '../docs/js/recommend.js';
+import { recommend, previewAugment } from '../docs/js/recommend.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const loadJson = (rel) => JSON.parse(readFileSync(join(ROOT, 'docs', 'data', rel), 'utf8'));
@@ -201,6 +201,49 @@ ok(typeof rec.skills === 'string' && rec.skills.length > 0, '추천: skills');
 ok(typeof rec.funScore === 'number' && rec.funScore >= 0 && rec.funScore <= 100,
   '추천: funScore 0~100 (' + rec.funScore + ')');
 ok(Array.isArray(rec.styleTags) && rec.styleTags.length > 0, '추천: styleTags');
+
+// ---- 4.5) previewAugment: 에코 드래프트 각 라운드 3슬롯 전부 무사고 + 형태 검증 ----
+// 실데이터로 라운드마다(빈 picked 1라운드 포함) 제시 카드 3장 각각에 미리보기를 호출한다.
+{
+  const game3 = newGame({ augments: augData.augments, champion: ekko, seed: SEED });
+  let calls = 0, bad = 0, newComboBad = 0;
+  for (let r = 0; r < 4; r++) {
+    const round = nextRound(game3);
+    for (let s = 0; s < round.slots.length; s++) {
+      const p = previewAugment({
+        champion: ekko,
+        candidate: round.slots[s],
+        picked: game3.picked.slice(),
+        synergies: synData,
+        items: itemData.items,
+        augments: augData.augments,
+      });
+      calls++;
+      const shapeOk = p && typeof p === 'object'
+        && typeof p.route === 'string' && p.route.length > 0
+        && Array.isArray(p.styleTags) && p.styleTags.length >= 1 && p.styleTags.length <= 2
+        && p.styleTags.every((t) => typeof t === 'string' && t.length > 0)
+        && Array.isArray(p.newCombos) && p.newCombos.length <= 2
+        && p.newCombos.every((c) => c && typeof c.title === 'string' && typeof c.whyFun === 'string')
+        && Array.isArray(p.items) && p.items.length <= 3
+        && p.items.every((it) => it && itemIds.has(it.id) && typeof it.nameKo === 'string' && typeof it.icon === 'string')
+        && typeof p.funDelta === 'number' && isFinite(p.funDelta);
+      if (!shapeOk) {
+        bad++;
+        console.error('  preview 형태 위반: 라운드 ' + (r + 1) + ' 슬롯 ' + s + ' — ' + JSON.stringify(p));
+      }
+      // newCombos 계약: 전부 실제 combo이고 candidate.apiName이 그 combo.augments에 포함돼야 함
+      for (const nc of p.newCombos || []) {
+        const src = synData.combos.find((c) => c.title === nc.title);
+        if (!src || !(src.augments || []).includes(round.slots[s].apiName)) newComboBad++;
+      }
+    }
+    pickAugment(game3, 0);
+  }
+  ok(calls === 12, 'preview: 4라운드 × 3슬롯 = 12회 호출 (' + calls + '회)');
+  ok(bad === 0, 'preview: 형태 위반 0건 (' + bad + '건)');
+  ok(newComboBad === 0, 'preview: newCombos 전부 후보 포함 실제 combo (' + newComboBad + '건 위반)');
+}
 
 // ---- 5) 전 챔피언 스모크: newGame + 1라운드 + recommend가 어떤 챔피언에서도 안 죽는지 ----
 let smokeErrors = 0;

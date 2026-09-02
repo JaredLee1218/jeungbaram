@@ -31,6 +31,10 @@ import {
   pickAugment,
 } from "./draft.js";
 import { recommend } from "./recommend.js";
+/* previewAugment는 F1이 병렬 구현 중인 신규 export — named import는
+ * export 부재 시 모듈 로드 자체가 깨지므로(SyntaxError) 네임스페이스로
+ * 받아 typeof 체크한다. 부재 시 미리보기 스트립만 조용히 생략된다. */
+import * as recommendApi from "./recommend.js";
 
 /* ---------------- 상수 ---------------- */
 
@@ -260,6 +264,8 @@ function startGame(champion, seed) {
   state.goldenArmed = false;
   state.actions = [];
   state.round = null;
+  previewCache.clear(); // 게임 단위 캐시 — 챔피언이 바뀌면 무효
+
   try {
     state.game = newGame({
       augments: state.data.augments,
@@ -741,6 +747,110 @@ function renderHistoryBar() {
   bar.innerHTML = html;
 }
 
+/* ---------- 픽 미리보기 스트립 ("이걸 고르면?") ----------
+ * 카드 1장(candidate)에 대해 previewAugment 차분 결과를 압축 표시.
+ * - previewAugment 부재(typeof)·호출 실패·형태 불량이면 "" 반환
+ *   → 기존 카드 그대로 (방어적)
+ * - 카드가 <button>이므로 내부는 phrasing content(span/img)만 사용
+ * - 리롤/황금 리롤/라운드 진행 후 재계산: 세 경로 모두 renderDraft()가
+ *   카드 HTML을 통째로 다시 만들므로 여기서 자동으로 재계산된다.
+ * - 메모 캐시: 키 = picked 증강 이름들 + 후보 이름. 리롤 시 바뀐 슬롯 1장만
+ *   실제 계산되고 나머지 2장은 캐시 히트 (라운드 진행 시 picked가 바뀌어
+ *   자연히 전 슬롯 재계산). 같은 게임 안에서 증강은 중복 제시되지 않으므로
+ *   apiName 키로 충분하다. 새 게임 시작 시 startGame()에서 비운다. */
+
+var previewCache = new Map();
+
+function cachePreview(key, html) {
+  if (key) previewCache.set(key, html);
+  return html;
+}
+
+function previewStripHtml(candidate) {
+  if (typeof recommendApi.previewAugment !== "function") return "";
+  if (!candidate || !state.champion || !state.data) return "";
+  var picks = resolvedPicks();
+  var cacheKey = "";
+  if (typeof candidate.apiName === "string" && candidate.apiName) {
+    cacheKey =
+      picks
+        .map(function (p) {
+          return p && p.apiName;
+        })
+        .join(",") +
+      "|" +
+      candidate.apiName;
+    if (previewCache.has(cacheKey)) return previewCache.get(cacheKey);
+  }
+  var pv = null;
+  try {
+    pv = recommendApi.previewAugment({
+      champion: state.champion,
+      candidate: candidate,
+      picked: picks,
+      synergies: state.data.synergies,
+      items: state.data.items,
+      augments: state.data.augments,
+    });
+  } catch (err) {
+    console.warn("previewAugment 실패 — 미리보기 생략", err);
+    return "";
+  }
+  if (!pv || typeof pv !== "object") return cachePreview(cacheKey, "");
+
+  var rows = "";
+
+  /* 1행: 꿀잼 루트 방향 + funDelta 배지 (0 이하면 배지 생략) */
+  var route = typeof pv.route === "string" ? pv.route : "";
+  var delta = Math.round(Number(pv.funDelta));
+  var deltaBadge =
+    isFinite(delta) && delta > 0
+      ? '<span class="aug-preview-delta">🍯+' + delta + "</span>"
+      : "";
+  if (route) {
+    rows +=
+      '<span class="aug-preview-route">' +
+      '<span class="aug-preview-route-text">→ ' + esc(route) + "</span>" +
+      deltaBadge +
+      "</span>";
+  }
+
+  /* 2행: 이 후보를 골라야 새로 가동되는 조합 — 과밀 방지로 최대 1개 */
+  var combo = Array.isArray(pv.newCombos) ? pv.newCombos[0] : null;
+  if (combo && combo.title) {
+    rows +=
+      '<span class="aug-preview-combo">⚡ ‘' + esc(combo.title) +
+      "’ 조합 가동!</span>";
+  }
+
+  /* 3행: 예시 아이템 아이콘 최대 3개 */
+  var itemsHtml = (Array.isArray(pv.items) ? pv.items : [])
+    .slice(0, 3)
+    .map(function (it) {
+      if (!it || !it.icon) return "";
+      return (
+        '<img src="' + esc(it.icon) + '" alt="' + esc(it.nameKo || "") +
+        '" loading="lazy" decoding="async" width="24" height="24">'
+      );
+    })
+    .join("");
+  if (itemsHtml) {
+    rows +=
+      '<span class="aug-preview-items">' +
+      '<span class="aug-preview-items-label">예시 빌드</span>' +
+      itemsHtml +
+      "</span>";
+  }
+
+  if (!rows) return cachePreview(cacheKey, "");
+  /* 카드 버튼에 aria-label이 이미 있어 접근성 이름은 중복되지 않지만,
+   * 콘텐츠 낭독 중복을 피하기 위해 정보성 스트립은 aria-hidden 처리 */
+  return cachePreview(
+    cacheKey,
+    '<span class="aug-preview" aria-hidden="true">' + rows + "</span>"
+  );
+}
+
 function renderDraft() {
   var r = state.round;
   if (!r) {
@@ -788,6 +898,7 @@ function renderDraft() {
             (enh.nameKo ? " · " + esc(enh.nameKo) : "") + "</span>"
           : "") +
         '<span class="aug-desc">' + esc(aug.descKo) + "</span>" +
+        previewStripHtml(aug) +
         "</button>" +
         '<button type="button" class="btn btn-reroll" data-slot="' + i +
         '" aria-label="' + esc(aug.nameKo) + " 리롤\"" +
