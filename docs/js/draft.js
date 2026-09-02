@@ -25,6 +25,12 @@
  *   같은 등급의 남은 증강이 부족하면 남은 것으로 먼저 채우고,
  *   그래도 모자라면 다른 등급에서 보충한다. 보충 순서는 아래 FALLBACK_ORDER 참조.
  *
+ * ⚠ 근사: 챔피언별 풀 게이트(classRequired/championWhitelist 등)와 가중 추출(weightFor)은
+ *   공식 확인 + 실측 통계 기반 근사다. 정확한 챔피언×증강 풀·가중치는 100% 서버 전용이라
+ *   재현 불가 (research/AUGMENT-POOLS-STUDY.md §3, research/data/eligibility-notes.json).
+ *   스킬 증강(category==='ability')은 제시 시 enhancedSkill(강화 대상 스킬)을 지정하는데,
+ *   실제 지정 규칙이 비공개라 "적격 스킬 중 무작위"로 근사한다 (STUDY §3-3).
+ *
  * 결정론: 같은 seed + 같은 순서의 함수 호출 = 항상 같은 결과 (공유 URL 재현용).
  * 게임 상태는 JSON 직렬화 가능한 plain object. 증강 객체는 불변으로 취급하며
  * 내부 비교는 전부 apiName 문자열 기준이므로 JSON.parse(JSON.stringify(game))로
@@ -132,16 +138,25 @@ function nextFloat(game) {
  *  - restrictions.rangedOnly → champion.ranged 필요
  *  - restrictions.meleeOnly → champion.ranged가 아니어야 함
  *  - restrictions.requiresMana → champion.usesMana 필요
+ *  - restrictions.classRequired → champion.tags와 교집합 1개 이상 필요
+ *      (예: Mercy's Strike는 Support 전용 — 26.15 공식 버그픽스로 확인.
+ *       근거: research/AUGMENT-POOLS-STUDY.md §3-1, research/data/eligibility-notes.json classBias)
+ *  - restrictions.classExcluded → champion.tags와 교집합이 있으면 제외
+ *  - restrictions.championWhitelist → champion.id가 목록에 있어야 함
+ *      (예: Spin To Win — 위키의 적격 챔피언 명시 목록. 근거: STUDY §3-1)
+ *  - restrictions.championExclude → champion.id가 목록에 있으면 제외
+ *      (예: Smolder×Combusting Interest — 26.14 공식 버그픽스. 근거: STUDY §3-1)
  *  - restrictions.abilityProps → champion.abilityProps와 교집합 1개 이상 필요 (OR 조건)
- *  - restrictions.abilityPropsAll → champion.abilityProps에 전부 포함 필요 (AND 조건.
- *      예: Tripleshot은 "대상 지정 + 투사체" 스킬이 필요 → ['targeted','projectile'])
+ *  - restrictions.abilityPropsAll → **스킬 단위 AND**: champion.spells 중 props가
+ *      요구 집합을 전부 포함하는 스킬이 1개 이상 필요
+ *      (예: Tripleshot은 "대상 지정이면서 투사체"인 같은 스킬 하나 필요 → ['targeted','projectile']).
+ *      spells[i].props가 없는 구스키마 데이터면 종전의 합집합(champion.abilityProps) 방식으로 폴백.
  * champion이 없으면(null) enabled 필터만 적용한다.
  * 입력 배열 순서를 보존한다(결정론에 중요).
  *
- * 근사: 실제 게임의 스킬 증강 필터는 "같은 스킬 하나"가 조건을 모두 만족해야 하지만
- * (예: Tripleshot = 대상 지정이면서 투사체인 스킬), champion.abilityProps는 챔피언의
- * 전 스킬 속성 합집합이라 스킬 단위 결합 판정은 불가능하다. abilityPropsAll(AND)은
- * 필요조건 근사이며, 서로 다른 스킬이 속성을 하나씩 나눠 가진 챔피언은 과잉 포함될 수 있다.
+ * 근사: 신규 필드가 없는 증강은 종전과 동일하게 동작한다(방어적 하위 호환).
+ * 스킬별 props 자체가 한국어 설명 키워드 기반 근사이므로(champions.json _note 참조)
+ * 스킬 단위 AND 판정도 근사다. 근거: research/AUGMENT-POOLS-STUDY.md §3-1·§3-3.
  */
 export function eligibleAugments(augments, champion) {
   if (!Array.isArray(augments)) throw new Error('augments 배열이 필요합니다.');
@@ -153,14 +168,48 @@ export function eligibleAugments(augments, champion) {
     if (r.rangedOnly && !champion.ranged) return false;
     if (r.meleeOnly && champion.ranged) return false;
     if (r.requiresMana && !champion.usesMana) return false;
+    // 클래스 게이트 (DDragon tags 어휘: Marksman/Mage/Tank/Support/Fighter/Assassin)
+    const tags = Array.isArray(champion.tags) ? champion.tags : [];
+    if (Array.isArray(r.classRequired) && r.classRequired.length > 0) {
+      const hasClass = r.classRequired.some(function (t) { return tags.indexOf(t) !== -1; });
+      if (!hasClass) return false;
+    }
+    if (Array.isArray(r.classExcluded) && r.classExcluded.length > 0) {
+      const hitExcluded = r.classExcluded.some(function (t) { return tags.indexOf(t) !== -1; });
+      if (hitExcluded) return false;
+    }
+    // 챔피언 단위 화이트리스트/제외 (champion.id — DDragon id 어휘)
+    if (Array.isArray(r.championWhitelist) && r.championWhitelist.length > 0) {
+      if (r.championWhitelist.indexOf(champion.id) === -1) return false;
+    }
+    if (Array.isArray(r.championExclude) && r.championExclude.length > 0) {
+      if (r.championExclude.indexOf(champion.id) !== -1) return false;
+    }
     const props = champion.abilityProps || [];
     if (Array.isArray(r.abilityProps) && r.abilityProps.length > 0) {
       const hasCommon = r.abilityProps.some(function (p) { return props.indexOf(p) !== -1; });
       if (!hasCommon) return false;
     }
     if (Array.isArray(r.abilityPropsAll) && r.abilityPropsAll.length > 0) {
-      const hasAll = r.abilityPropsAll.every(function (p) { return props.indexOf(p) !== -1; });
-      if (!hasAll) return false;
+      // 스킬 단위 AND: props가 있는 스킬이 1개라도 있으면 스킬 단위로 판정,
+      // 전부 없으면(구스키마) 종전 합집합 방식으로 폴백 (하위 호환)
+      // spellExclude(스킬 슬롯 단위 게이트)에 걸린 스킬은 충족 후보에서 제외한다.
+      const exKeys = (r.spellExclude && Array.isArray(r.spellExclude[champion.id]))
+        ? r.spellExclude[champion.id]
+        : [];
+      const spells = Array.isArray(champion.spells) ? champion.spells : [];
+      const spellsWithProps = spells.filter(function (s) {
+        return s && Array.isArray(s.props) && exKeys.indexOf(s.key) === -1;
+      });
+      if (spellsWithProps.length > 0) {
+        const anySpellHasAll = spellsWithProps.some(function (s) {
+          return r.abilityPropsAll.every(function (p) { return s.props.indexOf(p) !== -1; });
+        });
+        if (!anySpellHasAll) return false;
+      } else {
+        const hasAll = r.abilityPropsAll.every(function (p) { return props.indexOf(p) !== -1; });
+        if (!hasAll) return false;
+      }
     }
     return true;
   });
@@ -177,6 +226,9 @@ export function eligibleAugments(augments, champion) {
  * @param {Object} [opts.champion] champions.json의 챔피언 1명 (없으면 필터 생략)
  * @param {number|string} [opts.seed] 시드 (없으면 무작위 생성 — 공유 URL용으로는 반드시 지정 권장)
  * @param {Object} [opts.tierWeights] 등급 확률 재정의 (기본값은 추정치 DEFAULT_TIER_WEIGHTS)
+ * @param {boolean} [opts.trackL9] 진행도 트랙 Lv9 보정 (기본 false).
+ *   근사: 켜면 스킬 증강(category==='ability') 추출 가중치를 WEIGHT_TRACK_L9_ABILITY(1.5)배 —
+ *   실제 증가 폭은 비공개 (research/AUGMENT-POOLS-STUDY.md §3-2)
  * @returns JSON 직렬화 가능한 plain object 게임 상태
  */
 export function newGame(opts) {
@@ -190,6 +242,7 @@ export function newGame(opts) {
     seed: seed,                       // 원본 시드 (공유 URL 재현용)
     rngState: hashSeed(seed),         // RNG 내부 상태 (uint32, 호출마다 갱신)
     tierWeights: Object.assign({}, DEFAULT_TIER_WEIGHTS, o.tierWeights || {}),
+    trackL9: o.trackL9 === true,      // 진행도 트랙 Lv9 보정 (스킬 증강 가중치 ↑, 기본 off)
     champion: champion,               // 전달받은 챔피언 객체 그대로 (plain object)
     pool: eligibleAugments(o.augments, champion), // 이 챔피언이 받을 수 있는 전체 증강 풀
     rounds: [],                       // 라운드 이력: {level, tier, slots, rerolled, golden, pickedIndex}
@@ -249,14 +302,63 @@ function weightedTierPick(game, candidates, weights) {
 }
 
 /**
- * 지정 등급에서 미노출 증강 1개를 무작위로 뽑는다.
+ * 근사: 가중 추출 계수 — 실제 가중치 수치는 서버 전용·비공개라 전부 추정 상수다.
+ * Optimal/Viable/Average 3단(게임스컴 데브 2026 공개 강연, 수치 비공개)을
+ * favored 2.0 / 기본 1.0 / disfavored 0.6 으로 근사.
+ * 근거: research/AUGMENT-POOLS-STUDY.md §3-2, research/data/eligibility-notes.json classBias.
+ */
+export const WEIGHT_FAVORED = 2.0;
+export const WEIGHT_DISFAVORED = 0.6;
+/**
+ * 근사: 진행도 트랙 레벨 9 보상은 스킬 증강 등장 확률을 올린다(증가 폭 비공개) — 1.5배로 근사.
+ * 근거: research/AUGMENT-POOLS-STUDY.md §3-2, research/data/eligibility-notes.json abilityAugments.tierSystem.
+ */
+export const WEIGHT_TRACK_L9_ABILITY = 1.5;
+
+/**
+ * 증강 1개의 추출 가중치.
+ *  기본 1.0
+ *  × favoredClasses ∩ champion.tags 있으면 WEIGHT_FAVORED (2.0)
+ *  × disfavoredClasses ∩ champion.tags 있으면 WEIGHT_DISFAVORED (0.6)
+ *  × opts.trackL9 && category==='ability' 이면 WEIGHT_TRACK_L9_ABILITY (1.5)
+ * 신규 필드가 없는 증강/챔피언은 1.0 (종전 균등 추출과 동일 — 하위 호환).
+ * 근사: 계수는 전부 추정치 (위 상수 주석 참조).
+ * @param {Object} aug 증강 객체
+ * @param {Object|null} champion 챔피언 객체 (없으면 클래스 계수 미적용)
+ * @param {Object} [opts] { trackL9: boolean }
+ */
+export function weightFor(aug, champion, opts) {
+  let w = 1.0;
+  const tags = (champion && Array.isArray(champion.tags)) ? champion.tags : [];
+  if (tags.length > 0) {
+    if (Array.isArray(aug.favoredClasses) && aug.favoredClasses.length > 0) {
+      const fav = aug.favoredClasses.some(function (t) { return tags.indexOf(t) !== -1; });
+      if (fav) w *= WEIGHT_FAVORED;
+    }
+    if (Array.isArray(aug.disfavoredClasses) && aug.disfavoredClasses.length > 0) {
+      const dis = aug.disfavoredClasses.some(function (t) { return tags.indexOf(t) !== -1; });
+      if (dis) w *= WEIGHT_DISFAVORED;
+    }
+  }
+  if (opts && opts.trackL9 && aug.category === 'ability') {
+    w *= WEIGHT_TRACK_L9_ABILITY;
+  }
+  return w;
+}
+
+/**
+ * 지정 등급에서 미노출 증강 1개를 **가중 무작위**로 뽑는다.
+ * 가중치는 weightFor(aug, game.champion, {trackL9}) — rng 1회로 누적 가중치를 스캔하므로
+ * 시드 결정론이 유지되고, 가중치가 전부 같으면 종전 균등 추출과 동일한 인덱스를 낸다.
  * 그 등급이 고갈이면 fallbackOrder 순서로 다른 등급에서 보충한다(구현 보충 규칙 — 공식 아님).
  * 전 등급 고갈이면 null.
+ * 근사: 가중치 계수는 전부 추정치 (weightFor 주석 참조 — research/AUGMENT-POOLS-STUDY.md §3-2).
  */
 function drawAugment(game, tier, fallbackOrder) {
   const used = {};
   for (let i = 0; i < game.used.length; i++) used[game.used[i]] = true;
   const order = [tier].concat(fallbackOrder || FALLBACK_ORDER[tier] || []);
+  const wOpts = { trackL9: game.trackL9 === true };
   for (let t = 0; t < order.length; t++) {
     const cands = [];
     for (let i = 0; i < game.pool.length; i++) {
@@ -264,10 +366,95 @@ function drawAugment(game, tier, fallbackOrder) {
       if (a.tier === order[t] && !used[a.apiName]) cands.push(a);
     }
     if (cands.length > 0) {
-      return cands[Math.floor(nextFloat(game) * cands.length)];
+      // 가중 추출: rng 1회 → 누적 가중치 (결정론 유지)
+      const weights = [];
+      let total = 0;
+      for (let i = 0; i < cands.length; i++) {
+        const w = weightFor(cands[i], game.champion, wOpts);
+        weights.push(w);
+        total += w;
+      }
+      if (total <= 0) {
+        return cands[Math.floor(nextFloat(game) * cands.length)]; // 방어: 가중치 합 0이면 균등
+      }
+      let r = nextFloat(game) * total;
+      for (let i = 0; i < cands.length; i++) {
+        r -= weights[i];
+        if (r < 0) return cands[i];
+      }
+      return cands[cands.length - 1]; // 부동소수 잔여 방어
     }
   }
   return null;
+}
+
+/** 스킬 증강이 아닌 경우 그대로, 스킬 증강이면 enhancedSkill 지정용 기본 스킬 키 */
+const DEFAULT_SKILL_KEYS = ['Q', 'W', 'E', 'R'];
+
+/**
+ * 증강을 슬롯에 "제시"할 항목으로 변환.
+ * category==='ability'(스킬 증강)면 강화 대상 스킬을 지정해 enhancedSkill: {key, nameKo}를
+ * 부여한 얕은 복사본을 반환한다 (풀의 원본 증강 객체는 불변 유지).
+ * 대상 스킬은 restrictions.abilityPropsAll(requiredProps)을 충족하는 스킬 중 rng로 무작위 선택,
+ * requiredProps가 비어 있으면 전 스킬(Q/W/E/R) 중 무작위.
+ * spells[i].props가 없는 구스키마 데이터면 전 스킬을 후보로 폴백.
+ * rng(nextFloat)를 사용하므로 시드 결정론이 유지된다.
+ *
+ * 추가 restrictions 연동 (augments.json F2 스키마와의 계약):
+ *  - restrictions.slot ('Q'|'W'|'E'|'R'): 슬롯 고정형 증강(예: Bread 3종) —
+ *    rng를 쓰지 않고 해당 스킬을 그대로 지정한다 (공식 — 스킬 지정이 없는 고정 슬롯 전신).
+ *  - restrictions.spellExclude ({챔피언id: [스킬키...]}): 해당 챔피언의 그 스킬은
+ *    강화 대상 후보에서 제외한다 (공식 버그픽스 기반 — 예: 야스오 E×Specialized Recursion).
+ *
+ * 근사: 실제 게임의 증강×스킬 지정 규칙은 비공개(시스템이 조합을 사전 생성) —
+ * "적격 스킬 중 무작위"로 근사한다. 근거: research/AUGMENT-POOLS-STUDY.md §3-3,
+ * research/data/eligibility-notes.json abilityAugments.tierSystem.
+ */
+function presentAugment(game, aug) {
+  if (aug.category !== 'ability') return aug;
+  const r = aug.restrictions || {};
+  const champ = game.champion;
+  const spells = (champ && Array.isArray(champ.spells)) ? champ.spells : null;
+
+  // 슬롯 고정형 (예: Bread And Butter = Q): rng 소비 없이 결정적으로 지정
+  if (typeof r.slot === 'string' && DEFAULT_SKILL_KEYS.indexOf(r.slot) !== -1) {
+    let fixed = null;
+    if (spells) {
+      for (let i = 0; i < spells.length; i++) {
+        if (spells[i] && spells[i].key === r.slot) { fixed = spells[i]; break; }
+      }
+    }
+    return Object.assign({}, aug, {
+      enhancedSkill: { key: r.slot, nameKo: (fixed && fixed.nameKo !== undefined) ? fixed.nameKo : null },
+    });
+  }
+
+  const required = Array.isArray(r.abilityPropsAll) ? r.abilityPropsAll : [];
+  // 스킬 슬롯 단위 제외 목록 (이 챔피언에 해당하는 키만)
+  const excludedKeys = (champ && r.spellExclude && Array.isArray(r.spellExclude[champ.id]))
+    ? r.spellExclude[champ.id]
+    : [];
+  const notExcluded = function (s) { return !s || excludedKeys.indexOf(s.key) === -1; };
+  let cands;
+  if (spells && spells.length > 0) {
+    if (required.length > 0) {
+      cands = spells.filter(function (s) {
+        return s && Array.isArray(s.props) && notExcluded(s)
+          && required.every(function (p) { return s.props.indexOf(p) !== -1; });
+      });
+      if (cands.length === 0) cands = spells.filter(notExcluded); // 폴백: 스킬별 props 미비(구스키마) → 제외 외 전 스킬
+    } else {
+      cands = spells.filter(notExcluded);
+    }
+    if (cands.length === 0) cands = spells.slice(); // 방어: 제외로 전 스킬이 비면 전 스킬 폴백
+  } else {
+    // 챔피언 미지정/스킬 데이터 없음: 키만으로 후보 구성
+    cands = DEFAULT_SKILL_KEYS.map(function (k) { return { key: k, nameKo: null }; });
+  }
+  const s = cands[Math.floor(nextFloat(game) * cands.length)];
+  return Object.assign({}, aug, {
+    enhancedSkill: { key: s.key, nameKo: (s.nameKo === undefined ? null : s.nameKo) },
+  });
 }
 
 /* ------------------------------------------------------------------ */
@@ -303,13 +490,13 @@ export function nextRound(game) {
     // noSilver가 비면(실버 외 전부 고갈) 어쩔 수 없이 실버 유지 — 보충 규칙상 극단 케이스
   }
 
-  // 2) 해당 등급에서 3개 무작위 제시 (고갈 시 다른 등급 보충 — drawAugment 내부 FALLBACK_ORDER)
+  // 2) 해당 등급에서 3개 가중 무작위 제시 (고갈 시 다른 등급 보충 — drawAugment 내부 FALLBACK_ORDER)
   const slots = [];
   for (let k = 0; k < 3; k++) {
     const aug = drawAugment(game, tier);
     if (!aug) break; // 전 등급 완전 고갈: 남은 만큼만 제시
     game.used.push(aug.apiName);
-    slots.push(aug);
+    slots.push(presentAugment(game, aug)); // 스킬 증강이면 enhancedSkill 부여 (rng 사용)
   }
 
   const round = {
@@ -340,8 +527,9 @@ export function rerollSlot(game, i) {
   const aug = drawAugment(game, current.tier);
   if (!aug) return current; // 풀 완전 고갈: 교체 불가, 기존 유지
   game.used.push(aug.apiName);
-  round.slots[i] = aug;
-  return aug;
+  const presented = presentAugment(game, aug); // 스킬 증강이면 enhancedSkill 부여 (rng 사용)
+  round.slots[i] = presented;
+  return presented;
 }
 
 /**
@@ -364,8 +552,9 @@ export function goldenReroll(game, i) {
   const aug = drawAugment(game, upTier, FALLBACK_ORDER_UPGRADE[current.tier]);
   if (!aug) return current; // 풀 완전 고갈: 교체 불가, 기존 유지
   game.used.push(aug.apiName);
-  round.slots[i] = aug;
-  return aug;
+  const presented = presentAugment(game, aug); // 스킬 증강이면 enhancedSkill 부여 (rng 사용)
+  round.slots[i] = presented;
+  return presented;
 }
 
 /**

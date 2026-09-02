@@ -69,7 +69,8 @@ for (let gi = 0; gi < SEEDS.length; gi++) {
   const champion = CHAMPIONS[Math.floor(ctrl() * CHAMPIONS.length)];
   const label = 'seed=' + seed + ' champ=' + champion.id;
   try {
-    const g = newGame({ augments: AUGMENTS, champion: champion, seed: seed });
+    // 절반은 trackL9 on — 스킬 증강 가중(WEIGHT_TRACK_L9_ABILITY) 경로에서도 규칙 위반 0인지 확인
+    const g = newGame({ augments: AUGMENTS, champion: champion, seed: seed, trackL9: gi % 2 === 1 });
     const roundTiers = [];
     const levels = [];
     const seenNames = {};

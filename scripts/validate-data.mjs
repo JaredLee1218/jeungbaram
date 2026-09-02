@@ -112,3 +112,125 @@ combos.forEach((cb, i) => {
   for (const ag of (cb.augments || [])) if (disabledSet.has(ag)) disabledRefs.push([i, cb.title, ag]);
 });
 log('combos referencing disabled augments (' + disabledRefs.length + '): ' + JSON.stringify(disabledRefs));
+
+// ===== 5. 신규 스키마 필드 검증 (2차 스터디 반영분 — 위반 시 exit 1) =====
+// 어휘·구조 근거: research/AUGMENT-POOLS-STUDY.md §3, research/data/eligibility-notes.json
+log('\n=== 신규 스키마 필드 (category / restrictions / props) ===');
+
+const CATEGORY_VOCAB = new Set(['ability', 'quest', 'normal']);
+const CLASS_VOCAB = new Set(['Fighter', 'Tank', 'Mage', 'Assassin', 'Marksman', 'Support']); // DDragon tags 어휘
+const PROP_VOCAB = new Set([ // 계약 어휘 (스킬 속성 14종)
+  'projectile', 'dash', 'knockback', 'targeted', 'aoe', 'shield', 'heal', 'stealth',
+  'global', 'spin', 'immobilize', 'terrain', 'empoweredAttack', 'durationEffect',
+]);
+const SKILL_KEYS = new Set(['Q', 'W', 'E', 'R']);
+const RESTRICTION_KEYS = new Set([
+  'rangedOnly', 'meleeOnly', 'requiresMana', 'abilityProps', 'abilityPropsAll',
+  'classRequired', 'classExcluded', 'championWhitelist', 'championExclude',
+  'spellExclude', 'slot', 'note',
+]);
+
+const champIdSet = new Set(champions.map(c => c.id));
+
+// 5-1. augments: category 전수 + 어휘
+for (const a of augments) {
+  if (!CATEGORY_VOCAB.has(a.category)) {
+    issues.push(`augment ${a.apiName}: category 어휘 위반 (${JSON.stringify(a.category)})`);
+  }
+}
+const catDist = {};
+for (const a of augments) catDist[a.category] = (catDist[a.category] || 0) + 1;
+log('category 분포: ' + JSON.stringify(catDist));
+
+// 5-2. augments: restrictions 키/값 어휘 + 참조 무결성
+for (const a of augments) {
+  const r = a.restrictions;
+  if (r === undefined) continue;
+  if (typeof r !== 'object' || r === null || Array.isArray(r)) {
+    issues.push(`augment ${a.apiName}: restrictions가 객체가 아님`);
+    continue;
+  }
+  for (const k of Object.keys(r)) {
+    if (!RESTRICTION_KEYS.has(k)) issues.push(`augment ${a.apiName}: 미지의 restrictions 키 "${k}"`);
+  }
+  for (const k of ['abilityProps', 'abilityPropsAll']) {
+    for (const p of (r[k] || [])) {
+      if (!PROP_VOCAB.has(p)) issues.push(`augment ${a.apiName}: restrictions.${k} 속성 어휘 위반 "${p}"`);
+    }
+  }
+  for (const k of ['classRequired', 'classExcluded']) {
+    for (const t of (r[k] || [])) {
+      if (!CLASS_VOCAB.has(t)) issues.push(`augment ${a.apiName}: restrictions.${k} 클래스 어휘 위반 "${t}"`);
+    }
+  }
+  for (const k of ['championWhitelist', 'championExclude']) {
+    for (const id of (r[k] || [])) {
+      if (!champIdSet.has(id)) issues.push(`augment ${a.apiName}: restrictions.${k} 챔피언 id 미실존 "${id}"`);
+    }
+  }
+  if (r.spellExclude !== undefined) {
+    if (typeof r.spellExclude !== 'object' || r.spellExclude === null || Array.isArray(r.spellExclude)) {
+      issues.push(`augment ${a.apiName}: spellExclude는 {챔피언id: [스킬키]} 객체여야 함`);
+    } else {
+      for (const [id, keys] of Object.entries(r.spellExclude)) {
+        if (!champIdSet.has(id)) issues.push(`augment ${a.apiName}: spellExclude 챔피언 id 미실존 "${id}"`);
+        if (!Array.isArray(keys)) { issues.push(`augment ${a.apiName}: spellExclude["${id}"]가 배열이 아님`); continue; }
+        for (const k of keys) if (!SKILL_KEYS.has(k)) issues.push(`augment ${a.apiName}: spellExclude["${id}"] 스킬 키 위반 "${k}"`);
+      }
+    }
+  }
+  if (r.slot !== undefined && !SKILL_KEYS.has(r.slot)) {
+    issues.push(`augment ${a.apiName}: restrictions.slot 스킬 키 위반 "${r.slot}"`);
+  }
+}
+
+// 5-3. augments: favoredClasses/disfavoredClasses (가중치용) 클래스 어휘
+for (const a of augments) {
+  for (const k of ['favoredClasses', 'disfavoredClasses']) {
+    if (a[k] === undefined) continue;
+    if (!Array.isArray(a[k])) { issues.push(`augment ${a.apiName}: ${k}가 배열이 아님`); continue; }
+    for (const t of a[k]) {
+      if (!CLASS_VOCAB.has(t)) issues.push(`augment ${a.apiName}: ${k} 클래스 어휘 위반 "${t}"`);
+    }
+  }
+}
+
+// 5-4. champions: spells[].props 어휘 + abilityProps = 전 스킬 props 합집합 (계약: 하위 호환 재계산)
+for (const c of champions) {
+  const spells = Array.isArray(c.spells) ? c.spells : [];
+  const union = new Set();
+  let hasSpellProps = false;
+  for (const s of spells) {
+    if (!SKILL_KEYS.has(s.key)) issues.push(`champion ${c.id}: 스킬 키 위반 "${s.key}"`);
+    if (!Array.isArray(s.props)) continue; // 구스키마 허용 (draft.js 폴백 대상)
+    hasSpellProps = true;
+    for (const p of s.props) {
+      if (!PROP_VOCAB.has(p)) issues.push(`champion ${c.id} ${s.key}: props 어휘 위반 "${p}"`);
+      union.add(p);
+    }
+  }
+  if (hasSpellProps) {
+    const declared = new Set(c.abilityProps || []);
+    const a = [...union].sort().join(',');
+    const b = [...declared].sort().join(',');
+    if (a !== b) issues.push(`champion ${c.id}: abilityProps(${b})가 spells props 합집합(${a})과 불일치`);
+  }
+}
+
+// 5-5. 게이트 위생: 각 abilityPropsAll 게이트를 충족하는 챔피언이 1명 이상 존재 (dead gate 방지)
+for (const a of augments) {
+  const req = a.restrictions && a.restrictions.abilityPropsAll;
+  if (!Array.isArray(req) || req.length === 0) continue;
+  const anyChamp = champions.some(c => (c.spells || []).some(
+    s => Array.isArray(s.props) && req.every(p => s.props.includes(p))
+  ));
+  if (!anyChamp) issues.push(`augment ${a.apiName}: abilityPropsAll ${JSON.stringify(req)} 충족 챔피언 0명 (dead gate)`);
+}
+
+log('신규 스키마 위반: ' + issues.length + '건');
+for (const s of issues) log('  ISSUE: ' + s);
+if (issues.length > 0) {
+  console.error('\n검증 실패 (' + issues.length + '건)');
+  process.exit(1);
+}
+console.log('\n신규 스키마 검증 통과');

@@ -5,11 +5,13 @@
  * draft.js / recommend.js / data/*.json 은 공용 인터페이스 계약을
  * 그대로 신뢰하고 import 한다 (병렬 제작 — 통합은 C1 담당).
  *
- * 공유 URL 형식: ?champ=<id>&seed=<정수>&picks=<라운드별 액션>-...
+ * 공유 URL 형식: ?champ=<id>&seed=<정수>&picks=<라운드별 액션>-...&l9=1(선택)
  *   - 액션 2글자: p<슬롯>=선택, r<슬롯>=일반 리롤, g<슬롯>=황금 리롤
  *   - 예: picks=p2-r0p1-g2p0-p1
  *   - 리롤도 RNG를 소모하므로, 픽 인덱스와 함께 리롤 액션까지
  *     기록해야 같은 seed에서 같은 결과가 재현된다.
+ *   - l9=1: 진행도 트랙 Lv9 보정(스킬 증강 확률 ↑) 켠 게임.
+ *     하위 호환: 파라미터가 없으면 off (기존 공유 URL 재현성 유지).
  *
  * 검증 노트: Node v14.17.4에서 이 파일의 .mjs 사본으로
  * `node --check` 구문 검사를 통과함 (ESM import 포함). 단 v14에는
@@ -55,6 +57,7 @@ var state = {
   actions: [], // 라운드별 액션 로그 [["p2"], ["r0","p1"], ...]
   search: "",
   roleFilter: null,
+  trackL9: false, // 진행도 트랙 Lv9 보정 (기본 off — 근사: research/AUGMENT-POOLS-STUDY.md §3-2)
 };
 
 /* ---------------- DOM 헬퍼 ---------------- */
@@ -202,6 +205,9 @@ function startGame(champion, seed) {
       augments: state.data.augments,
       champion: champion,
       seed: seed,
+      /* 진행도 트랙 Lv9 보정 — draft.js가 아직 이 옵션을 모르면 조용히 무시된다 (방어적).
+       * 근사: 실제 증가 폭 비공개 (research/AUGMENT-POOLS-STUDY.md §3-2) */
+      trackL9: !!state.trackL9,
     });
     advanceRound();
     return true;
@@ -310,6 +316,9 @@ function buildShareUrl() {
       })
       .join("-")
   );
+  /* 하위 호환: trackL9 off면 파라미터를 아예 넣지 않는다 —
+   * 기존 공유 URL(파라미터 없음)은 off로 재현된다. */
+  if (state.trackL9) params.set("l9", "1");
   return (
     location.origin + location.pathname + "?" + params.toString()
   );
@@ -345,6 +354,9 @@ function replayFromParams(params) {
     toast("공유된 챔피언을 찾을 수 없습니다.");
     return false;
   }
+  /* l9 파라미터 → trackL9 복원 (없으면 off — 기존 URL 하위 호환) */
+  state.trackL9 = params.get("l9") === "1";
+  syncL9Toggle();
   if (!startGame(champion, seed)) return false;
 
   var rounds = picksStr ? picksStr.split("-") : [];
@@ -476,10 +488,16 @@ function onChampGridClick(e) {
   }
 }
 
+function syncL9Toggle() {
+  var el = $("#toggle-l9");
+  if (el) el.checked = !!state.trackL9;
+}
+
 function showSelectScreen() {
   state.goldenArmed = false;
   renderRoleChips();
   renderChampGrid();
+  syncL9Toggle();
   showScreen("select");
 }
 
@@ -507,9 +525,15 @@ function renderHistoryBar() {
   for (var i = 0; i < TOTAL_ROUNDS; i++) {
     var p = picks[i];
     if (p) {
+      /* 스킬 증강이면 강화 대상 스킬을 title로 노출 (필드 없으면 이름만 — 방어적) */
+      var histTitle =
+        p.nameKo +
+        (p.enhancedSkill && p.enhancedSkill.key
+          ? " (" + p.enhancedSkill.key + " 강화)"
+          : "");
       html +=
         '<div class="history-item tier-' + esc(p.tier || "silver") + '" title="' +
-        esc(p.nameKo) + '">' +
+        esc(histTitle) + '">' +
         '<img src="' + esc(p.icon) + '" alt="' + esc(p.nameKo) +
         '" loading="lazy" decoding="async"></div>';
     } else {
@@ -547,6 +571,11 @@ function renderDraft() {
       if (!aug) return "";
       var augTier = aug.tier || tier;
       var rerolledThis = r.rerolled && r.rerolled[i];
+      /* 방어적 파싱: category/enhancedSkill은 draft.js 신규 필드 (F3 병렬 작업 중).
+       * 필드가 없으면 배지·강화 스킬 줄을 그리지 않는다. */
+      var isAbility = aug.category === "ability";
+      var enh =
+        aug.enhancedSkill && aug.enhancedSkill.key ? aug.enhancedSkill : null;
       return (
         '<div class="aug-slot">' +
         '<button type="button" class="aug-card tier-' + esc(augTier) +
@@ -554,7 +583,12 @@ function renderDraft() {
         '<img class="aug-icon" src="' + esc(aug.icon) +
         '" alt="" loading="lazy" decoding="async" width="64" height="64">' +
         '<span class="aug-tier-label">' + esc(TIER_LABEL[augTier] || augTier) + "</span>" +
+        (isAbility ? '<span class="aug-badge-ability">스킬 증강</span>' : "") +
         '<span class="aug-name">' + esc(aug.nameKo) + "</span>" +
+        (enh
+          ? '<span class="aug-enhanced">' + esc(enh.key) + " 강화" +
+            (enh.nameKo ? " · " + esc(enh.nameKo) : "") + "</span>"
+          : "") +
         '<span class="aug-desc">' + esc(aug.descKo) + "</span>" +
         "</button>" +
         '<button type="button" class="btn btn-reroll" data-slot="' + i +
@@ -645,7 +679,11 @@ function renderResult() {
           '<div class="result-aug">' +
           '<div class="history-item tier-' + esc(p.tier || "silver") + '">' +
           '<img src="' + esc(p.icon) + '" alt="" loading="lazy" decoding="async"></div>' +
-          '<span class="result-aug-name">' + esc(p.nameKo) + "</span></div>"
+          '<span class="result-aug-name">' + esc(p.nameKo) + "</span>" +
+          (p.enhancedSkill && p.enhancedSkill.key
+            ? '<span class="result-aug-skill">' + esc(p.enhancedSkill.key) + " 강화</span>"
+            : "") +
+          "</div>"
         );
       })
       .join("") +
@@ -757,6 +795,13 @@ function bindEvents() {
     if (searchTimer) clearTimeout(searchTimer);
     searchTimer = setTimeout(renderChampGrid, 120);
   });
+
+  var l9Toggle = $("#toggle-l9");
+  if (l9Toggle) {
+    l9Toggle.addEventListener("change", function (e) {
+      state.trackL9 = !!e.target.checked;
+    });
+  }
 
   $("#champ-grid").addEventListener("click", onChampGridClick);
   $("#aug-cards").addEventListener("click", onAugCardsClick);

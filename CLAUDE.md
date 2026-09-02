@@ -42,7 +42,7 @@ node scripts/test-draft.mjs # 이하 Testing 섹션의 테스트 5종
 ## Testing
 
 ```
-node scripts/test-draft.mjs && node scripts/test-recommend.mjs && node scripts/test-e2e.mjs && node scripts/validate-data.mjs && node scripts/test-montecarlo.mjs
+node scripts/test-draft.mjs && node scripts/test-recommend.mjs && node scripts/test-e2e.mjs && node scripts/validate-data.mjs && node scripts/test-montecarlo.mjs && node scripts/test-fidelity.mjs
 ```
 
 로직 변경 시 전부, 데이터 변경 시 validate-data + e2e 필수. 게임 규칙 관련 수정은 research/raw/01-mode-mechanics.md 기준으로 회귀 테스트를 추가할 것.

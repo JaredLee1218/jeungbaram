@@ -9,6 +9,14 @@
  *  [4] 중복 금지 (게임 내 노출/선택 증강 재등장 없음 — 풀 스트레스)
  *  [5] 시드 재현성 (같은 seed+같은 조작=같은 결과, 직렬화 복원 후에도 동일, createRng)
  *  [6] eligibleAugments 챔피언 필터 (보너스 체크)
+ *
+ * 신규 스키마 계약 검증 (research/AUGMENT-POOLS-STUDY.md §3):
+ *  [8] 신규 restrictions 판정 — 계약 검증 기준 1~5 (마나/대시/서포트/화이트리스트/속박 게이트)
+ *  [9] abilityPropsAll 스킬 단위 AND (spells[i].props, 구스키마 합집합 폴백)
+ *  [10] weightFor 단위 (favored 2.0 / disfavored 0.6 / trackL9 ability 1.5)
+ *  [11] 가중 추출 분포 + 챔피언별 풀 비대칭 — 계약 검증 기준 6
+ *  [12] 스킬 증강 enhancedSkill + trackL9 옵션
+ *  [13] 신규 기능 포함 시드 재현성 — 계약 검증 기준 7
  */
 import {
   createRng,
@@ -18,6 +26,10 @@ import {
   rerollSlot,
   goldenReroll,
   pickAugment,
+  weightFor,
+  WEIGHT_FAVORED,
+  WEIGHT_DISFAVORED,
+  WEIGHT_TRACK_L9_ABILITY,
   ROUND_LEVELS,
 } from '../docs/js/draft.js';
 
@@ -326,6 +338,403 @@ section('7. 황금 리롤 고갈 보충 (프리즘 고갈 시 골드 유지)');
     }
   }
   check('골드 라운드 케이스 확보', goldChecked);
+}
+
+/* ================================================================== */
+/* 신규 스키마 계약 검증 (research/AUGMENT-POOLS-STUDY.md §3)            */
+/* ================================================================== */
+
+/* ---------------- 계약 검증용 합성 fixture ---------------- */
+// 게이트 5종 + 챔피언/클래스 제외 + 필러 (계약 [검증 기준] 1~5 대응)
+function gatedFixture() {
+  const augs = [
+    // [기준 1] 마나 게이트 3종 (requiresMana)
+    { apiName: 'ARAM_Overflow', tier: 'silver', enabled: true, restrictions: { requiresMana: true } },
+    { apiName: 'ARAM_Juiced', tier: 'gold', enabled: true, restrictions: { requiresMana: true } },
+    { apiName: 'ARAM_MindtoMatter', tier: 'prismatic', enabled: true, restrictions: { requiresMana: true } },
+    // [기준 2] 대시 게이트 (abilityProps OR)
+    { apiName: 'ARAM_Dashing', tier: 'gold', enabled: true, restrictions: { abilityProps: ['dash'] } },
+    // [기준 3] 서포트 게이트 (classRequired)
+    { apiName: 'MercysStrike', tier: 'gold', enabled: true, restrictions: { classRequired: ['Support'] } },
+    // [기준 4] 화이트리스트 (championWhitelist)
+    { apiName: 'ARAM_SpinToWin', tier: 'silver', enabled: true, restrictions: { championWhitelist: ['Garen', 'Darius'] } },
+    // [기준 5] 속박 게이트 (abilityPropsAll — 스킬 단위)
+    { apiName: 'ARAM_Cruelty', tier: 'silver', enabled: true, restrictions: { abilityPropsAll: ['immobilize'] } },
+    // 챔피언 단위 제외 (championExclude — 스몰더×Combusting Interest 류)
+    { apiName: 'BloodMoneyBurn', tier: 'gold', enabled: true, restrictions: { championExclude: ['Smolder'] } },
+    // 클래스 제외 (classExcluded)
+    { apiName: 'NoMages', tier: 'silver', enabled: true, restrictions: { classExcluded: ['Mage'] } },
+  ];
+  for (let i = 1; i <= 9; i++) augs.push({ apiName: 'Free_silver_' + i, tier: 'silver', enabled: true });
+  for (let i = 1; i <= 7; i++) augs.push({ apiName: 'Free_gold_' + i, tier: 'gold', enabled: true });
+  for (let i = 1; i <= 6; i++) augs.push({ apiName: 'Free_prism_' + i, tier: 'prismatic', enabled: true });
+  return augs;
+}
+const GATED = gatedFixture();
+
+// 제드형: 기력(무마나) 암살자, 대시 보유, 속박 없음
+const ZED = {
+  id: 'Zed', nameKo: '제드', tags: ['Assassin'], ranged: false, usesMana: false,
+  abilityProps: ['projectile', 'dash', 'spin', 'targeted'],
+  spells: [
+    { key: 'Q', nameKo: '예리한 표창', props: ['projectile'] },
+    { key: 'W', nameKo: '살아있는 그림자', props: ['dash'] },
+    { key: 'E', nameKo: '그림자 베기', props: ['aoe', 'spin'] },
+    { key: 'R', nameKo: '죽음의 표식', props: ['targeted', 'dash'] },
+  ],
+};
+// 소라카형: 서포트, 대시·속박 없음
+const SORAKA = {
+  id: 'Soraka', nameKo: '소라카', tags: ['Support', 'Mage'], ranged: true, usesMana: true,
+  abilityProps: ['projectile', 'heal', 'aoe'],
+  spells: [
+    { key: 'Q', nameKo: '별부름', props: ['projectile', 'aoe'] },
+    { key: 'W', nameKo: '은하의 마력', props: ['heal', 'targeted'] },
+    { key: 'E', nameKo: '별의 균형', props: ['aoe'] },
+    { key: 'R', nameKo: '기원', props: ['heal', 'global'] },
+  ],
+};
+// 모르가나형: 속박 스킬 보유
+const BINDER = {
+  id: 'Morgana', nameKo: '모르가나', tags: ['Mage'], ranged: true, usesMana: true,
+  abilityProps: ['projectile', 'immobilize', 'shield', 'aoe'],
+  spells: [
+    { key: 'Q', nameKo: '어둠의 속박', props: ['projectile', 'immobilize'] },
+    { key: 'W', nameKo: '고통의 대지', props: ['aoe'] },
+    { key: 'E', nameKo: '칠흑의 방패', props: ['shield', 'targeted'] },
+    { key: 'R', nameKo: '영혼의 족쇄', props: ['aoe', 'immobilize'] },
+  ],
+};
+const GAREN = {
+  id: 'Garen', nameKo: '가렌', tags: ['Fighter', 'Tank'], ranged: false, usesMana: false,
+  abilityProps: ['spin', 'aoe', 'targeted', 'empoweredAttack'],
+  spells: [
+    { key: 'Q', nameKo: '결정타', props: ['empoweredAttack'] },
+    { key: 'W', nameKo: '용기', props: ['shield', 'durationEffect'] },
+    { key: 'E', nameKo: '심판', props: ['spin', 'aoe'] },
+    { key: 'R', nameKo: '데마시아의 정의', props: ['targeted'] },
+  ],
+};
+const SMOLDER = {
+  id: 'Smolder', nameKo: '스몰더', tags: ['Marksman'], ranged: true, usesMana: true,
+  abilityProps: ['projectile', 'aoe', 'dash'],
+  spells: [
+    { key: 'Q', nameKo: '초강력 화염 숨결', props: ['projectile', 'targeted'] },
+    { key: 'W', nameKo: '뜨거운 침', props: ['projectile', 'aoe'] },
+    { key: 'E', nameKo: '펄럭펄럭', props: ['dash'] },
+    { key: 'R', nameKo: '마마!', props: ['aoe', 'global'] },
+  ],
+};
+const hasAug = (arr, name) => arr.some((a) => a.apiName === name);
+
+/* ---------------- [8] 신규 restrictions 판정 (계약 검증 기준 1~5) ---------------- */
+section('8. 신규 restrictions 판정 (계약 검증 기준 1~5)');
+{
+  const zedPool = eligibleAugments(GATED, ZED);
+  // [기준 1] 제드(기력)에게 마나 증강 3종 절대 미제시
+  check('기준1: 제드 풀에 마나 증강 3종 없음',
+    !hasAug(zedPool, 'ARAM_Overflow') && !hasAug(zedPool, 'ARAM_Juiced') && !hasAug(zedPool, 'ARAM_MindtoMatter'),
+    zedPool.map((a) => a.apiName).join(','));
+  // 풀 스트레스: 전 라운드·전 리롤을 돌려도 슬롯에 마나 증강이 한 번도 노출되지 않아야 함
+  let manaExposed = 0;
+  for (let s = 0; s < 80; s++) {
+    const g = newGame({ augments: GATED, champion: ZED, seed: 20000 + s });
+    for (let r = 0; r < 4; r++) {
+      const round = nextRound(g);
+      for (let i = 0; i < round.slots.length; i++) rerollSlot(g, i);
+      if (!g.goldenUsed) goldenReroll(g, 0);
+      pickAugment(g, 0);
+    }
+    for (const n of ['ARAM_Overflow', 'ARAM_Juiced', 'ARAM_MindtoMatter']) {
+      if (g.used.indexOf(n) !== -1) manaExposed++;
+    }
+  }
+  check('기준1: 80게임 풀스트레스에서 마나 증강 노출 0건', manaExposed === 0, manaExposed + '건');
+
+  // [기준 2] 대시 게이트는 대시 스킬 보유 챔피언에게만
+  check('기준2: 대시 보유(제드)에게 ARAM_Dashing 제시', hasAug(zedPool, 'ARAM_Dashing'));
+  check('기준2: 대시 미보유(소라카)에게 ARAM_Dashing 미제시',
+    !hasAug(eligibleAugments(GATED, SORAKA), 'ARAM_Dashing'));
+
+  // [기준 3] 서포트 게이트(classRequired)는 tags에 Support 있는 챔피언에게만
+  check('기준3: 소라카(Support)에게 MercysStrike 제시', hasAug(eligibleAugments(GATED, SORAKA), 'MercysStrike'));
+  check('기준3: 제드(non-support)에게 MercysStrike 미제시', !hasAug(zedPool, 'MercysStrike'));
+
+  // [기준 4] Spin To Win은 화이트리스트 챔피언에게만
+  check('기준4: 가렌(화이트리스트)에게 SpinToWin 제시', hasAug(eligibleAugments(GATED, GAREN), 'ARAM_SpinToWin'));
+  check('기준4: 제드(목록 밖)에게 SpinToWin 미제시', !hasAug(zedPool, 'ARAM_SpinToWin'));
+  check('기준4: 스몰더(목록 밖)에게 SpinToWin 미제시', !hasAug(eligibleAugments(GATED, SMOLDER), 'ARAM_SpinToWin'));
+
+  // [기준 5] 속박 게이트는 속박 스킬 보유자에게만
+  check('기준5: 모르가나(속박 Q)에게 Cruelty 제시', hasAug(eligibleAugments(GATED, BINDER), 'ARAM_Cruelty'));
+  check('기준5: 제드(속박 없음)에게 Cruelty 미제시', !hasAug(zedPool, 'ARAM_Cruelty'));
+
+  // championExclude / classExcluded
+  check('championExclude: 스몰더에게 BloodMoneyBurn 미제시',
+    !hasAug(eligibleAugments(GATED, SMOLDER), 'BloodMoneyBurn'));
+  check('championExclude: 다른 챔피언(제드)에게는 제시', hasAug(zedPool, 'BloodMoneyBurn'));
+  check('classExcluded: Mage(모르가나)에게 NoMages 미제시',
+    !hasAug(eligibleAugments(GATED, BINDER), 'NoMages'));
+  check('classExcluded: 비Mage(제드)에게는 제시', hasAug(zedPool, 'NoMages'));
+
+  // 하위 호환: 신규 필드 없는 증강·챔피언은 종전 동작 (champion 미지정 시 enabled만)
+  check('하위 호환: 챔피언 미지정 시 enabled 필터만', eligibleAugments(GATED, null).length === GATED.length);
+}
+
+/* ---------------- [9] abilityPropsAll 스킬 단위 AND ---------------- */
+section('9. abilityPropsAll 스킬 단위 AND (spells[i].props)');
+{
+  const tripleshot = [{ apiName: 'SpellVolley', tier: 'prismatic', enabled: true, restrictions: { abilityPropsAll: ['targeted', 'projectile'] } }];
+  // 같은 스킬 하나가 targeted+projectile → 적격
+  const oneSpell = { id: 'A', tags: [], ranged: true, usesMana: true, abilityProps: ['targeted', 'projectile'],
+    spells: [{ key: 'Q', nameKo: 'Q스킬', props: ['targeted', 'projectile'] }] };
+  check('스킬 하나가 AND 전부 충족 → 적격', eligibleAugments(tripleshot, oneSpell).length === 1);
+  // 서로 다른 스킬이 나눠 가짐(합집합은 충족) → 스킬 단위 판정으로 부적격
+  const splitSpells = { id: 'B', tags: [], ranged: true, usesMana: true, abilityProps: ['targeted', 'projectile'],
+    spells: [
+      { key: 'Q', nameKo: 'Q스킬', props: ['targeted'] },
+      { key: 'W', nameKo: 'W스킬', props: ['projectile'] },
+    ] };
+  check('속성이 스킬별로 분산(합집합만 충족) → 부적격 (스킬 단위 AND)',
+    eligibleAugments(tripleshot, splitSpells).length === 0);
+  // 구스키마: spells[i].props 없음 → 종전 합집합 방식 폴백 (적격)
+  const legacy = { id: 'C', tags: [], ranged: true, usesMana: true, abilityProps: ['targeted', 'projectile'],
+    spells: [{ key: 'Q', nameKo: 'Q스킬' }, { key: 'W', nameKo: 'W스킬' }] };
+  check('구스키마(props 없음) → 합집합 폴백으로 적격', eligibleAugments(tripleshot, legacy).length === 1);
+  // 일부 스킬만 props 보유(신스키마로 간주)하고 그 스킬이 미충족 → 부적격
+  const partial = { id: 'D', tags: [], ranged: true, usesMana: true, abilityProps: ['targeted', 'projectile'],
+    spells: [{ key: 'Q', nameKo: 'Q스킬', props: ['aoe'] }, { key: 'W', nameKo: 'W스킬' }] };
+  check('props 있는 스킬이 미충족이면 부적격 (부분 데이터도 스킬 단위 판정)',
+    eligibleAugments(tripleshot, partial).length === 0);
+}
+
+/* ---------------- [10] weightFor 단위 ---------------- */
+section('10. weightFor 가중치 단위');
+{
+  const champ = { id: 'W1', tags: ['Marksman'], spells: [] };
+  check('기본 가중치 1.0', weightFor({}, champ) === 1.0);
+  check('favoredClasses 교집합 → 2.0 (WEIGHT_FAVORED)',
+    weightFor({ favoredClasses: ['Marksman'] }, champ) === WEIGHT_FAVORED);
+  check('disfavoredClasses 교집합 → 0.6 (WEIGHT_DISFAVORED)',
+    weightFor({ disfavoredClasses: ['Marksman'] }, champ) === WEIGHT_DISFAVORED);
+  check('교집합 없으면 1.0',
+    weightFor({ favoredClasses: ['Mage'], disfavoredClasses: ['Tank'] }, champ) === 1.0);
+  check('favored+disfavored 동시 → 곱연산 1.2',
+    Math.abs(weightFor({ favoredClasses: ['Marksman'], disfavoredClasses: ['Marksman'] }, champ) - WEIGHT_FAVORED * WEIGHT_DISFAVORED) < 1e-12);
+  check('trackL9 + category=ability → 1.5 (WEIGHT_TRACK_L9_ABILITY)',
+    weightFor({ category: 'ability' }, champ, { trackL9: true }) === WEIGHT_TRACK_L9_ABILITY);
+  check('trackL9 꺼짐이면 ability도 1.0', weightFor({ category: 'ability' }, champ, { trackL9: false }) === 1.0);
+  check('trackL9 켜져도 normal은 1.0', weightFor({ category: 'normal' }, champ, { trackL9: true }) === 1.0);
+  check('챔피언 null이면 클래스 계수 미적용 (trackL9 ability는 적용)',
+    weightFor({ favoredClasses: ['Marksman'], category: 'ability' }, null, { trackL9: true }) === WEIGHT_TRACK_L9_ABILITY);
+  check('favored × trackL9 ability 결합 3.0',
+    Math.abs(weightFor({ favoredClasses: ['Marksman'], category: 'ability' }, champ, { trackL9: true }) - WEIGHT_FAVORED * WEIGHT_TRACK_L9_ABILITY) < 1e-12);
+}
+
+/* ---------------- [11] 가중 추출 분포 + 풀 비대칭 (계약 검증 기준 6) ---------------- */
+section('11. 가중 추출 분포 + 챔피언별 풀 비대칭');
+{
+  // favored 3종 vs 일반 3종 (전부 실버 → 매 라운드 실버) — 슬롯 0 등장 빈도로 2:1 편향 확인
+  const biasPool = [];
+  for (let i = 1; i <= 3; i++) biasPool.push({ apiName: 'Fav_' + i, tier: 'silver', enabled: true, favoredClasses: ['Marksman'] });
+  for (let i = 1; i <= 3; i++) biasPool.push({ apiName: 'Plain_' + i, tier: 'silver', enabled: true });
+  const marksman = { id: 'MM', tags: ['Marksman'], ranged: true, usesMana: true, abilityProps: [], spells: [] };
+  let favCount = 0;
+  let plainCount = 0;
+  for (let s = 0; s < 500; s++) {
+    const g = newGame({ augments: biasPool, champion: marksman, seed: 30000 + s });
+    const round = nextRound(g);
+    if (round.slots[0].apiName.indexOf('Fav_') === 0) favCount++;
+    else plainCount++;
+  }
+  // 근사 계수 2.0 → 기대 비율 2:1. 느슨한 통계 체크(500표본)
+  check('favoredClasses 증강이 유의하게 더 자주 등장 (기대 2:1)',
+    favCount > plainCount * 1.4, favCount + ' vs ' + plainCount);
+
+  // disfavored 편향: 0.6배 → 덜 등장
+  const disPool = [];
+  for (let i = 1; i <= 3; i++) disPool.push({ apiName: 'Dis_' + i, tier: 'silver', enabled: true, disfavoredClasses: ['Marksman'] });
+  for (let i = 1; i <= 3; i++) disPool.push({ apiName: 'Plain_' + i, tier: 'silver', enabled: true });
+  let disCount = 0;
+  let plainCount2 = 0;
+  for (let s = 0; s < 500; s++) {
+    const g = newGame({ augments: disPool, champion: marksman, seed: 40000 + s });
+    const round = nextRound(g);
+    if (round.slots[0].apiName.indexOf('Dis_') === 0) disCount++;
+    else plainCount2++;
+  }
+  check('disfavoredClasses 증강이 유의하게 덜 등장 (기대 0.6:1)',
+    disCount * 1.2 < plainCount2, disCount + ' vs ' + plainCount2);
+
+  // [기준 6] 풀 크기 비대칭: 킷이 다양한 탱커(말파이트형) 풀 > 게이트에 덜 걸리는 원딜(징크스형) 풀
+  const malphite = {
+    id: 'Malphite', tags: ['Tank'], ranged: false, usesMana: true,
+    abilityProps: ['targeted', 'projectile', 'aoe', 'knockback', 'immobilize', 'dash', 'empoweredAttack'],
+    spells: [
+      { key: 'Q', nameKo: '지진의 파편', props: ['targeted', 'projectile'] },
+      { key: 'W', nameKo: '천둥소리', props: ['empoweredAttack'] },
+      { key: 'E', nameKo: '지면 강타', props: ['aoe'] },
+      { key: 'R', nameKo: '멈출 수 없는 힘', props: ['dash', 'knockback', 'aoe', 'immobilize'] },
+    ],
+  };
+  const jinx = {
+    id: 'Jinx', tags: ['Marksman'], ranged: true, usesMana: true,
+    abilityProps: ['projectile', 'aoe', 'global'],
+    spells: [
+      { key: 'Q', nameKo: '전환!', props: [] },
+      { key: 'W', nameKo: '찌직!', props: ['projectile'] },
+      { key: 'E', nameKo: '와작와작', props: ['projectile', 'aoe'] },
+      { key: 'R', nameKo: '슈퍼 메가 죽음의 로켓!', props: ['projectile', 'aoe', 'global'] },
+    ],
+  };
+  const malphPool = eligibleAugments(GATED, malphite);
+  const jinxPool = eligibleAugments(GATED, jinx);
+  check('기준6: 말파이트형 풀 > 징크스형 풀 (대시·속박 게이트 차이)',
+    malphPool.length > jinxPool.length, malphPool.length + ' vs ' + jinxPool.length);
+}
+
+/* ---------------- [12] 스킬 증강 enhancedSkill + trackL9 ---------------- */
+section('12. 스킬 증강 enhancedSkill + trackL9 옵션');
+{
+  // 스킬 증강 fixture: knockback 요구 1종 + 무조건 1종 + 일반 필러
+  const abilityPool = [
+    { apiName: 'ChainReaction', tier: 'silver', enabled: true, category: 'ability', restrictions: { abilityPropsAll: ['knockback'] } },
+    { apiName: 'ARAM_SustainingStrike', tier: 'silver', enabled: true, category: 'ability' },
+  ];
+  for (let i = 1; i <= 6; i++) abilityPool.push({ apiName: 'Norm_' + i, tier: 'silver', enabled: true });
+  const knocker = {
+    id: 'K', tags: ['Tank'], ranged: false, usesMana: true, abilityProps: ['projectile', 'knockback', 'aoe'],
+    spells: [
+      { key: 'Q', nameKo: '투사체기', props: ['projectile'] },
+      { key: 'W', nameKo: '올려치기', props: ['knockback'] },
+      { key: 'E', nameKo: '보통기', props: [] },
+      { key: 'R', nameKo: '광역 올려치기', props: ['knockback', 'aoe'] },
+    ],
+  };
+  let chainSeen = 0;
+  let chainKeyOk = true;
+  let siphonSeen = 0;
+  let siphonKeyOk = true;
+  let normNoSkill = true;
+  let shapeOk = true;
+  for (let s = 0; s < 200; s++) {
+    const g = newGame({ augments: abilityPool, champion: knocker, seed: 50000 + s });
+    const round = nextRound(g);
+    for (const slot of round.slots) {
+      if (slot.apiName === 'ChainReaction') {
+        chainSeen++;
+        if (!slot.enhancedSkill || ['W', 'R'].indexOf(slot.enhancedSkill.key) === -1) chainKeyOk = false;
+        if (!slot.enhancedSkill || typeof slot.enhancedSkill.nameKo !== 'string') shapeOk = false;
+      } else if (slot.apiName === 'ARAM_SustainingStrike') {
+        siphonSeen++;
+        if (!slot.enhancedSkill || ['Q', 'W', 'E', 'R'].indexOf(slot.enhancedSkill.key) === -1) siphonKeyOk = false;
+      } else if (slot.enhancedSkill !== undefined) {
+        normNoSkill = false;
+      }
+    }
+  }
+  check('ChainReaction 케이스 확보(200시드)', chainSeen > 0, chainSeen + '회');
+  check('requiredProps 충족 스킬(W/R)에만 enhancedSkill 지정', chainKeyOk);
+  check('enhancedSkill 형태 {key, nameKo}', shapeOk);
+  check('requiredProps 없는 스킬 증강은 Q/W/E/R 중 지정', siphonSeen > 0 && siphonKeyOk, siphonSeen + '회');
+  check('일반 증강에는 enhancedSkill 없음', normNoSkill);
+  check('풀의 원본 증강 객체는 불변 (enhancedSkill 미오염)',
+    abilityPool[0].enhancedSkill === undefined && abilityPool[1].enhancedSkill === undefined);
+
+  // 적격 스킬이 하나뿐이면 항상 그 스킬
+  const singleKnock = {
+    id: 'SK', tags: [], ranged: false, usesMana: true, abilityProps: ['knockback'],
+    spells: [
+      { key: 'Q', nameKo: '보통기1', props: [] },
+      { key: 'W', nameKo: '유일한 넉백기', props: ['knockback'] },
+      { key: 'E', nameKo: '보통기2', props: [] },
+      { key: 'R', nameKo: '보통기3', props: [] },
+    ],
+  };
+  let alwaysW = true;
+  let singleSeen = 0;
+  for (let s = 0; s < 200 && singleSeen < 10; s++) {
+    const g = newGame({ augments: abilityPool, champion: singleKnock, seed: 60000 + s });
+    const round = nextRound(g);
+    for (const slot of round.slots) {
+      if (slot.apiName === 'ChainReaction') {
+        singleSeen++;
+        if (!slot.enhancedSkill || slot.enhancedSkill.key !== 'W') alwaysW = false;
+      }
+    }
+  }
+  check('적격 스킬 1개면 항상 그 스킬(W) 지정', singleSeen > 0 && alwaysW, singleSeen + '회');
+
+  // trackL9 기본값 off + 게임 상태 포함(직렬화)
+  const gDef = newGame({ augments: abilityPool, champion: knocker, seed: 1 });
+  check('trackL9 기본값 false', gDef.trackL9 === false);
+  const gOn = newGame({ augments: abilityPool, champion: knocker, seed: 1, trackL9: true });
+  check('trackL9 옵션이 게임 상태에 저장(직렬화 가능)',
+    gOn.trackL9 === true && JSON.parse(JSON.stringify(gOn)).trackL9 === true);
+
+  // trackL9=true면 스킬 증강 등장 빈도 증가 (근사 계수 1.5)
+  function countAbilityOffers(trackL9) {
+    let n = 0;
+    for (let s = 0; s < 400; s++) {
+      const g = newGame({ augments: abilityPool, champion: knocker, seed: 70000 + s, trackL9: trackL9 });
+      const round = nextRound(g);
+      for (const slot of round.slots) if (slot.category === 'ability') n++;
+    }
+    return n;
+  }
+  const offOffers = countAbilityOffers(false);
+  const onOffers = countAbilityOffers(true);
+  check('trackL9=true면 스킬 증강 제시 빈도 증가', onOffers > offOffers, onOffers + ' vs ' + offOffers);
+}
+
+/* ---------------- [13] 신규 기능 포함 시드 재현성 (계약 검증 기준 7) ---------------- */
+section('13. 신규 기능 포함 시드 재현성');
+{
+  // 가중치 + 카테고리 + 게이트가 섞인 풀에서의 전체 트레이스 재현 (enhancedSkill 포함)
+  const mixedPool = [];
+  for (let i = 1; i <= 5; i++) {
+    mixedPool.push({ apiName: 'Mix_silver_' + i, tier: 'silver', enabled: true, favoredClasses: i % 2 ? ['Assassin'] : [] });
+  }
+  mixedPool.push({ apiName: 'MixAbility_s', tier: 'silver', enabled: true, category: 'ability' });
+  for (let i = 1; i <= 4; i++) {
+    mixedPool.push({ apiName: 'Mix_gold_' + i, tier: 'gold', enabled: true, disfavoredClasses: i % 2 ? ['Assassin'] : [] });
+  }
+  mixedPool.push({ apiName: 'MixAbility_g', tier: 'gold', enabled: true, category: 'ability', restrictions: { abilityPropsAll: ['dash'] } });
+  for (let i = 1; i <= 4; i++) mixedPool.push({ apiName: 'Mix_prism_' + i, tier: 'prismatic', enabled: true });
+
+  function playScript2(seed, trackL9) {
+    const g = newGame({ augments: mixedPool, champion: ZED, seed: seed, trackL9: trackL9 });
+    const trace = [];
+    for (let r = 0; r < 4; r++) {
+      const round = nextRound(g);
+      trace.push(round.tier);
+      for (const aug of round.slots) {
+        trace.push(aug.apiName + (aug.enhancedSkill ? ':' + aug.enhancedSkill.key : ''));
+      }
+      rerollSlot(g, r % 3);
+      const s2 = round.slots[r % 3];
+      trace.push(s2.apiName + (s2.enhancedSkill ? ':' + s2.enhancedSkill.key : ''));
+      if (r === 1) goldenReroll(g, 0);
+      trace.push(pickAugment(g, (r + 1) % 3).apiName);
+    }
+    return trace.join('|');
+  }
+  check('기준7: 같은 시드 = 같은 결과 (가중 추출 + enhancedSkill 포함)',
+    playScript2(42, false) === playScript2(42, false));
+  check('기준7: trackL9=true도 자체적으로는 결정적',
+    playScript2(42, true) === playScript2(42, true));
+  check('trackL9 미지정과 false는 동일 전개 (URL 하위 호환)',
+    playScript2(42, undefined) === playScript2(42, false));
+
+  // 직렬화 복원 후에도 동일 진행 (enhancedSkill 지정 rng 포함)
+  const gA = newGame({ augments: mixedPool, champion: ZED, seed: 999, trackL9: true });
+  nextRound(gA);
+  const gB = JSON.parse(JSON.stringify(gA));
+  pickAugment(gA, 0);
+  pickAugment(gB, 0);
+  const rA = nextRound(gA);
+  const rB = nextRound(gB);
+  check('직렬화 복원 후 동일 진행 (신규 상태 필드 포함)', JSON.stringify(rA) === JSON.stringify(rB));
 }
 
 /* ---------------- 결과 ---------------- */

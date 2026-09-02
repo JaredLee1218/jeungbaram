@@ -309,10 +309,22 @@ function buildHeadline(styleTags, champTags) {
 
 // ---------------------------------------------------------------- playstyle / skills
 
-function buildPlaystyle(matchedCombos, matchedRules, champ, champTags, pickedCount) {
+function buildPlaystyle(matchedCombos, matchedRules, champ, champTags, picked) {
+  const pickedCount = picked.length;
   const parts = [];
   const top = matchedCombos[0];
   if (top && isStr(top.combo.whyFun)) parts.push(top.combo.whyFun.trim());
+  // 정확 매칭 combo가 없어도 스킬 증강(category === "ability")을 뽑았다면
+  // 강화된 스킬 중심 한 줄을 넣는다. category는 augments.json 신규 필드
+  // (병렬 제작 중) — 필드가 없으면 조용히 생략하는 방어적 처리.
+  if (
+    !matchedCombos.length &&
+    picked.some((a) => a && a.category === "ability")
+  ) {
+    parts.push(
+      "스킬 증강을 뽑았으니 강화된 스킬 중심 운용이 핵심입니다 — 강화된 스킬의 쿨타임마다 각을 만들어 존재감을 키우세요."
+    );
+  }
   const rule = matchedRules[0];
   if (rule && isStr(rule.rule.playstyle)) parts.push(rule.rule.playstyle.trim());
   const rolePlay = ROLE_PLAY[champTags[0]];
@@ -384,7 +396,7 @@ export function recommend(input) {
   const funScore = calcFunScore(matchedCombos, matchedRules, tagCounts, picked.length);
   const styleTags = buildStyleTags(matchedCombos, champTags, tagCounts);
   const headline = buildHeadline(styleTags, champTags);
-  const playstyle = buildPlaystyle(matchedCombos, matchedRules, champ, champTags, picked.length);
+  const playstyle = buildPlaystyle(matchedCombos, matchedRules, champ, champTags, picked);
   const skills = buildSkills(matchedCombos, champ);
 
   return {

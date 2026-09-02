@@ -37,6 +37,11 @@
                placeholder="챔피언 이름 검색 (예: 아리)" autocomplete="off"
                aria-label="챔피언 이름 검색">
         <div id="role-chips" class="chips" role="group" aria-label="역할 필터"></div>
+        <label class="setting-toggle" for="toggle-l9"
+               title="진행 트랙 레벨 9 보상: 스킬 증강 등장 확률 증가 (증가 폭 비공개 — 근사)">
+          <input id="toggle-l9" type="checkbox">
+          <span>진행도 트랙 Lv9 보정 <span class="setting-sub">(스킬 증강 확률 ↑)</span></span>
+        </label>
       </div>
       <div id="champ-grid" class="champ-grid"></div>
       <p id="champ-empty" class="empty-msg" hidden>검색 결과가 없습니다.</p>
@@ -77,7 +82,7 @@
   </main>
 
   <footer class="app-footer">
-    <p>※ 증강 등급 등장 확률과 챔피언별 증강 필터는 <strong>추정치</strong>입니다.</p>
+    <p>※ 챔피언별 증강 풀·가중치는 <strong>공식 확인 + 실측 통계 기반 근사</strong>입니다.</p>
     <p>팬 제작 시뮬레이터입니다. Riot Games와 무관하며, Riot Games는 본 프로젝트를 보증하지 않습니다.</p>
   </footer>
 

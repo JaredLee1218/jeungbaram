@@ -7,6 +7,7 @@
    "nameKo": "단호함",
    "nameEn": "Adamant",
    "tier": "silver",
+   "category": "normal",
    "descKo": "적 챔피언을 이동 불가 또는 속박 상태로 만들면 10초 동안 방어력과 마법 저항력이 10 증가합니다. 최대 10회 중첩(총 100)되며 재발동 시 갱신됩니다(시전당 5초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/adamant_large.png",
    "enabled": false,
@@ -22,6 +23,7 @@
    "nameKo": "적응형 능력치",
    "nameEn": "ADAPt",
    "tier": "silver",
+   "category": "normal",
    "descKo": "추가 공격력을 0.6당 주문력 1의 비율로 모두 주문력으로 전환합니다. 추가로 주문력이 15% 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/adapt_large.png",
    "enabled": true,
@@ -29,13 +31,24 @@
    "tags": [
     "ap"
    ],
-   "restrictions": {}
+   "favoredClasses": [
+    "Mage",
+    "Support"
+   ],
+   "restrictions": {
+    "classRequired": [
+     "Mage",
+     "Support"
+    ],
+    "note": "AP 코어 — 이진 제외(실측 empirical: 징크스·제드·다리우스 구조적 부재 011010, 11 §3-2). ⚠ 근사: classRequired [Mage,Support]로 근사(카타리나류 AP 하이브리드는 Mage 태그로 보존, 다리우스 Fighter+Tank 차단). 근거: STUDY §3-4 3단계, eligibility-notes.json classBias.ap. 예외: Phenomenal Evil은 징크스 포함(개별 게이트 상이)이라 미이식 — 가중치 유지"
+   }
   },
   {
    "apiName": "WardingWeapon",
    "nameKo": "적응형 와드",
    "nameEn": "Adaptive Ward",
    "tier": "silver",
+   "category": "ability",
    "descKo": "챔피언의 스킬 하나를 강화해, 적 챔피언에게 적중하면 6초 동안 방어력 또는 마법 저항력 7~12(레벨 비례)를 얻습니다(4초 재사용 대기시간, 중첩 가능). 대상의 적응형 속성에 따라 물리는 방어력, 마법은 마법 저항력을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_silver.png",
    "enabled": true,
@@ -43,13 +56,21 @@
    "tags": [
     "tank"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "spellExclude": {
+     "Akshan": [
+      "E"
+     ]
+    },
+    "note": "스킬 슬롯 단위 게이트: 아크샨 E 부적격 (공식 26.15 버그픽스). 근거: eligibility-notes.json championSpecific"
+   }
   },
   {
    "apiName": "ARAM_BluntForce",
    "nameKo": "육중한 힘",
    "nameEn": "Blunt Force",
    "tier": "silver",
+   "category": "normal",
    "descKo": "공격력이 20% 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/bluntforce_large.png",
    "enabled": true,
@@ -57,13 +78,26 @@
    "tags": [
     "ad"
    ],
-   "restrictions": {}
+   "favoredClasses": [
+    "Marksman",
+    "Fighter",
+    "Assassin"
+   ],
+   "restrictions": {
+    "classRequired": [
+     "Marksman",
+     "Fighter",
+     "Assassin"
+    ],
+    "note": "AD/크리 코어 — 이진 제외(실측 empirical: 브랜드·말파이트·소라카 구조적 부재, 11 §3-1). ⚠ 근사: \"mage/enchanter/tank(주문형) 제외\"를 classRequired [Marksman,Fighter,Assassin]로 근사(6인 패턴 100101 일치). 근거: STUDY §3-4 3단계, eligibility-notes.json classBias.adCrit"
+   }
   },
   {
    "apiName": "DoubleDefense",
    "nameKo": "보강",
    "nameEn": "Bolstered",
    "tier": "silver",
+   "category": "ability",
    "descKo": "보호막 효과가 있는 스킬 하나를 강화해, 대상의 잃은 체력에 비례해 보호막 흡수량이 최대 60만큼 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_silver.png",
    "enabled": true,
@@ -72,10 +106,10 @@
     "shield"
    ],
    "restrictions": {
-    "abilityProps": [
+    "abilityPropsAll": [
      "shield"
     ],
-    "note": "보호막 효과가 있는 스킬 필요"
+    "note": "보호막 효과가 있는 스킬 필요 (스킬 단위 AND). 근거: eligibility-notes.json abilityAugments"
    }
   },
   {
@@ -83,6 +117,7 @@
    "nameKo": "치명적 가속",
    "nameEn": "Crit 'n Cast",
    "tier": "silver",
+   "category": "normal",
    "descKo": "치명타 확률의 40%에 해당하는 스킬 가속을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/critncast_large.png",
    "enabled": true,
@@ -97,12 +132,16 @@
    "nameKo": "능수능란",
    "nameEn": "Deft",
    "tier": "silver",
+   "category": "normal",
    "descKo": "공격 속도가 60% 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/deft_large.png",
    "enabled": true,
    "arenaOrigin": true,
    "tags": [
     "as"
+   ],
+   "favoredClasses": [
+    "Marksman"
    ],
    "restrictions": {}
   },
@@ -111,6 +150,7 @@
    "nameKo": "폭격기",
    "nameEn": "Dive Bomber",
    "tier": "silver",
+   "category": "normal",
    "descKo": "사망 시 폭발하여 500유닛 내 적에게 대상 최대 체력의 20%에 해당하는 고정 피해를 입힙니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/divebomber_large.png",
    "enabled": true,
@@ -125,6 +165,7 @@
    "nameKo": "속전속결",
    "nameEn": "Don't Blink",
    "tier": "silver",
+   "category": "normal",
    "descKo": "대상보다 이동 속도가 10 높을 때마다 피해량이 1% 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/dontblink_large.png",
    "enabled": true,
@@ -139,6 +180,7 @@
    "nameKo": "채널 고정",
    "nameEn": "Don't Change the Channel",
    "tier": "silver",
+   "category": "normal",
    "descKo": "스킬을 정신 집중(채널링)하는 동안 매초 50~200(레벨 비례)(+공격력의 50%)(+주문력의 25%)(+추가 체력의 10%) 보호막을 얻습니다. 집중이 끝나면 보호막이 빠르게 사라집니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/dontchangethechannel_large.png",
    "enabled": true,
@@ -155,6 +197,7 @@
    "nameKo": "2연속 공격",
    "nameEn": "Double Strike",
    "tier": "silver",
+   "category": "ability",
    "descKo": "강화 기본 공격 효과가 있는 스킬 하나를 강화해, 해당 공격이 적중 효과를 한 번 더 적용합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/adamant_large.png",
    "enabled": false,
@@ -163,7 +206,10 @@
     "onhit"
    ],
    "restrictions": {
-    "note": "강화 기본 공격 효과가 있는 스킬 필요. 미출시(내부 데이터 전용)"
+    "abilityPropsAll": [
+     "empoweredAttack"
+    ],
+    "note": "강화 기본 공격 효과가 있는 스킬 필요 (스킬 단위 AND). 미출시(내부 데이터 전용)"
    }
   },
   {
@@ -171,6 +217,7 @@
    "nameKo": "부식",
    "nameEn": "Erosion",
    "tier": "silver",
+   "category": "normal",
    "descKo": "적에게 피해를 입힐 때마다 대상의 방어력과 마법 저항력을 4초 동안 1.5% 감소시킵니다. 최대 20회 중첩(총 30% 감소)됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/erosion_large.png",
    "enabled": true,
@@ -185,6 +232,7 @@
    "nameKo": "마법사 (물리)",
    "nameEn": "EscAPADe",
    "tier": "silver",
+   "category": "normal",
    "descKo": "주문력을 1.66당 추가 공격력 1의 비율로 모두 공격력으로 전환합니다. 추가로 총 공격력이 15% 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/escapade_large.png",
    "enabled": true,
@@ -192,13 +240,26 @@
    "tags": [
     "ad"
    ],
-   "restrictions": {}
+   "favoredClasses": [
+    "Marksman",
+    "Fighter",
+    "Assassin"
+   ],
+   "restrictions": {
+    "classRequired": [
+     "Marksman",
+     "Fighter",
+     "Assassin"
+    ],
+    "note": "AD/크리 코어 — 이진 제외(실측 empirical: 브랜드·말파이트·소라카 구조적 부재, 11 §3-1). ⚠ 근사: \"mage/enchanter/tank(주문형) 제외\"를 classRequired [Marksman,Fighter,Assassin]로 근사(6인 패턴 100101 일치). 근거: STUDY §3-4 3단계, eligibility-notes.json classBias.adCrit"
+   }
   },
   {
    "apiName": "EscapePlan",
    "nameKo": "도주 계획",
    "nameEn": "Escape Plan",
    "tier": "silver",
+   "category": "normal",
    "descKo": "최대 체력의 35% 아래로 떨어지면 최대 체력의 65% 보호막, 이동 속도 150%, 크기 감소를 얻습니다(75초 재사용 대기시간). 효과는 5.5초에 걸쳐 사라집니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/escapeplan_large.png",
    "enabled": true,
@@ -214,6 +275,7 @@
    "nameKo": "불여우",
    "nameEn": "Firefox",
    "tier": "silver",
+   "category": "normal",
    "descKo": "주기적으로 여우불을 자동 시전합니다. 2초에 걸쳐 사라지는 이동 속도 25%를 얻고, 주위를 도는 화염 3개가 가까운 적에게 날아가 각각 35~160(레벨 비례)(+추가 공격력의 25%)(+주문력의 25%) 적응형 피해를 입힙니다(7초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/firfox_large.png",
    "enabled": true,
@@ -230,6 +292,7 @@
    "nameKo": "응급처치 키트",
    "nameEn": "First-Aid Kit",
    "tier": "silver",
+   "category": "normal",
    "descKo": "치유 및 보호막 효과가 20% 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/firstaidkit_large.png",
    "enabled": true,
@@ -246,6 +309,7 @@
    "nameKo": "점멸 2",
    "nameEn": "Flash 2",
    "tier": "silver",
+   "category": "normal",
    "descKo": "소환사 주문 하나를 점멸로 교체합니다. 추가로 소환사 주문 가속 70을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/flash2_large.png",
    "enabled": true,
@@ -260,6 +324,7 @@
    "nameKo": "점멸탄",
    "nameEn": "Flashbang",
    "tier": "silver",
+   "category": "normal",
    "descKo": "점멸 사용 시 도착 지점에서 폭발이 일어나 주변 적에게 70~240(레벨 비례)(+공격력의 70%)(+주문력의 60%) 마법 피해를 입히고 1.25초 동안 35% 둔화시킵니다. 사망 시 점멸 재사용 대기시간이 초기화됩니다. 점멸 미장착 시 교체 안내가 표시됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/flashbang_large.png",
    "enabled": true,
@@ -276,6 +341,7 @@
    "nameKo": "장인의 솜씨",
    "nameEn": "Forged By The Master",
    "tier": "silver",
+   "category": "normal",
    "descKo": "아이템 효과와 증강이 입히는 피해가 45% 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/forgedbythemaster_large.png",
    "enabled": true,
@@ -290,6 +356,7 @@
    "nameKo": "선혈포식",
    "nameEn": "Goredrink",
    "tier": "silver",
+   "category": "normal",
    "descKo": "모든 피해 흡혈 15%를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/goredrink_large.png",
    "enabled": true,
@@ -304,6 +371,7 @@
    "nameKo": "죄책감의 쾌락",
    "nameEn": "Guilty Pleasure",
    "tier": "silver",
+   "category": "normal",
    "descKo": "적 챔피언을 이동 불가 또는 속박 상태로 만들면 30~250(레벨 비례)(+최대 체력의 1.5%)만큼 체력을 회복합니다(시전당 5초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/guiltypleasure_large.png",
    "enabled": true,
@@ -319,6 +387,7 @@
    "nameKo": "강타자",
    "nameEn": "Heavy Hitter",
    "tier": "silver",
+   "category": "normal",
    "descKo": "기본 공격이 자신의 최대 체력의 3.5%에 해당하는 추가 물리 피해를 입힙니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/heavyhitter_large.png",
    "enabled": true,
@@ -334,6 +403,7 @@
    "nameKo": "마법공학의 영혼",
    "nameEn": "Hextech Soul",
    "tier": "silver",
+   "category": "normal",
    "descKo": "마법공학 드래곤의 영혼을 얻습니다. 이미 보유 중이면 다른 드래곤 영혼을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/infernalsoul_large.png",
    "enabled": true,
@@ -348,6 +418,7 @@
    "nameKo": "민병대",
    "nameEn": "Homeguard",
    "tier": "silver",
+   "category": "normal",
    "descKo": "이동 속도가 100% 증가합니다. 챔피언에게 피해를 받으면 6초 동안 이 효과를 잃습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/homeguard_large.png",
    "enabled": true,
@@ -362,6 +433,7 @@
    "nameKo": "차가운 냉기",
    "nameEn": "Ice Cold",
    "tier": "silver",
+   "category": "normal",
    "descKo": "자신의 둔화 효과가 대상의 이동 속도를 추가로 75 감소시킵니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/icecold_large.png",
    "enabled": true,
@@ -377,6 +449,7 @@
    "nameKo": "지옥불 영혼",
    "nameEn": "Infernal Soul",
    "tier": "silver",
+   "category": "normal",
    "descKo": "화염 드래곤의 영혼을 얻습니다. 이미 보유 중이면 다른 드래곤 영혼을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/infernalsoul_large.png",
    "enabled": true,
@@ -391,6 +464,7 @@
    "nameKo": "출발할 시간",
    "nameEn": "It's Go Time",
    "tier": "silver",
+   "category": "ability",
    "descKo": "지속시간 기반 효과가 있는 스킬 하나를 강화해, 효과 지속시간 동안 이동 속도 25~45%(레벨 비례)를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_silver.png",
    "enabled": true,
@@ -399,7 +473,10 @@
     "move"
    ],
    "restrictions": {
-    "note": "지속시간형 효과가 있는 스킬 필요"
+    "abilityPropsAll": [
+     "durationEffect"
+    ],
+    "note": "지속시간형 효과가 있는 스킬 필요 (스킬 단위 AND). 근거: eligibility-notes.json abilityAugments(requiredProps)"
    }
   },
   {
@@ -407,6 +484,7 @@
    "nameKo": "도취",
    "nameEn": "Juiced",
    "tier": "silver",
+   "category": "normal",
    "descKo": "적 챔피언 기본 공격 적중 시 최대 마나의 2.5%를 소모해 최대 마나의 4.5%에 해당하는 추가 마법 피해를 입힙니다. 이 피해는 치명타(+100%)로 적중할 수 있습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/juiced_large.png",
    "enabled": true,
@@ -416,7 +494,8 @@
     "mana"
    ],
    "restrictions": {
-    "requiresMana": true
+    "requiresMana": true,
+    "note": "마나 게이트: 마나 미사용(기력·무자원) 챔피언에게 미제시 — 실측(제드 부재)·kiwi.bin mAugmentTags=8·아레나 공식 삼중 일치. 근거: STUDY §3-1, eligibility-notes.json classBias(mana)"
    }
   },
   {
@@ -424,6 +503,7 @@
    "nameKo": "확보된 킬",
    "nameEn": "Kill Secured",
    "tier": "silver",
+   "category": "normal",
    "descKo": "최대 체력이 40% 이하인 적 챔피언을 향해 이동할 때 이동 속도가 60% 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/killsecure_large.png",
    "enabled": true,
@@ -439,6 +519,7 @@
    "nameKo": "하체 운동의 날",
    "nameEn": "Leg Day",
    "tier": "silver",
+   "category": "normal",
    "descKo": "이동 속도 50과 둔화 저항 40%를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/legday_large.png",
    "enabled": true,
@@ -453,6 +534,7 @@
    "nameKo": "불을 밝혀",
    "nameEn": "Light 'em Up!",
    "tier": "silver",
+   "category": "normal",
    "descKo": "기본 공격마다 중첩을 쌓아(최대 4), 4번째 중첩 시 대상에게 미사일 4발을 연사합니다. 각 미사일은 11~80(레벨 비례)(+추가 공격력의 35%)(+주문력의 19%) 추가 마법 피해를 입힙니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/lightemup_large.png",
    "enabled": true,
@@ -461,6 +543,9 @@
     "onhit",
     "as"
    ],
+   "favoredClasses": [
+    "Marksman"
+   ],
    "restrictions": {}
   },
   {
@@ -468,6 +553,7 @@
    "nameKo": "강력한 방패",
    "nameEn": "Mighty Shield",
    "tier": "silver",
+   "category": "normal",
    "descKo": "보호막을 얻으면 3초 동안 적응형 능력치 40~100(레벨 비례)을 얻습니다(5초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/mightyshield_large.png",
    "enabled": true,
@@ -484,6 +570,7 @@
    "nameKo": "정신 변환",
    "nameEn": "Mind to Matter",
    "tier": "silver",
+   "category": "normal",
    "descKo": "최대 마나의 50%에 해당하는 추가 체력을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/mindtomatter_large.png",
    "enabled": true,
@@ -494,7 +581,7 @@
    ],
    "restrictions": {
     "requiresMana": true,
-    "note": "마나가 없는 챔피언에게는 제시되지 않는 것으로 추정(비공식)"
+    "note": "마나 게이트: 마나 미사용(기력·무자원) 챔피언에게 미제시 — 실측(제드 부재)·kiwi.bin mAugmentTags=8·아레나 공식 삼중 일치. 근거: STUDY §3-1, eligibility-notes.json classBias(mana)"
    }
   },
   {
@@ -502,6 +589,7 @@
    "nameKo": "대지의 영혼",
    "nameEn": "Mountain Soul",
    "tier": "silver",
+   "category": "normal",
    "descKo": "대지 드래곤의 영혼을 얻습니다. 이미 보유 중이면 다른 드래곤 영혼을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/mountainsoul_large.png",
    "enabled": true,
@@ -517,6 +605,7 @@
    "nameKo": "바다의 영혼",
    "nameEn": "Ocean Soul",
    "tier": "silver",
+   "category": "normal",
    "descKo": "바다 드래곤의 영혼(기본 회복량 100으로 조정)을 얻습니다. 이미 보유 중이면 다른 드래곤 영혼을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/oceansoul_large.png",
    "enabled": true,
@@ -532,6 +621,7 @@
    "nameKo": "폴터가이스트",
    "nameEn": "Poltergeist",
    "tier": "silver",
+   "category": "normal",
    "descKo": "소환사 주문 하나를 폴터가이스트로 교체합니다. 폴터가이스트: 유령을 소환해 적을 공격하게 합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/poltergeist_large.png",
    "enabled": true,
@@ -546,6 +636,7 @@
    "nameKo": "순수주의자 - 마법사",
    "nameEn": "Purist - Caster",
    "tier": "silver",
+   "category": "normal",
    "descKo": "추가 공격 속도를 1%당 스킬 가속 0.65의 비율로 모두 스킬 가속으로 전환합니다. 추가로 스킬의 총 재사용 대기시간이 10% 감소합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/puristcaster_large.png",
    "enabled": true,
@@ -560,6 +651,7 @@
    "nameKo": "조준경 부착",
    "nameEn": "Scoped Weapons",
    "tier": "silver",
+   "category": "normal",
    "descKo": "기본 공격 사거리 75(근접) / 50(원거리)를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/scopedweapons_large.png",
    "enabled": true,
@@ -574,6 +666,7 @@
    "nameKo": "그림자 질주",
    "nameEn": "Shadow Runner",
    "tier": "silver",
+   "category": "normal",
    "descKo": "돌진, 점멸 또는 은신 해제 후 2초 동안 이동 속도 300을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/shadowrunner_large.png",
    "enabled": true,
@@ -582,13 +675,19 @@
     "move",
     "dash"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "abilityProps": [
+     "dash"
+    ],
+    "note": "돌진 스킬 보유 챔피언에게만 (실측 5종 동일 패턴). 근거: STUDY §3-1, eligibility-notes.json classBias(dash)"
+   }
   },
   {
    "apiName": "ARAM_SustainingStrike",
    "nameKo": "흡수",
    "nameEn": "Siphon",
    "tier": "silver",
+   "category": "ability",
    "descKo": "스킬 하나를 강화해, 그 스킬이 적 챔피언에게 입힌 피해(방어 적용 후)의 30%만큼 체력을 회복합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_silver.png",
    "enabled": true,
@@ -603,6 +702,7 @@
    "nameKo": "우당탕탕",
    "nameEn": "Slap Around",
    "tier": "silver",
+   "category": "normal",
    "descKo": "적 챔피언을 이동 불가 또는 속박 상태로 만들 때마다 적응형 능력치 10을 영구히 얻습니다(무한 중첩, 시전당 5초 재사용 대기시간). 사망 시 중첩의 50%를 잃습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/slaparound_large.png",
    "enabled": true,
@@ -612,13 +712,19 @@
     "ad",
     "ap"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "abilityProps": [
+     "immobilize"
+    ],
+    "note": "하드 CC(속박/접지) 스킬 보유 챔피언에게만. 근거: STUDY §3-1, eligibility-notes.json classBias(immobilize)"
+   }
   },
   {
    "apiName": "ARAM_Snowday",
    "nameKo": "눈 오는 날",
    "nameEn": "Snowday",
    "tier": "silver",
+   "category": "normal",
    "descKo": "표식(눈덩이)이 피해의 100%에 해당하는 추가 마법 피해를 입히고, 재사용 대기시간이 스킬 가속 100만큼 감소합니다. 표식 미장착 시 교체 안내가 표시됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/snowday_large.png",
    "enabled": true,
@@ -633,6 +739,7 @@
    "nameKo": "음속 폭발",
    "nameEn": "Sonic Boom",
    "tier": "silver",
+   "category": "normal",
    "descKo": "아군에게 버프, 치유 또는 보호막을 부여하면 대상 주변 450유닛 내 적에게 30~150(레벨 비례) 고정 피해를 입히고 2초 동안 30% 둔화시킵니다(2초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/sonicboom_large.png",
    "enabled": true,
@@ -642,13 +749,23 @@
     "cc",
     "aoe"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "classRequired": [
+     "Support"
+    ],
+    "note": "아군 힐/실드 계열 — Support 클래스 + 킷에 힐/실드 보유(OR) 이중 게이트. ⚠ 근사: classRequired [Support]만으로는 DDragon 태그상 Support인 브랜드가 통과 — 실측(11 §3-4, empirical)은 킷에 힐/실드 있는 소라카만 등재라 abilityProps [heal,shield]를 추가. 근거: STUDY §3-1, eligibility-notes.json classBias.allyHealShield",
+    "abilityProps": [
+     "heal",
+     "shield"
+    ]
+   }
   },
   {
    "apiName": "YouSpinMeRightRound",
    "nameKo": "빙글빙글",
    "nameEn": "Spin Me Right Round",
    "tier": "silver",
+   "category": "normal",
    "descKo": "소환사 주문 하나를 영웅의 그네로 교체합니다. 지형에 갈고리를 걸어 회전 이동하며 주변 적에게 15~75(레벨 비례)(+공격력의 15%) 물리 피해 사격을 연사하고, 마지막에 도약으로 마무리합니다(10초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/youspinmerightround_large.png",
    "enabled": true,
@@ -664,6 +781,7 @@
    "nameKo": "승리를 위한 회전",
    "nameEn": "Spin To Win",
    "tier": "silver",
+   "category": "normal",
    "descKo": "회전 스킬이 30% 증가한 피해를 입히고 재사용 대기시간이 스킬 가속 30만큼 감소합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/spintowin_large.png",
    "enabled": true,
@@ -672,10 +790,31 @@
     "aoe"
    ],
    "restrictions": {
-    "abilityProps": [
-     "spin"
+    "championWhitelist": [
+     "Ahri",
+     "Ambessa",
+     "Amumu",
+     "Darius",
+     "Draven",
+     "Garen",
+     "Hecarim",
+     "Jax",
+     "Katarina",
+     "Kayn",
+     "Lillia",
+     "MonkeyKing",
+     "Nocturne",
+     "Rammus",
+     "Renekton",
+     "RekSai",
+     "Riven",
+     "Samira",
+     "Sylas",
+     "Tryndamere",
+     "XinZhao",
+     "Zed"
     ],
-    "note": "회전 스킬 보유 챔피언에게만 유의미(가렌 E, 다리우스 R, 카타리나, 오공 등)"
+    "note": "위키 명시 적격 스킬 목록의 챔피언 화이트리스트 (공식 — 아리 W·R, 다리우스 Q, 가렌 E, 제드 E 등 22명). 검증 대기분(아크샨·뽀삐 R 등)은 미포함. 근거: STUDY §3-1, research/raw/03-champion-augment-pools.md §1"
    }
   },
   {
@@ -683,6 +822,7 @@
    "nameKo": "다단 중첩",
    "nameEn": "Stackosaurus Rex",
    "tier": "silver",
+   "category": "normal",
    "descKo": "스킬로 얻는 영구 중첩의 획득량이 100% 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/stackosaurusrex_large.png",
    "enabled": true,
@@ -695,6 +835,7 @@
    "nameKo": "능력치!",
    "nameEn": "Stats!",
    "tier": "silver",
+   "category": "normal",
    "descKo": "능력치 모루 2개를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/stats_large.png",
    "enabled": true,
@@ -707,6 +848,7 @@
    "nameKo": "확고한 의지로",
    "nameEn": "Stay Resolute",
    "tier": "silver",
+   "category": "ability",
    "descKo": "스킬 하나를 강화해, 적 챔피언에게 피해를 입히면 방어력 또는 마법 저항력 1~3(레벨 비례)을 영구히 얻습니다(무한 중첩, 대상·시전당 5초 재사용 대기시간). 첫 증강이 아니면 방어력과 마법 저항력 20을 즉시 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_silver.png",
    "enabled": true,
@@ -714,13 +856,17 @@
    "tags": [
     "tank"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "meleeOnly": true,
+    "note": "근사: 실측에서 근접 3인(말파이트·제드·다리우스)에게만 등재 — 근접 클래스 게이트로 추정해 meleeOnly로 이식. 근거: eligibility-notes.json classBias(meleeCluster), research/raw/11-empirical-pools.md §3-8"
+   }
   },
   {
    "apiName": "SwiftAndSafe",
    "nameKo": "빠르고 안전하게",
    "nameEn": "Swift and Safe",
    "tier": "silver",
+   "category": "normal",
    "descKo": "돌진 또는 점멸 후 2초 동안 65~290(레벨 비례)(+공격력의 65%)(+주문력의 26%) 피해를 흡수하는 보호막을 얻습니다(5초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/swiftandsafe_large.png",
    "enabled": true,
@@ -729,13 +875,19 @@
     "dash",
     "shield"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "abilityProps": [
+     "dash"
+    ],
+    "note": "돌진 스킬 보유 챔피언에게만 (실측 5종 동일 패턴). 근거: STUDY §3-1, eligibility-notes.json classBias(dash)"
+   }
   },
   {
    "apiName": "ARAM_TankItOrLeaveIt",
    "nameKo": "확률적 방어",
    "nameEn": "Tank It Or Leave It",
    "tier": "silver",
+   "category": "normal",
    "descKo": "치명타 확률과 같은 확률(최대 50%)로 받는 피해를 20% 줄입니다(적 스킬 시전당 5초 재사용 대기시간). 추가로 치명타 확률 25%를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/tankitorleaveit_large.png",
    "enabled": true,
@@ -744,6 +896,9 @@
     "crit",
     "tank"
    ],
+   "favoredClasses": [
+    "Marksman"
+   ],
    "restrictions": {}
   },
   {
@@ -751,6 +906,7 @@
    "nameKo": "전환: 골드",
    "nameEn": "Transmute: Gold",
    "tier": "silver",
+   "category": "normal",
    "descKo": "무작위 골드 등급 증강 1개를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/transmutegold_large.png",
    "enabled": true,
@@ -763,18 +919,27 @@
    "nameKo": "믿음직한 무기",
    "nameEn": "Trusty Weapon",
    "tier": "silver",
+   "category": "ability",
    "descKo": "스킬 하나를 강화해, 적 챔피언 적중 시 6초 동안 우정 중첩을 얻습니다. 중첩당 그 스킬의 피해가 5% 증가합니다(중첩 제한 있음).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_silver.png",
    "enabled": true,
    "arenaOrigin": false,
    "tags": [],
-   "restrictions": {}
+   "restrictions": {
+    "spellExclude": {
+     "Akshan": [
+      "E"
+     ]
+    },
+    "note": "스킬 슬롯 단위 게이트: 아크샨 E 부적격 (공식 26.15 버그픽스). 근거: eligibility-notes.json championSpecific"
+   }
   },
   {
    "apiName": "Twinfire",
    "nameKo": "쌍둥이 불꽃",
    "nameEn": "Twin Fire",
    "tier": "silver",
+   "category": "normal",
    "descKo": "적 챔피언에게 스킬 피해를 입히면 미사일을 발사합니다(기본 1발, 치명타 확률 33.33%당 +1발). 각 미사일은 10~30(레벨 비례)(+추가 공격력의 7%)(+주문력의 7%) 마법 피해를 입힙니다(5초 재사용 대기시간). 추가로 치명타 확률 25%를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/twinfire_large.png",
    "enabled": true,
@@ -790,6 +955,7 @@
    "nameKo": "태풍",
    "nameEn": "Typhoon",
    "tier": "silver",
+   "category": "normal",
    "descKo": "기본 공격 시 주변의 다른 적(챔피언 우선)에게 공격력의 30% 물리 피해를 입히고 적중 효과를 적용하는 미사일을 발사합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/typhoon_large.png",
    "enabled": true,
@@ -798,13 +964,26 @@
     "onhit",
     "as"
    ],
-   "restrictions": {}
+   "favoredClasses": [
+    "Marksman",
+    "Fighter",
+    "Assassin"
+   ],
+   "restrictions": {
+    "classRequired": [
+     "Marksman",
+     "Fighter",
+     "Assassin"
+    ],
+    "note": "AD/크리 코어 — 이진 제외(실측 empirical: 브랜드·말파이트·소라카 구조적 부재, 11 §3-1). ⚠ 근사: \"mage/enchanter/tank(주문형) 제외\"를 classRequired [Marksman,Fighter,Assassin]로 근사(6인 패턴 100101 일치). 근거: STUDY §3-4 3단계, eligibility-notes.json classBias.adCrit"
+   }
   },
   {
    "apiName": "ARAM_UltimateUnstoppable",
    "nameKo": "궁극의 저지 불가",
    "nameEn": "Ultimate Unstoppable",
    "tier": "silver",
+   "category": "normal",
    "descKo": "궁극기 시전 시 3초 동안 군중 제어에 면역이 됩니다(8초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/ultimateunstoppable_large.png",
    "enabled": true,
@@ -820,6 +999,7 @@
    "nameKo": "징수의 총 업그레이드",
    "nameEn": "Upgrade Collector",
    "tier": "silver",
+   "category": "normal",
    "descKo": "징수의 총을 강화합니다. 적 챔피언 처치마다 처형 임계값이 0.5%씩 증가(최대 12.5%)하고, 킬 골드가 총 50골드로 증가합니다. 추가로 250골드를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/upgradecollector_large.png",
    "enabled": true,
@@ -828,13 +1008,26 @@
     "gold",
     "execute"
    ],
-   "restrictions": {}
+   "favoredClasses": [
+    "Marksman",
+    "Fighter",
+    "Assassin"
+   ],
+   "restrictions": {
+    "classRequired": [
+     "Marksman",
+     "Fighter",
+     "Assassin"
+    ],
+    "note": "AD/크리 코어 — 이진 제외(실측 empirical: 브랜드·말파이트·소라카 구조적 부재, 11 §3-1). ⚠ 근사: \"mage/enchanter/tank(주문형) 제외\"를 classRequired [Marksman,Fighter,Assassin]로 근사(6인 패턴 100101 일치). 근거: STUDY §3-4 3단계, eligibility-notes.json classBias.adCrit"
+   }
   },
   {
    "apiName": "Upgrade_DeathDance",
    "nameKo": "죽음의 무도 업그레이드",
    "nameEn": "Upgrade Death's Dance",
    "tier": "silver",
+   "category": "normal",
    "descKo": "죽음의 무도를 강화합니다. 고통 무시의 피해 감소가 40%(근접)/15%(원거리)로, 저항의 회복 계수가 추가 공격력의 125%로 증가하고 즉시 회복됩니다. 추가로 250골드를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/upgradedeathdance_large.png",
    "enabled": true,
@@ -844,13 +1037,26 @@
     "heal",
     "ad"
    ],
-   "restrictions": {}
+   "favoredClasses": [
+    "Marksman",
+    "Fighter",
+    "Assassin"
+   ],
+   "restrictions": {
+    "classRequired": [
+     "Marksman",
+     "Fighter",
+     "Assassin"
+    ],
+    "note": "AD/크리 코어 — 이진 제외(실측 empirical: 브랜드·말파이트·소라카 구조적 부재, 11 §3-1). ⚠ 근사: \"mage/enchanter/tank(주문형) 제외\"를 classRequired [Marksman,Fighter,Assassin]로 근사(6인 패턴 100101 일치). 근거: STUDY §3-4 3단계, eligibility-notes.json classBias.adCrit"
+   }
   },
   {
    "apiName": "ARAM_Upgrade_Immolate",
    "nameKo": "불사르기 업그레이드",
    "nameEn": "Upgrade Immolate",
    "tier": "silver",
+   "category": "normal",
    "descKo": "불사르기 계열 아이템(바미의 불씨·공허한 광휘·태양불꽃 방패 등)을 강화해, 불사르기 피해 틱마다 적중한 적 챔피언당 12골드를 얻습니다. 추가로 250골드를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/upgradeimmolate_large.png",
    "enabled": true,
@@ -860,13 +1066,17 @@
     "gold",
     "aoe"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "meleeOnly": true,
+    "note": "근사: 실측에서 근접 3인에게만 등재 → meleeOnly로 이식. 근거: eligibility-notes.json classBias(meleeCluster)"
+   }
   },
   {
    "apiName": "ARAM_Upgrade_ZH",
    "nameKo": "존야 업그레이드",
    "nameEn": "Upgrade Zhonya's",
    "tier": "silver",
+   "category": "normal",
    "descKo": "존야의 모래시계 계열 아이템을 강화합니다. 정지 중 모든 군중 제어가 해제되고 이동할 수 있으며 이동 속도 50%를 얻습니다. 정지 재사용 대기시간이 45초로 감소합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/upgradezh_large.png",
    "enabled": true,
@@ -875,13 +1085,24 @@
     "ap",
     "tank"
    ],
-   "restrictions": {}
+   "favoredClasses": [
+    "Mage",
+    "Support"
+   ],
+   "restrictions": {
+    "classRequired": [
+     "Mage",
+     "Support"
+    ],
+    "note": "AP 코어 — 이진 제외(실측 empirical: 징크스·제드·다리우스 구조적 부재 011010, 11 §3-2). ⚠ 근사: classRequired [Mage,Support]로 근사(카타리나류 AP 하이브리드는 Mage 태그로 보존, 다리우스 Fighter+Tank 차단). 근거: STUDY §3-4 3단계, eligibility-notes.json classBias.ap. 예외: Phenomenal Evil은 징크스 포함(개별 게이트 상이)이라 미이식 — 가중치 유지"
+   }
   },
   {
    "apiName": "VeilOfWarding",
    "nameKo": "감시의 장막",
    "nameEn": "Veil of Warding",
    "tier": "silver",
+   "category": "normal",
    "descKo": "다음 적 스킬을 막아내는 주문 보호막을 얻습니다(30초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/poltergeist_large.png",
    "enabled": true,
@@ -897,6 +1118,7 @@
    "nameKo": "사악한 정신",
    "nameEn": "Witchful Thinking",
    "tier": "silver",
+   "category": "normal",
    "descKo": "주문력 20~80(레벨 비례)을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/witchfulthinking_large.png",
    "enabled": true,
@@ -904,13 +1126,24 @@
    "tags": [
     "ap"
    ],
-   "restrictions": {}
+   "favoredClasses": [
+    "Mage",
+    "Support"
+   ],
+   "restrictions": {
+    "classRequired": [
+     "Mage",
+     "Support"
+    ],
+    "note": "AP 코어 — 이진 제외(실측 empirical: 징크스·제드·다리우스 구조적 부재 011010, 11 §3-2). ⚠ 근사: classRequired [Mage,Support]로 근사(카타리나류 AP 하이브리드는 Mage 태그로 보존, 다리우스 Fighter+Tank 차단). 근거: STUDY §3-4 3단계, eligibility-notes.json classBias.ap. 예외: Phenomenal Evil은 징크스 포함(개별 게이트 상이)이라 미이식 — 가중치 유지"
+   }
   },
   {
    "apiName": "ARAM_Zealot",
    "nameKo": "광신자",
    "nameEn": "Zealot",
    "tier": "silver",
+   "category": "normal",
    "descKo": "공격 속도 35%(+주문력 100당 5%)와 치명타 확률 25%(+주문력 100당 5%)를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/zealot_large.png",
    "enabled": true,
@@ -927,6 +1160,7 @@
    "nameKo": "너만을 위해",
    "nameEn": "All For You",
    "tier": "gold",
+   "category": "normal",
    "descKo": "아군 챔피언에게 주는 치유와 보호막의 효과가 30% 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/allforyou_large.png",
    "enabled": true,
@@ -936,13 +1170,23 @@
     "heal",
     "shield"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "classRequired": [
+     "Support"
+    ],
+    "note": "아군 힐/실드 계열 — Support 클래스 + 킷에 힐/실드 보유(OR) 이중 게이트. ⚠ 근사: classRequired [Support]만으로는 DDragon 태그상 Support인 브랜드가 통과 — 실측(11 §3-4, empirical)은 킷에 힐/실드 있는 소라카만 등재라 abilityProps [heal,shield]를 추가. 근거: STUDY §3-1, eligibility-notes.json classBias.allyHealShield",
+    "abilityProps": [
+     "heal",
+     "shield"
+    ]
+   }
   },
   {
    "apiName": "ARAM_ApexInventor",
    "nameKo": "최첨단 발명가",
    "nameEn": "Apex Inventor",
    "tier": "gold",
+   "category": "normal",
    "descKo": "아이템 가속 100을 얻습니다(아이템 재사용 대기시간 50% 감소에 해당).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/apexinventor_large.png",
    "enabled": true,
@@ -955,6 +1199,7 @@
    "nameKo": "전술적 대비",
    "nameEn": "Big Brain",
    "tier": "gold",
+   "category": "normal",
    "descKo": "주문력의 300%에 해당하는 피해를 흡수하는 보호막을 얻습니다. 파괴될 때까지 유지되며, 부활 시와 70초마다 다시 충전됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/bigbrain_large.png",
    "enabled": true,
@@ -963,13 +1208,24 @@
     "ap",
     "shield"
    ],
-   "restrictions": {}
+   "favoredClasses": [
+    "Mage",
+    "Support"
+   ],
+   "restrictions": {
+    "classRequired": [
+     "Mage",
+     "Support"
+    ],
+    "note": "AP 코어 — 이진 제외(실측 empirical: 징크스·제드·다리우스 구조적 부재 011010, 11 §3-2). ⚠ 근사: classRequired [Mage,Support]로 근사(카타리나류 AP 하이브리드는 Mage 태그로 보존, 다리우스 Fighter+Tank 차단). 근거: STUDY §3-4 3단계, eligibility-notes.json classBias.ap. 예외: Phenomenal Evil은 징크스 포함(개별 게이트 상이)이라 미이식 — 가중치 유지"
+   }
   },
   {
    "apiName": "Bonk",
    "nameKo": "꽁!",
    "nameEn": "BONK!",
    "tier": "gold",
+   "category": "ability",
    "descKo": "강화 기본 공격 효과가 있는 스킬 하나를 강화해, 해당 공격이 대상에게 30% 증가한 피해를 입히고 주변 적에게도 피해의 30%를 입힙니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/bonk_large.png",
    "enabled": true,
@@ -979,7 +1235,10 @@
     "aoe"
    ],
    "restrictions": {
-    "note": "강화 기본 공격 효과가 있는 스킬 필요"
+    "abilityPropsAll": [
+     "empoweredAttack"
+    ],
+    "note": "강화 기본 공격 효과가 있는 스킬 필요 (스킬 단위 AND). 실측: 6명 중 다리우스(강화 평타 W)만 등재. 근거: eligibility-notes.json abilityAugments"
    }
   },
   {
@@ -987,42 +1246,58 @@
    "nameKo": "빵과 버터",
    "nameEn": "Bread And Butter",
    "tier": "gold",
+   "category": "ability",
    "descKo": "첫 번째 기본 스킬(Q)이 스킬 가속 100을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_gold.png",
    "enabled": true,
    "arenaOrigin": true,
    "tags": [],
-   "restrictions": {}
+   "restrictions": {
+    "championExclude": [
+     "Jinx"
+    ],
+    "slot": "Q",
+    "note": "Q 슬롯 고정형. 실측: 토글 Q(쿨다운 없음)인 징크스만 제외 — 스킬 단위 dead draw 필터. 근거: eligibility-notes.json championSpecific, research/raw/11-empirical-pools.md §4-2"
+   }
   },
   {
    "apiName": "ARAM_BreadAndCheese",
    "nameKo": "빵과 치즈",
    "nameEn": "Bread And Cheese",
    "tier": "gold",
+   "category": "ability",
    "descKo": "세 번째 기본 스킬(E)이 스킬 가속 100을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_gold.png",
    "enabled": true,
    "arenaOrigin": true,
    "tags": [],
-   "restrictions": {}
+   "restrictions": {
+    "slot": "E",
+    "note": "E 슬롯 고정형 (스킬 지정 불필요한 전신 — 09 §3-3)"
+   }
   },
   {
    "apiName": "ARAM_BreadAndJam",
    "nameKo": "빵과 잼",
    "nameEn": "Bread And Jam",
    "tier": "gold",
+   "category": "ability",
    "descKo": "두 번째 기본 스킬(W)이 스킬 가속 100을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_gold.png",
    "enabled": true,
    "arenaOrigin": true,
    "tags": [],
-   "restrictions": {}
+   "restrictions": {
+    "slot": "W",
+    "note": "W 슬롯 고정형 (스킬 지정 불필요한 전신 — 09 §3-3)"
+   }
   },
   {
    "apiName": "ARAM_CelestialBody",
    "nameKo": "천상의 신체",
    "nameEn": "Celestial Body",
    "tier": "gold",
+   "category": "normal",
    "descKo": "추가 체력 1500을 얻지만, 가하는 피해가 10% 감소합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/celestialbody_large.png",
    "enabled": true,
@@ -1037,6 +1312,7 @@
    "nameKo": "연쇄 반응",
    "nameEn": "Chain Reaction",
    "tier": "gold",
+   "category": "ability",
    "descKo": "밀쳐내기 효과가 있는 스킬 하나를 강화합니다. 밀려난 적이 다른 적 챔피언과 충돌하면 100~400(레벨 비례) 마법 피해와 0.5초 띄워 올리기, 지형과 충돌하면 150~800(레벨 비례) 마법 피해와 띄워 올리기·기절이 발생합니다. 궁극기라면 피해가 250%로 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_gold.png",
    "enabled": true,
@@ -1046,10 +1322,10 @@
     "aoe"
    ],
    "restrictions": {
-    "abilityProps": [
+    "abilityPropsAll": [
      "knockback"
     ],
-    "note": "밀쳐내기 효과가 있는 스킬 필요"
+    "note": "밀쳐내기(넉백) 효과가 있는 스킬 필요 (스킬 단위 AND). 궁극기 대상이면 피해 250%. 근거: eligibility-notes.json abilityAugments"
    }
   },
   {
@@ -1057,6 +1333,7 @@
    "nameKo": "타오르는 이자",
    "nameEn": "Combusting Interest",
    "tier": "gold",
+   "category": "normal",
    "descKo": "지속 피해 효과로 적 챔피언에게 피해를 입힐 때마다 틱당 1~3골드(레벨 비례)(+피해량의 0.75%)를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/bloodmoney2_large.png",
    "enabled": true,
@@ -1065,13 +1342,19 @@
     "gold",
     "dot"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "championExclude": [
+     "Smolder"
+    ],
+    "note": "스몰더에게 미제시 (공식 26.14 버그픽스). 근거: research/data/eligibility-notes.json championSpecific"
+   }
   },
   {
    "apiName": "ARAM_CriticalHealing",
    "nameKo": "치명적 치유",
    "nameEn": "Critical Healing",
    "tier": "gold",
+   "category": "normal",
    "descKo": "치유와 보호막이 치명타 확률과 같은 확률로 효과가 40% 증가합니다(시전당 5초 재사용 대기시간). 추가로 치명타 확률 25%를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/criticalhealing_large.png",
    "enabled": true,
@@ -1088,6 +1371,7 @@
    "nameKo": "치명적 미사일",
    "nameEn": "Critical Missile",
    "tier": "gold",
+   "category": "normal",
    "descKo": "적 챔피언에게 치명타 적중 시 미사일을 발사합니다(기본 1발, 치명타 확률 50%당 +1발). 각 미사일은 15~65(레벨 비례) 마법 피해를 입힙니다. 추가로 치명타 확률 25%를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/criticalmissile_large.png",
    "enabled": true,
@@ -1095,13 +1379,26 @@
    "tags": [
     "crit"
    ],
-   "restrictions": {}
+   "favoredClasses": [
+    "Marksman",
+    "Fighter",
+    "Assassin"
+   ],
+   "restrictions": {
+    "classRequired": [
+     "Marksman",
+     "Fighter",
+     "Assassin"
+    ],
+    "note": "AD/크리 코어 — 이진 제외(실측 empirical: 브랜드·말파이트·소라카 구조적 부재, 11 §3-1). ⚠ 근사: \"mage/enchanter/tank(주문형) 제외\"를 classRequired [Marksman,Fighter,Assassin]로 근사(6인 패턴 100101 일치). 근거: STUDY §3-4 3단계, eligibility-notes.json classBias.adCrit"
+   }
   },
   {
    "apiName": "CriticalRhythm",
    "nameKo": "치명적 리듬",
    "nameEn": "Critical Rhythm",
    "tier": "gold",
+   "category": "normal",
    "descKo": "치명타 시 6초 동안 공격 속도 6%를 얻습니다(최대 10중첩, 총 60%). 추가로 치명타 확률 25%를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/criticalrhythm_large.png",
    "enabled": true,
@@ -1110,13 +1407,26 @@
     "crit",
     "as"
    ],
-   "restrictions": {}
+   "favoredClasses": [
+    "Marksman",
+    "Fighter",
+    "Assassin"
+   ],
+   "restrictions": {
+    "classRequired": [
+     "Marksman",
+     "Fighter",
+     "Assassin"
+    ],
+    "note": "AD/크리 코어 — 이진 제외(실측 empirical: 브랜드·말파이트·소라카 구조적 부재, 11 §3-1). ⚠ 근사: \"mage/enchanter/tank(주문형) 제외\"를 classRequired [Marksman,Fighter,Assassin]로 근사(6인 패턴 100101 일치). 근거: STUDY §3-4 3단계, eligibility-notes.json classBias.adCrit"
+   }
   },
   {
    "apiName": "ARAM_DawnbringersResolve",
    "nameKo": "빛의 인도자 결의",
    "nameEn": "Dawnbringer's Resolve",
    "tier": "gold",
+   "category": "normal",
    "descKo": "최대 체력의 50% 아래로 떨어지면 3초에 걸쳐 최대 체력의 30%를 회복합니다(45초 재사용 대기시간, 사망 시 초기화).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/dawnbringersresolve_large.png",
    "enabled": true,
@@ -1132,6 +1442,7 @@
    "nameKo": "신성한 중재",
    "nameEn": "Divine Intervention",
    "tier": "gold",
+   "category": "normal",
    "descKo": "주기적으로 우주의 광휘를 자동 시전합니다. 2.5초에 걸쳐 별이 내려온 뒤 자신과 주변 400유닛 내 아군 챔피언이 2.5초 동안 무적이 됩니다(35초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/slowactingpainkillers_large.png",
    "enabled": true,
@@ -1147,6 +1458,7 @@
    "nameKo": "후원",
    "nameEn": "Donation",
    "tier": "gold",
+   "category": "normal",
    "descKo": "이 증강 획득 시 1750골드를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/donation_large.png",
    "enabled": true,
@@ -1161,6 +1473,7 @@
    "nameKo": "끝없는 학살",
    "nameEn": "Endless Decimation",
    "tier": "gold",
+   "category": "normal",
    "descKo": "전투 중 강화된 대학살(다리우스 Q 형태)을 자동 시전해 주변 460 반경을 베어 100~400(레벨 비례)(+공격력의 60%)(+주문력의 40%) 물리 피해를 입힙니다(8초 재사용 대기시간). 바깥 날에 맞은 적 챔피언당 잃은 체력의 18%를 회복하고 재사용 대기시간이 10% 감소합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/endlessdecimate_large.png",
    "enabled": true,
@@ -1177,6 +1490,7 @@
    "nameKo": "환영 무기",
    "nameEn": "Ethereal Weapon",
    "tier": "gold",
+   "category": "normal",
    "descKo": "스킬이 적중 효과를 적용합니다(대상당 1초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/etherealweapon_large.png",
    "enabled": true,
@@ -1191,6 +1505,7 @@
    "nameKo": "최후의 도시 대중교통",
    "nameEn": "Final City Transit",
    "tier": "gold",
+   "category": "normal",
    "descKo": "사망 시 열차를 소환해 자신을 처치한 적 방향으로 발사합니다. 경로상의 적에게 150~750(레벨 비례)(+추가 공격력의 65%)(+주문력의 50%)(+최대 체력의 15%) 물리 피해를 입힙니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/nightstalking_large.png",
    "enabled": false,
@@ -1205,6 +1520,7 @@
    "nameKo": "화염 낙인",
    "nameEn": "Firebrand",
    "tier": "gold",
+   "category": "normal",
    "descKo": "기본 공격이 5초 동안 매초 대상 최대 체력의 0.4%에 해당하는 마법 피해를 입히는 화상을 남깁니다. 화상은 무한히 중첩되고 적중할 때마다 갱신됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/firebrand_large.png",
    "enabled": true,
@@ -1220,6 +1536,7 @@
    "nameKo": "점멸 난사",
    "nameEn": "Flashy",
    "tier": "gold",
+   "category": "normal",
    "descKo": "점멸이 충전 3회 방식으로 바뀝니다(시전 간 2초, 3회 전체 재충전 120초). 점멸 미장착 시 교체 안내가 표시됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/flashy_large.png",
    "enabled": true,
@@ -1234,6 +1551,7 @@
    "nameKo": "시작부터 끝까지",
    "nameEn": "From Beginning to End",
    "tier": "gold",
+   "category": "normal",
    "descKo": "어둠의 수확과 선제공격 핵심 룬을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/frombeginningtoend_large.png",
    "enabled": true,
@@ -1249,6 +1567,7 @@
    "nameKo": "로켓 배송",
    "nameEn": "From Downtown",
    "tier": "gold",
+   "category": "quest",
    "descKo": "퀘스트: 600유닛 이상 떨어진 적 챔피언에게 스킬 15회 적중. 보상: 원거리 스킬 적중 시 유성이 떨어져 75~200(레벨 비례)(+추가 공격력의 50%)(+주문력의 20%) 마법 피해를 입힙니다. 거리가 멀수록 피해와 범위가 최대 2.3배까지 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/questbangbang_large.png",
    "enabled": true,
@@ -1258,13 +1577,17 @@
     "quest",
     "aoe"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "rangedOnly": true,
+    "note": "근사: 장거리(600+) 스킬샷 계열 — 실측에서 원거리 3인만 등재·근접 3인 부재 → rangedOnly로 근사. 근거: eligibility-notes.json classBias(sniper), research/raw/11-empirical-pools.md §3-7"
+   }
   },
   {
    "apiName": "ARAM_GetExcited",
    "nameKo": "신난다!",
    "nameEn": "Get Excited",
    "tier": "gold",
+   "category": "normal",
    "descKo": "챔피언 처치 관여 시 4초 동안 이동 속도 100%와 공격 속도 15%를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/getexcited_large.png",
    "enabled": true,
@@ -1281,6 +1604,7 @@
    "nameKo": "급속 성장",
    "nameEn": "Growth Spurt",
    "tier": "gold",
+   "category": "normal",
    "descKo": "소환사 주문 하나를 급속 성장으로 교체합니다. 급속 성장: 자신을 성장시켜 강화합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/growthspurt_large.png",
    "enabled": true,
@@ -1296,6 +1620,7 @@
    "nameKo": "Hide on bush",
    "nameEn": "Hide on Bush",
    "tier": "gold",
+   "category": "normal",
    "descKo": "수풀 안에 있는 동안 피해량이 20% 증가합니다. 수풀을 벗어난 후에도 2초 동안 유지됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/brushpower_large.png",
    "enabled": true,
@@ -1308,6 +1633,7 @@
    "nameKo": "넘을 수 없는 벽",
    "nameEn": "Impassable",
    "tier": "gold",
+   "category": "normal",
    "descKo": "여진과 빙결 강화 핵심 룬을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/impassable_large.png",
    "enabled": true,
@@ -1316,19 +1642,28 @@
     "tank",
     "cc"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "abilityProps": [
+     "immobilize"
+    ],
+    "note": "하드 CC(속박/접지) 스킬 보유 챔피언에게만. 근거: STUDY §3-1, eligibility-notes.json classBias(immobilize)"
+   }
   },
   {
    "apiName": "ARAM_ItsCritical",
    "nameKo": "치명적인 공격",
    "nameEn": "It's Critical",
    "tier": "gold",
+   "category": "normal",
    "descKo": "치명타 확률 50%를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/itscritical_large.png",
    "enabled": true,
    "arenaOrigin": true,
    "tags": [
     "crit"
+   ],
+   "favoredClasses": [
+    "Marksman"
    ],
    "restrictions": {}
   },
@@ -1337,6 +1672,7 @@
    "nameKo": "처형 시간",
    "nameEn": "It's Killing Time",
    "tier": "gold",
+   "category": "normal",
    "descKo": "궁극기 시전 시 모든 적 챔피언에게 죽음의 표식을 남깁니다(8초 재사용 대기시간). 표식은 5초 동안 대상에게 가한 피해(방어 적용 후)의 40%를 저장한 뒤 고정 피해로 폭발합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/itskillingtime_large.png",
    "enabled": true,
@@ -1352,6 +1688,7 @@
    "nameKo": "작은 도움",
    "nameEn": "Lil' Extra Help",
    "tier": "gold",
+   "category": "ability",
    "descKo": "일정 시간 기본 공격을 강화하는 스킬 하나를 강화해, 효과 지속 중 사거리 150(근접)/100(원거리)과 공격 속도 75%(근접)/40%(원거리)를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_gold.png",
    "enabled": true,
@@ -1361,7 +1698,11 @@
     "as"
    ],
    "restrictions": {
-    "note": "기본 공격을 강화하는 지속형 스킬 필요"
+    "abilityPropsAll": [
+     "empoweredAttack",
+     "durationEffect"
+    ],
+    "note": "일정 시간 기본 공격을 강화하는 스킬 필요 (empoweredAttack+durationEffect 스킬 단위 AND). 근거: eligibility-notes.json abilityAugments"
    }
   },
   {
@@ -1369,6 +1710,7 @@
    "nameKo": "마법 미사일",
    "nameEn": "Magic Missile",
    "tier": "gold",
+   "category": "normal",
    "descKo": "스킬로 적 챔피언에게 피해를 입히면 미사일 3발을 발사해 각각 대상 최대 체력의 0.33%(이동 거리에 비례해 최대 1%) 고정 피해를 입힙니다(같은 시전당 6초에 1회).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/maps/particles/kiwi/magicmissile_large.png",
    "enabled": true,
@@ -1384,6 +1726,7 @@
    "nameKo": "마법 명사수",
    "nameEn": "Marksmage",
    "tier": "gold",
+   "category": "normal",
    "descKo": "기본 공격이 주문력의 75%에 해당하는 추가 물리 피해를 입힙니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/marksmage_large.png",
    "enabled": true,
@@ -1399,6 +1742,7 @@
    "nameKo": "자비의 일격",
    "nameEn": "Mercy's Strike",
    "tier": "gold",
+   "category": "ability",
    "descKo": "스킬 하나를 강화해, 시전 시 다음 기본 공격이 강화됩니다. 강화 공격: 사거리 +300, 공격 속도 75%, 대상 최대 체력의 3%(+치유 및 보호막 효과 10%당 2%) 추가 마법 피해.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_gold.png",
    "enabled": true,
@@ -1407,13 +1751,23 @@
     "onhit",
     "support"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "classRequired": [
+     "Support"
+    ],
+    "note": "서포트 전용 (26.15 공식 버그픽스로 게이트 실존 확인) + 아군 힐/실드 계열 — Support 클래스 + 킷에 힐/실드 보유(OR) 이중 게이트. ⚠ 근사: classRequired [Support]만으로는 DDragon 태그상 Support인 브랜드가 통과 — 실측(11 §3-4, empirical)은 킷에 힐/실드 있는 소라카만 등재라 abilityProps [heal,shield]를 추가. 근거: STUDY §3-1, eligibility-notes.json classBias.allyHealShield",
+    "abilityProps": [
+     "heal",
+     "shield"
+    ]
+   }
   },
   {
    "apiName": "ARAM_Minionmancer",
    "nameKo": "소환술사",
    "nameEn": "Minionmancer",
    "tier": "gold",
+   "category": "normal",
    "descKo": "소환물(펫)이 40% 증가한 피해를 입히고 체력과 크기가 40% 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/minionmancer_large.png",
    "enabled": true,
@@ -1426,6 +1780,7 @@
    "nameKo": "자연의 회복",
    "nameEn": "Nature is Healing",
    "tier": "gold",
+   "category": "normal",
    "descKo": "수풀에 들어가면 1.5초에 걸쳐 40~300(레벨 비례)(+잃은 체력의 15%)을 회복합니다(수풀당 20초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/natureishealing_large.png",
    "enabled": true,
@@ -1440,6 +1795,7 @@
    "nameKo": "밤의 추적",
    "nameEn": "Nightstalking",
    "tier": "gold",
+   "category": "normal",
    "descKo": "피해를 입힌 지 3초 안에 적 챔피언 처치에 관여하면 1.5초 동안 투명해지고 이동 속도 40%를 얻습니다. 공격하거나 스킬을 사용하면 은신이 즉시 풀립니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/nightstalking_large.png",
    "enabled": true,
@@ -1455,6 +1811,7 @@
    "nameKo": "부메랑 투척",
    "nameEn": "OK Boomerang",
    "tier": "gold",
+   "category": "normal",
    "descKo": "1250유닛 내 가장 가까운 적 챔피언에게 강화된 부메랑 칼날을 자동 시전해 경로상의 적에게 40~200(레벨 비례)(+추가 공격력의 30%)(+주문력의 20%) 적응형 피해를 입힙니다(10초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/okboomerang_large.png",
    "enabled": true,
@@ -1470,6 +1827,7 @@
    "nameKo": "우리의 치유",
    "nameEn": "Our Healing",
    "tier": "gold",
+   "category": "normal",
    "descKo": "주변 유닛(자신 제외)이 치유될 때마다 그 회복량의 15%(적의 치유는 30%)만큼 자신을 치유합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/equillibrium_large.png",
    "enabled": true,
@@ -1484,6 +1842,7 @@
    "nameKo": "무법자의 투지",
    "nameEn": "Outlaw's Grit",
    "tier": "gold",
+   "category": "normal",
    "descKo": "돌진 또는 점멸 시 15초 동안 방어력과 마법 저항력 12를 얻습니다(최대 5중첩, 총 60, 재발동 시 갱신).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/outlawsgrit_large.png",
    "enabled": true,
@@ -1492,13 +1851,19 @@
     "dash",
     "tank"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "abilityProps": [
+     "dash"
+    ],
+    "note": "돌진 스킬 보유 챔피언에게만 (실측 5종 동일 패턴). 근거: STUDY §3-1, eligibility-notes.json classBias(dash)"
+   }
   },
   {
    "apiName": "Overextender",
    "nameKo": "무리한 진입",
    "nameEn": "Overextender",
    "tier": "gold",
+   "category": "normal",
    "descKo": "대포 발사가 강화되어 사거리 12,000유닛, 착탄 피해 50%, 이동 속도가 크게 증가합니다. 귀환이 강화 귀환으로 바뀝니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/overextender_large.png",
    "enabled": true,
@@ -1515,6 +1880,7 @@
    "nameKo": "범람",
    "nameEn": "Overflow",
    "tier": "gold",
+   "category": "normal",
    "descKo": "스킬의 마나 소모가 2배가 되지만, 피해량과 자신 및 아군 대상 치유·보호막이 10%(+최대 마나 100당 0.5%) 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/overflow_large.png",
    "enabled": true,
@@ -1525,7 +1891,8 @@
     "shield"
    ],
    "restrictions": {
-    "requiresMana": true
+    "requiresMana": true,
+    "note": "마나 게이트: 마나 미사용(기력·무자원) 챔피언에게 미제시 — 실측(제드 부재)·kiwi.bin mAugmentTags=8·아레나 공식 삼중 일치. 근거: STUDY §3-1, eligibility-notes.json classBias(mana)"
    }
   },
   {
@@ -1533,6 +1900,7 @@
    "nameKo": "격려하기",
    "nameEn": "Pat On The Back",
    "tier": "gold",
+   "category": "normal",
    "descKo": "아군 챔피언과 200유닛 내로 가까워지면 격려를 받아 50~150(레벨 비례)(+추가 이동 속도의 25%) 보호막과 이동 속도 30%를 3초 동안 얻습니다(9초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/patontheback_large.png",
    "enabled": true,
@@ -1548,6 +1916,7 @@
    "nameKo": "인내심",
    "nameEn": "Perseverance",
    "tier": "gold",
+   "category": "normal",
    "descKo": "기본 체력 재생이 1000% 증가하며, 최대 체력 25% 이하에서는 2000%로 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/perseverance_large.png",
    "enabled": false,
@@ -1565,12 +1934,17 @@
    "nameKo": "극악무도",
    "nameEn": "Phenomenal Evil",
    "tier": "gold",
+   "category": "normal",
    "descKo": "스킬로 적 챔피언에게 피해를 입힐 때마다 극악무도한 힘 중첩을 영구히 얻어, 중첩당 주문력 1을 얻습니다. 첫 증강이 아니면 40중첩(주문력 40)을 갖고 시작합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/aram_phenomenalevil_large.png",
    "enabled": true,
    "arenaOrigin": true,
    "tags": [
     "ap"
+   ],
+   "favoredClasses": [
+    "Mage",
+    "Support"
    ],
    "restrictions": {}
   },
@@ -1579,6 +1953,7 @@
    "nameKo": "핀볼",
    "nameEn": "Pinball",
    "tier": "gold",
+   "category": "normal",
    "descKo": "표식이 핀볼로 강화되어 100~500(레벨 비례) 추가 고정 피해를 입히고, 지형에 최대 4회 튕기며 매번 커지고(최대 +100%) 강해집니다(최대 +80% 피해). 표식 재사용 대기시간이 스킬 가속 50만큼 감소합니다. 표식 미장착 시 교체 안내가 표시됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/pinballsnowball_large.png",
    "enabled": true,
@@ -1593,6 +1968,7 @@
    "nameKo": "고슴도치",
    "nameEn": "Porcupine",
    "tier": "gold",
+   "category": "normal",
    "descKo": "적 챔피언에게 받은 피해를 최대 400~3900(레벨 비례)까지 저장한 뒤, 가시를 폭발시켜 400 반경에 75~200(레벨 비례)(+추가 방어력의 125%)(+추가 마법 저항력의 125%) 물리 피해와 2초 동안 30% 둔화를 가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/pincushion_large.png",
    "enabled": true,
@@ -1608,6 +1984,7 @@
    "nameKo": "압력솥",
    "nameEn": "Pressure Cooker",
    "tier": "gold",
+   "category": "quest",
    "descKo": "주변 300유닛 내 적 챔피언에게 매초 자신 최대 체력의 0.5%에 해당하는 화상(3초, 무한 중첩)을 입힙니다. 화상 피해량 퀘스트 3단계를 완료할 때마다 효과가 강화됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/questpressurecooker_large.png",
    "enabled": true,
@@ -1625,6 +2002,7 @@
    "nameKo": "가속 추구",
    "nameEn": "Pursuit of Haste",
    "tier": "gold",
+   "category": "ability",
    "descKo": "특정 스킬을 적 챔피언에게 여러 번 적중시키는 퀘스트를 받습니다. 2단계의 퀘스트를 완료할 때마다 그 스킬의 스킬 가속을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_gold.png",
    "enabled": true,
@@ -1632,13 +2010,24 @@
    "tags": [
     "quest"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "spellExclude": {
+     "Yasuo": [
+      "E"
+     ],
+     "Akshan": [
+      "E"
+     ]
+    },
+    "note": "스킬 슬롯 단위 게이트: 야스오 E(26.14)·아크샨 E(26.15) 부적격 (공식 버그픽스). 근거: eligibility-notes.json championSpecific"
+   }
   },
   {
    "apiName": "SpecializedEmpowerment",
    "nameKo": "위력 추구",
    "nameEn": "Pursuit of Power",
    "tier": "gold",
+   "category": "ability",
    "descKo": "퀘스트: 특정 스킬을 적 챔피언에게 10회 적중. 보상: 그 스킬의 피해가 30% 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/marksmage_large.png",
    "enabled": true,
@@ -1646,13 +2035,30 @@
    "tags": [
     "quest"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "spellExclude": {
+     "Akshan": [
+      "E"
+     ],
+     "Draven": [
+      "Q"
+     ],
+     "Illaoi": [
+      "E"
+     ],
+     "Malphite": [
+      "W"
+     ]
+    },
+    "note": "스킬 슬롯 단위 게이트: 아크샨 E·드레이븐 Q·일라오이 E·말파이트 W 부적격 (공식 26.15 버그픽스). 근거: eligibility-notes.json championSpecific"
+   }
   },
   {
    "apiName": "ARAM_Quest_SteelYourHeart",
    "nameKo": "강철 같은 심장",
    "nameEn": "Quest: Steel Your Heart",
    "tier": "gold",
+   "category": "quest",
    "descKo": "퀘스트: 심장강철을 구매하고 거인의 급습으로 추가 체력 300 이상 축적. 보상: 거인의 급습으로 얻는 추가 체력이 200% 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/quest_steelyourheart_large.png",
    "enabled": true,
@@ -1668,6 +2074,7 @@
    "nameKo": "날쌘걸음",
    "nameEn": "Quickstep",
    "tier": "gold",
+   "category": "ability",
    "descKo": "스킬 하나를 강화해, 시전 시 커서 방향으로 최대 350유닛 돌진합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_gold.png",
    "enabled": true,
@@ -1675,13 +2082,17 @@
    "tags": [
     "dash"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "meleeOnly": true,
+    "note": "근사: 실측에서 근접 3인에게만 등재 → meleeOnly로 이식. 26.12 발표 조건(자가 대상 AoE)은 현행 여부 미확인이라 미이식. 근거: eligibility-notes.json classBias(meleeCluster)·abilityAugments"
+   }
   },
   {
    "apiName": "DarkWind",
    "nameKo": "굶주린 속박",
    "nameEn": "Ravenous Bind",
    "tier": "gold",
+   "category": "ability",
    "descKo": "이동 불가 또는 속박 효과가 있는 스킬 하나를 강화해, 대상에게 15~90(레벨 비례)(+주문력의 10%)(+최대 체력의 0.5%) 마법 피해를 입히고 자신은 50~200(레벨 비례)(+주문력의 5%)(+추가 체력의 10%)을 회복합니다. 스킬 재사용 대기시간이 길수록 회복이 최대 50% 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/upgradehubris_large.png",
    "enabled": true,
@@ -1691,7 +2102,10 @@
     "heal"
    ],
    "restrictions": {
-    "note": "이동 불가/속박 효과가 있는 스킬 필요"
+    "abilityPropsAll": [
+     "immobilize"
+    ],
+    "note": "속박/그라운딩(immobilize) 스킬 필요 (스킬 단위 AND). 챔피언마다 다른 스킬에 바인딩(빅토르 W·레넥톤 W 실측). 근거: eligibility-notes.json abilityAugments"
    }
   },
   {
@@ -1699,6 +2113,7 @@
    "nameKo": "되풀이",
    "nameEn": "Recursion",
    "tier": "gold",
+   "category": "normal",
    "descKo": "스킬 가속 60을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/recursion_large.png",
    "enabled": true,
@@ -1711,6 +2126,7 @@
    "nameKo": "원기 회복",
    "nameEn": "Rejuvenation",
    "tier": "gold",
+   "category": "ability",
    "descKo": "스킬 하나를 강화해, 시전 시 30~100(레벨 비례)(+추가 공격력의 25%)(+주문력의 15%)(+추가 체력의 5%)을 회복합니다. 스킬 재사용 대기시간이 길수록 최대 50% 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/rabblerousing_large.png",
    "enabled": true,
@@ -1725,6 +2141,7 @@
    "nameKo": "재장전",
    "nameEn": "Reload",
    "tier": "gold",
+   "category": "ability",
    "descKo": "지속시간 기반 효과가 있는 스킬 하나를 강화해, 지속 중 기본 공격 적중 시 그 스킬의 남은 재사용 대기시간이 0.15~0.35초(레벨 비례) 감소합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/lightningstrikes_large.png",
    "enabled": false,
@@ -1734,7 +2151,10 @@
     "as"
    ],
    "restrictions": {
-    "note": "지속시간형 스킬 필요. 미출시(내부 데이터 전용)"
+    "abilityPropsAll": [
+     "durationEffect"
+    ],
+    "note": "지속시간형 스킬 필요 (스킬 단위 AND). 미출시(내부 데이터 전용)"
    }
   },
   {
@@ -1742,6 +2162,7 @@
    "nameKo": "상급 조준경 부착",
    "nameEn": "Scopier Weapons",
    "tier": "gold",
+   "category": "normal",
    "descKo": "기본 공격 사거리 200(근접) / 100(원거리)를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/scopierweapons_large.png",
    "enabled": true,
@@ -1756,6 +2177,7 @@
    "nameKo": "타오르는 새벽",
    "nameEn": "Searing Dawn",
    "tier": "gold",
+   "category": "normal",
    "descKo": "햇빛을 얻습니다. 피해를 주는 스킬이 적에게 표식을 남겨, 아군의 다음 기본 공격이나 스킬 적중 시 40~200(레벨 비례) 추가 마법 피해를 입힙니다(대상당 0.75초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/searingdawn_large.png",
    "enabled": true,
@@ -1771,6 +2193,7 @@
    "nameKo": "상어 미끼",
    "nameEn": "Shark Bait",
    "tier": "gold",
+   "category": "normal",
    "descKo": "치명적인 피해를 받으면 3.5초 동안 좀비 상태(무적, 이동 속도 400 고정, 주변 적 40% 둔화)가 됩니다. 종료 시 거대한 상어가 나타나 400 반경에 120~350(레벨 비례)(+대상 잃은 체력의 30%) 마법 피해를 입히고 1초 동안 띄워 올립니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/fishbait_large.png",
    "enabled": true,
@@ -1786,6 +2209,7 @@
    "nameKo": "상어 폭풍",
    "nameEn": "Shark Tempest",
    "tier": "gold",
+   "category": "normal",
    "descKo": "표식 주위에 상어들이 맴돌아 경로상의 적에게 50~100(레벨 비례) 마법 피해와 1초 동안 30% 둔화를 가합니다. 적 챔피언 적중 시 그 주위를 3초 동안 맴돌며 매초 25~75(레벨 비례)(+추가 공격력의 20%)(+주문력의 12%) 마법 피해를 입힙니다. 표식 미장착 시 교체 안내가 표시됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/sharktempest_large.png",
    "enabled": true,
@@ -1801,6 +2225,7 @@
    "nameKo": "축소 엔진",
    "nameEn": "Shrink Engine",
    "tier": "gold",
+   "category": "normal",
    "descKo": "챔피언 처치 관여마다 중첩을 얻어(무한), 중첩당 스킬 가속 8과 이동 속도 1%를 얻고 크기가 4% 작아집니다(최대 80% 축소). 사망 시 중첩의 65%를 잃습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/shrinkengine_large.png",
    "enabled": true,
@@ -1816,6 +2241,7 @@
    "nameKo": "감쇠 광선",
    "nameEn": "Shrink Ray",
    "tier": "gold",
+   "category": "normal",
    "descKo": "기본 공격 적중 시 3초 동안 대상의 피해량을 15% 감소시키고 크기를 크게 줄입니다(적중 시 갱신).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/shrinkray_large.png",
    "enabled": true,
@@ -1831,6 +2257,7 @@
    "nameKo": "노련한 저격수",
    "nameEn": "Skilled Sniper",
    "tier": "gold",
+   "category": "normal",
    "descKo": "600유닛 이상 떨어진 적 챔피언에게 기본 스킬을 적중시키면 그 스킬의 남은 재사용 대기시간이 총 재사용 대기시간의 80%(지속 피해 스킬은 65%)만큼 감소합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/skilledsniper_large.png",
    "enabled": true,
@@ -1838,13 +2265,17 @@
    "tags": [
     "poke"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "rangedOnly": true,
+    "note": "근사: 장거리(600+) 스킬샷 계열 — 실측에서 원거리 3인만 등재·근접 3인 부재 → rangedOnly로 근사. 근거: eligibility-notes.json classBias(sniper), research/raw/11-empirical-pools.md §3-7"
+   }
   },
   {
    "apiName": "SnapBack",
    "nameKo": "원상복구",
    "nameEn": "Snap Back",
    "tier": "gold",
+   "category": "ability",
    "descKo": "스킬 하나를 강화해 재시전할 수 있게 됩니다. 재시전하면 원래 시전 위치로 순간이동하며 폭발해 주변 적에게 100~300(레벨 비례)(+공격력의 20%)(+주문력의 20%) 마법 피해를 입힙니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_gold.png",
    "enabled": false,
@@ -1862,6 +2293,7 @@
    "nameKo": "눈덩이 업그레이드",
    "nameEn": "Snowball Upgrade",
    "tier": "gold",
+   "category": "normal",
    "descKo": "표식 적중 지점에 2초 동안 눈보라가 몰아쳐 시야를 밝히고 200(+추가 공격력의 200%)(+주문력의 120%) 마법 피해와 50%(+주문력 100당 6%) 둔화를 가합니다. 표식 재사용 대기시간이 스킬 가속 50만큼 감소합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/snowballupgrade_large.png",
    "enabled": false,
@@ -1877,6 +2309,7 @@
    "nameKo": "눈 폭발",
    "nameEn": "Snowblast",
    "tier": "gold",
+   "category": "normal",
    "descKo": "표식의 돌진이 100% 증가한 피해를 입히고, 도착 시 대상을 0.5초 동안 띄워 올리며 주변 적을 밀쳐냅니다. 표식 재사용 대기시간이 스킬 가속 100만큼 감소합니다. 표식 미장착 시 교체 안내가 표시됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/snowbomb_large.png",
    "enabled": true,
@@ -1892,6 +2325,7 @@
    "nameKo": "소나타",
    "nameEn": "Sonata",
    "tier": "gold",
+   "category": "normal",
    "descKo": "10초마다 인내의 아리아와 기민함의 노래를 번갈아 자동 시전합니다. 인내의 아리아: 자신과 가장 부상당한 아군을 60(+주문력의 60%) 회복시키고 보호막 오라를 생성합니다. 기민함의 노래: 7초 동안 이동 속도 30%를 얻고 아군에게 이동 속도 오라를 부여합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/sonata_large.png",
    "enabled": true,
@@ -1909,6 +2343,7 @@
    "nameKo": "영혼의 포식자",
    "nameEn": "Soul Eater",
    "tier": "gold",
+   "category": "normal",
    "descKo": "적 챔피언을 이동 불가 또는 속박 상태로 만들면 추가 체력 20을 영구히 얻습니다(무한 중첩, 시전당 5초 재사용 대기시간). 첫 증강이 아니면 추가 체력 300을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/souleater_large.png",
    "enabled": true,
@@ -1917,13 +2352,19 @@
     "cc",
     "tank"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "abilityProps": [
+     "immobilize"
+    ],
+    "note": "하드 CC(속박/접지) 스킬 보유 챔피언에게만. 근거: STUDY §3-1, eligibility-notes.json classBias(immobilize)"
+   }
   },
   {
    "apiName": "ARAM_SoulSiphon",
    "nameKo": "영혼 흡수",
    "nameEn": "Soul Siphon",
    "tier": "gold",
+   "category": "normal",
    "descKo": "치명타로 입힌 피해(방어 적용 후)의 12%만큼 회복합니다. 추가로 치명타 확률 25%를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/soulsiphon_large.png",
    "enabled": true,
@@ -1939,6 +2380,7 @@
    "nameKo": "영혼의 정화",
    "nameEn": "Spiritual Purification",
    "tier": "gold",
+   "category": "normal",
    "descKo": "챔피언 처치에 관여하면 처치된 챔피언 주위 500유닛이 폭발해 적에게 현재 체력의 15%에 해당하는 적응형 피해를 입히고, 1.5초 동안 60% 둔화 지역을 남깁니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/spiritualpurification_large.png",
    "enabled": true,
@@ -1955,6 +2397,7 @@
    "nameKo": "능력치 더하기 능력치!",
    "nameEn": "Stats on Stats!",
    "tier": "gold",
+   "category": "normal",
    "descKo": "능력치 모루 3개를 얻습니다. 골드·프리즘 등급 모루가 나올 확률이 높아집니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/statsonstats_large.png",
    "enabled": true,
@@ -1967,6 +2410,7 @@
    "nameKo": "탱크 엔진",
    "nameEn": "Tank Engine",
    "tier": "gold",
+   "category": "normal",
    "descKo": "챔피언 처치 관여마다 중첩을 얻어(무한), 중첩당 최대 체력과 크기가 5% 증가합니다. 사망 시 중첩의 65%를 잃습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/tank_engine_large.png",
    "enabled": true,
@@ -1982,6 +2426,7 @@
    "nameKo": "지형 생성됨",
    "nameEn": "Terrain'd",
    "tier": "gold",
+   "category": "ability",
    "descKo": "지형을 생성하는 스킬 하나를 강화해, 지형 주변 적에게 20~180(레벨 비례)(+주문력의 20%) 마법 피해를 입힙니다. 궁극기라면 피해가 200% 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/lightningstrikes_large.png",
    "enabled": true,
@@ -1990,7 +2435,10 @@
     "aoe"
    ],
    "restrictions": {
-    "note": "지형을 생성하는 스킬 필요(아니비아·탈리야·트런들 등)"
+    "abilityPropsAll": [
+     "terrain"
+    ],
+    "note": "지형을 생성하는 스킬 필요 (스킬 단위 AND — 아니비아·탈리야·트런들 등). 궁극기면 피해 3배. 근거: eligibility-notes.json abilityAugments"
    }
   },
   {
@@ -1998,6 +2446,7 @@
    "nameKo": "공포",
    "nameEn": "Terror",
    "tier": "gold",
+   "category": "ability",
    "descKo": "스킬 하나를 강화해, 시전 시 주변 450유닛 내 모든 적을 1.75초 동안 공포에 빠뜨립니다(30초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/desecrator_large.png",
    "enabled": true,
@@ -2012,6 +2461,7 @@
    "nameKo": "바늘에 실 끼우기",
    "nameEn": "Thread the Needle",
    "tier": "gold",
+   "category": "normal",
    "descKo": "물리 관통력과 마법 관통력 18%를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/threadtheneedle_large.png",
    "enabled": true,
@@ -2027,6 +2477,7 @@
    "nameKo": "이빨 요정",
    "nameEn": "Tooth Fairy",
    "tier": "gold",
+   "category": "normal",
    "descKo": "2.5초 안에 적 챔피언 최대 체력의 25% 이상 피해를 입히면 대상이 이빨을 떨어뜨립니다(대상당 4초 재사용 대기시간). 이빨을 주우면 치아 기록 중첩을 얻어, 중첩당 물리 관통력 3과 고정 마법 관통력 3을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/questburstingteeth_large.png",
    "enabled": true,
@@ -2043,6 +2494,7 @@
    "nameKo": "전환: 프리즘",
    "nameEn": "Transmute: Prismatic",
    "tier": "gold",
+   "category": "normal",
    "descKo": "무작위 프리즘 등급 증강 1개를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/transmuteprismatic_large.png",
    "enabled": true,
@@ -2055,6 +2507,7 @@
    "nameKo": "무한의 대검 업그레이드",
    "nameEn": "Upgrade Infinity Edge",
    "tier": "gold",
+   "category": "normal",
    "descKo": "무한의 대검을 강화해 신성한 검의 채찍질 효과를 얻습니다. 채찍질: 치명타 확률의 최대 50%에 달하는 무작위 추가 치명타 피해를 얻습니다(0.25초마다 변동). 추가로 500골드를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/upgradeie_large.png",
    "enabled": true,
@@ -2064,13 +2517,26 @@
     "ad",
     "gold"
    ],
-   "restrictions": {}
+   "favoredClasses": [
+    "Marksman",
+    "Fighter",
+    "Assassin"
+   ],
+   "restrictions": {
+    "classRequired": [
+     "Marksman",
+     "Fighter",
+     "Assassin"
+    ],
+    "note": "AD/크리 코어 — 이진 제외(실측 empirical: 브랜드·말파이트·소라카 구조적 부재, 11 §3-1). ⚠ 근사: \"mage/enchanter/tank(주문형) 제외\"를 classRequired [Marksman,Fighter,Assassin]로 근사(6인 패턴 100101 일치). 근거: STUDY §3-4 3단계, eligibility-notes.json classBias.adCrit"
+   }
   },
   {
    "apiName": "Upgrade_Ravenous",
    "nameKo": "굶주린 히드라 업그레이드",
    "nameEn": "Upgrade Ravenous Hydra",
    "tier": "gold",
+   "category": "normal",
    "descKo": "굶주린 히드라를 강화해 생명력 흡수가 20%로 증가하고, 스킬 적중 시에도 갈래 베기가 발동합니다(스킬당 1초 재사용 대기시간). 추가로 500골드를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/upgradesheen_large.png",
    "enabled": true,
@@ -2081,13 +2547,26 @@
     "aoe",
     "gold"
    ],
-   "restrictions": {}
+   "favoredClasses": [
+    "Marksman",
+    "Fighter",
+    "Assassin"
+   ],
+   "restrictions": {
+    "classRequired": [
+     "Marksman",
+     "Fighter",
+     "Assassin"
+    ],
+    "note": "AD/크리 코어 — 이진 제외(실측 empirical: 브랜드·말파이트·소라카 구조적 부재, 11 §3-1). ⚠ 근사: \"mage/enchanter/tank(주문형) 제외\"를 classRequired [Marksman,Fighter,Assassin]로 근사(6인 패턴 100101 일치). 근거: STUDY §3-4 3단계, eligibility-notes.json classBias.adCrit"
+   }
   },
   {
    "apiName": "ARAM_Upgrade_Sheen",
    "nameKo": "광휘의 검 업그레이드",
    "nameEn": "Upgrade Sheen",
    "tier": "gold",
+   "category": "normal",
    "descKo": "주문검 계열 아이템을 모두 강화해, 주문검 효과가 대상 최대 체력의 4% 추가 물리 피해를 입히고 자신 최대 체력의 3.5%를 회복시킵니다. 추가로 250골드를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/upgradesheen_large.png",
    "enabled": true,
@@ -2103,6 +2582,7 @@
    "nameKo": "갈라진 하늘 업그레이드",
    "nameEn": "Upgrade Sundered Sky",
    "tier": "gold",
+   "category": "normal",
    "descKo": "갈라진 하늘을 강화해 빛방패 강타의 회복이 잃은 체력의 9%로 증가하고 재사용 대기시간이 5초로 감소합니다. 추가로 500골드를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/upgradeie_large.png",
    "enabled": true,
@@ -2112,13 +2592,26 @@
     "ad",
     "gold"
    ],
-   "restrictions": {}
+   "favoredClasses": [
+    "Marksman",
+    "Fighter",
+    "Assassin"
+   ],
+   "restrictions": {
+    "classRequired": [
+     "Marksman",
+     "Fighter",
+     "Assassin"
+    ],
+    "note": "AD/크리 코어 — 이진 제외(실측 empirical: 브랜드·말파이트·소라카 구조적 부재, 11 §3-1). ⚠ 근사: \"mage/enchanter/tank(주문형) 제외\"를 classRequired [Marksman,Fighter,Assassin]로 근사(6인 패턴 100101 일치). 근거: STUDY §3-4 3단계, eligibility-notes.json classBias.adCrit"
+   }
   },
   {
    "apiName": "Vampirism",
    "nameKo": "흡혈병",
    "nameEn": "Vampirism",
    "tier": "gold",
+   "category": "normal",
    "descKo": "아군에게 치유받을 수 없고 체력 재생이 0이 되는 대신, 모든 피해 흡혈 25%를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/vampired_large.png",
    "enabled": false,
@@ -2135,6 +2628,7 @@
    "nameKo": "공허 돌진",
    "nameEn": "Void Dash",
    "tier": "gold",
+   "category": "ability",
    "descKo": "돌진이 있는 스킬 하나를 강화해, 돌진 도착 지점에 공허 지대(250 반경)를 생성합니다. 지대 안의 적 챔피언은 80~400(레벨 비례)(+스킬 가속의 100%) 마법 피해를 입고 1초 동안 35% 둔화됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_gold.png",
    "enabled": false,
@@ -2144,10 +2638,10 @@
     "aoe"
    ],
    "restrictions": {
-    "abilityProps": [
+    "abilityPropsAll": [
      "dash"
     ],
-    "note": "돌진이 있는 스킬 필요"
+    "note": "돌진(dash)이 있는 스킬 필요 (스킬 단위 AND). 26.12 핫픽스 이후 비활성. 근거: eligibility-notes.json abilityAugments"
    }
   },
   {
@@ -2155,6 +2649,7 @@
    "nameKo": "취약",
    "nameEn": "Vulnerability",
    "tier": "gold",
+   "category": "normal",
    "descKo": "아이템 피해와 지속 피해 효과가 치명타(145% + 추가 치명타 피해)로 적중할 수 있습니다(시전당 5초 재사용 대기시간). 추가로 치명타 확률 25%를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/vulnerability_large.png",
    "enabled": true,
@@ -2163,6 +2658,9 @@
     "crit",
     "dot"
    ],
+   "favoredClasses": [
+    "Marksman"
+   ],
    "restrictions": {}
   },
   {
@@ -2170,6 +2668,7 @@
    "nameKo": "마도사의 주스 상자",
    "nameEn": "Warlock Juicebox",
    "tier": "gold",
+   "category": "normal",
    "descKo": "모든 피해 흡혈 10%(+주문력 100당 3%)를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/warlockjuicebox_large.png",
    "enabled": true,
@@ -2185,6 +2684,7 @@
    "nameKo": "삐뽀삐뽀",
    "nameEn": "Wee Woo Wee Woo",
    "tier": "gold",
+   "category": "normal",
    "descKo": "주변 아군 챔피언을 향해 이동할 때 그 아군의 잃은 체력에 비례해 최대 50의 이동 속도를 얻습니다(벗어난 후 2초 유지). 치유와 보호막 효과도 대상의 잃은 체력에 비례해 최대 50 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/weewooweewoo_large.png",
    "enabled": true,
@@ -2194,13 +2694,23 @@
     "heal",
     "move"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "classRequired": [
+     "Support"
+    ],
+    "note": "아군 힐/실드 계열 — Support 클래스 + 킷에 힐/실드 보유(OR) 이중 게이트. ⚠ 근사: classRequired [Support]만으로는 DDragon 태그상 Support인 브랜드가 통과 — 실측(11 §3-4, empirical)은 킷에 힐/실드 있는 소라카만 등재라 abilityProps [heal,shield]를 추가. 근거: STUDY §3-1, eligibility-notes.json classBias.allyHealShield",
+    "abilityProps": [
+     "heal",
+     "shield"
+    ]
+   }
   },
   {
    "apiName": "ARAM_WithHaste",
    "nameKo": "속행",
    "nameEn": "With Haste",
    "tier": "gold",
+   "category": "normal",
    "descKo": "스킬 가속의 70%에 해당하는 이동 속도를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/withhaste_large.png",
    "enabled": true,
@@ -2215,6 +2725,7 @@
    "nameKo": "으악, 내 동전!",
    "nameEn": "Yowch, My Coins!",
    "tier": "gold",
+   "category": "normal",
    "descKo": "처치에 관여한 적 챔피언이 동전 6~10개(레벨 비례)를 떨어뜨립니다(10초 유지). 자신이나 아군이 주우면 개당 15골드를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/youchmycoins_large.png",
    "enabled": true,
@@ -2230,6 +2741,7 @@
    "nameKo": "대마법사",
    "nameEn": "Archmage",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "스킬을 시전할 때마다 무작위로 선택된 다른 스킬의 재사용 대기시간이 시전한 스킬 재사용 대기시간의 30%만큼 감소합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/eureka_large.png",
    "enabled": true,
@@ -2242,6 +2754,7 @@
    "nameKo": "기본으로 돌아가기",
    "nameEn": "Back to Basics",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "기본 스킬이 35% 증가한 피해를 입히고 스킬 가속 70, 받는 치유·보호막 35% 증가를 얻지만, 궁극기가 영구히 봉인됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/backtobasics_large.png",
    "enabled": true,
@@ -2256,6 +2769,7 @@
    "nameKo": "데굴데굴 눈덩이!",
    "nameEn": "Biggest Snowball Ever",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "표식이 거대한 눈덩이로 강화되어 크기가 커지고 챔피언이 아닌 유닛을 관통합니다. 명중 시 폭발해 주변 적에게 200~350(레벨 비례)(+추가 공격력의 100%)(+주문력의 60%) 마법 피해를 입히고 0.75초 띄워 올린 뒤 2초 동안 20% 둔화시킵니다. 표식 재사용 대기시간이 스킬 가속 100만큼 감소합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/biggestsnowballever_large.png",
    "enabled": true,
@@ -2272,6 +2786,7 @@
    "nameKo": "검무",
    "nameEn": "Blade Waltz",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "소환사 주문 하나를 검무로 교체합니다. 검무: 대상 적 챔피언에게 점멸한 뒤 1.75초 동안 최대 7회 추가로 근처 적에게 연속 점멸하며, 점멸마다 30~150(레벨 비례)(+추가 공격력의 10%)(+주문력의 6%) 물리 피해와 적중 효과(50%)를 적용합니다. 시전 중에는 대상으로 지정할 수 없습니다(45초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/bladewaltz_large.png",
    "enabled": true,
@@ -2288,6 +2803,7 @@
    "nameKo": "난공불락",
    "nameEn": "Can't Touch This",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "궁극기 시전 시 2초 동안 무적이 됩니다(8초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/canttouchthis_large.png",
    "enabled": true,
@@ -2303,6 +2819,7 @@
    "nameKo": "죽음의 순환",
    "nameEn": "Circle of Death",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "자신이 받는 치유와 체력 재생의 70%에 해당하는 마법 피해를 1000유닛 내 가장 가까운 적 챔피언에게 입힙니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/circleofdeath_large.png",
    "enabled": true,
@@ -2310,13 +2827,19 @@
    "tags": [
     "heal"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "abilityProps": [
+     "heal"
+    ],
+    "note": "근사: 실측에서 소라카+다리우스(셀프힐 Q)만 등재 — 조건을 \"킷 내 회복 보유\"로 추정해 abilityProps=heal로 이식. 근거: eligibility-notes.json classBias(selfHealCircle), research/raw/11-empirical-pools.md §4-3"
+   }
   },
   {
    "apiName": "ARAM_ClownCollege",
    "nameKo": "광대 대학",
    "nameEn": "Clown College",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "샤코의 기습 공격(배후 추가 피해), 속임수(은신+점멸), 환각 폭발(사망 시 폭발+상자 소환)을 얻습니다. 소환사 주문 하나가 속임수로 교체됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/clowncollege_large.png",
    "enabled": false,
@@ -2332,6 +2855,7 @@
    "nameKo": "거석상의 용기",
    "nameEn": "Courage of the Colossus",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "적 챔피언을 이동 불가 또는 속박 상태로 만들면 3초 동안 150~450(레벨 비례)(+최대 체력의 4%) 피해를 흡수하는 보호막을 얻습니다(시전당 5초 재사용 대기시간, 보호막 중첩 가능).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/courageofthecolossus_large.png",
    "enabled": true,
@@ -2340,13 +2864,19 @@
     "cc",
     "shield"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "abilityProps": [
+     "immobilize"
+    ],
+    "note": "하드 CC(속박/접지) 스킬 보유 챔피언에게만. 근거: STUDY §3-1, eligibility-notes.json classBias(immobilize)"
+   }
   },
   {
    "apiName": "ARAM_Cruelty",
    "nameKo": "잔혹 행위",
    "nameEn": "Cruelty",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "적 챔피언을 이동 불가 또는 속박 상태로 만들면 1초 후 그 위치에 혜성이 떨어져 300 반경에 50~150(레벨 비례)(+주문력의 40%)(+자신 최대 체력의 4%) 마법 피해를 입힙니다(시전당 6초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/cruelty_large.png",
    "enabled": true,
@@ -2355,13 +2885,19 @@
     "cc",
     "aoe"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "abilityProps": [
+     "immobilize"
+    ],
+    "note": "하드 CC(속박/접지) 스킬 보유 챔피언에게만 (실측: 제드만 부재·kiwi.bin mAugmentTags=16 합치). 반례 관측: 속박 E 보유 징크스가 실측 부재 — 클래스 오버라이드 추정, 미이식. 근거: STUDY §3-1, eligibility-notes.json classBias(immobilize)"
+   }
   },
   {
    "apiName": "ARAM_Dashing",
    "nameKo": "돌진",
    "nameEn": "Dashing",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "돌진 또는 점멸이 있는 스킬이 스킬 가속 175를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/dashing_large.png",
    "enabled": true,
@@ -2373,7 +2909,7 @@
     "abilityProps": [
      "dash"
     ],
-    "note": "돌진/점멸 스킬에 적용. 칼리스타는 대신 공격 속도 125%를 얻음"
+    "note": "돌진/점멸 스킬 보유 챔피언에게만 (실측 5종 완전 동일 패턴·kiwi.bin mAugmentTags=32 합치). 칼리스타는 대신 공격 속도 125%를 얻음 (효과 치환 — community, note로만). 근거: STUDY §3-1, eligibility-notes.json classBias(dash)·championSpecific"
    }
   },
   {
@@ -2381,6 +2917,7 @@
    "nameKo": "어깨 위의 악마",
    "nameEn": "Devil on Your Shoulder",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "티모와 계약합니다. 매초 현재 체력의 0.5%(적 챔피언이 1000유닛 내에 있으면 5%)를 잃는 대신, 20% 추가 고정 피해를 입히고 공격과 스킬이 생명의 잔재를 소환합니다. 잔재를 흡수하면 50~150(레벨 비례)(+추가 공격력의 50%)(+주문력의 25%)을 회복하고 이동 속도 15%를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/littledevil_large.png",
    "enabled": false,
@@ -2396,6 +2933,7 @@
    "nameKo": "차원 이동",
    "nameEn": "Dimension Shift",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "소환사 주문 하나를 어둠이 찾아올 때로 교체합니다. 빛에 맞은 유닛들을 별도의 어둠 차원 전장으로 보내, 차원 안팎의 유닛끼리는 서로 간섭할 수 없게 됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/whenthedarknesscomes_large.png",
    "enabled": true,
@@ -2410,6 +2948,7 @@
    "nameKo": "한 발에 두 놈",
    "nameEn": "Double Tap",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "치명타로 적중한 기본 공격이 적중 효과를 한 번 더 적용합니다. 추가로 치명타 확률 25%를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/dualwield_large.png",
    "enabled": true,
@@ -2418,6 +2957,9 @@
     "crit",
     "onhit"
    ],
+   "favoredClasses": [
+    "Marksman"
+   ],
    "restrictions": {}
   },
   {
@@ -2425,6 +2967,7 @@
    "nameKo": "검을 뽑아라",
    "nameEn": "Draw Your Sword",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "근접 챔피언이 됩니다(사거리 200으로 변경). 대신 공격력 24%, 공격 속도 20%, 체력 24%, 이동 속도 20%, 생명력 흡수 20%를 얻으며, 원래 사거리가 길수록 보너스가 최대 2배까지 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/drawyoursword_large.png",
    "enabled": true,
@@ -2435,9 +2978,17 @@
     "move",
     "heal"
    ],
+   "favoredClasses": [
+    "Marksman"
+   ],
    "restrictions": {
     "rangedOnly": true,
-    "note": "원거리 챔피언 전용. 루난의 허리케인 보유 시 제시되지 않음"
+    "note": "원거리 챔피언 전용 (공식). 루난의 허리케인 보유 시 미제시 (아이템 조건부 — note로만 기록). ⚠ 근사: 실측상 원거리 브랜드·소라카에도 부재(11 §4-1, empirical) — 명문 조건보다 좁은 클래스 필터를 classRequired [Marksman,Fighter,Assassin] 이진 제외로 이식(STUDY §3-4 3단계). 근거: eligibility-notes.json classBias.ARAM_DrawYourSword",
+    "classRequired": [
+     "Marksman",
+     "Fighter",
+     "Assassin"
+    ]
    }
   },
   {
@@ -2445,6 +2996,7 @@
    "nameKo": "곰 투하",
    "nameEn": "DropBear",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "사망 시 티버가 하늘에서 떨어져 주변 적에게 250~750(레벨 비례)(+주문력의 100%) 마법 피해를 입히고 1.5초 동안 기절시킵니다. 티버는 자신의 모든 증강을 지닌 채 자신을 처치한 적을 쫓으며 최대 8~20초(레벨 비례) 동안 싸웁니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/drop_bear.png",
    "enabled": true,
@@ -2461,6 +3013,7 @@
    "nameKo": "드롭킥",
    "nameEn": "Dropkick",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "기본 공격과 스킬이 최대 체력 4%(+기본 공격력 100당 5.5%)(+추가 체력 1000당 1%) 이하의 적 챔피언을 처형하고, 시체를 날려 보냅니다. 시체가 적 챔피언이나 지형에 충돌하면 폭발해 150~500(레벨 비례)(+추가 방어력의 100%)(+추가 마법 저항력의 100%) 마법 피해를 입힙니다. 처형 성공 시 100~300(레벨 비례)(+추가 체력의 25%)을 회복합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/dropkick_large.png",
    "enabled": true,
@@ -2477,6 +3030,7 @@
    "nameKo": "카피바라 폭격",
    "nameEn": "Droppybara",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "소환사 주문 하나를 카피바라 폭격으로 교체합니다. 하늘에서 카피바라들을 떨어뜨려 적을 공격합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/orbitallaser_large.png",
    "enabled": false,
@@ -2494,6 +3048,7 @@
    "nameKo": "양손잡이",
    "nameEn": "Dual Wield",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "기본 공격 시 0.225초 후 대상에게 볼트를 추가 발사합니다. 볼트는 원래 공격 피해(방어 적용 전)의 40%를 입히고 적중 효과를 40% 효율로 적용합니다. 추가로 총 공격 속도가 10% 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/dualwield_large.png",
    "enabled": true,
@@ -2509,6 +3064,7 @@
    "nameKo": "대지의 각성",
    "nameEn": "Earthwake",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "돌진 또는 점멸 시 이동 경로에 흔적을 남기고, 0.75초 후 300 반경씩 폭발해 90~250(레벨 비례)(+추가 공격력의 125%)(+주문력의 60%) 물리 피해를 입힙니다(대상당 1초에 1회).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/earthwake_large.png",
    "enabled": true,
@@ -2521,7 +3077,7 @@
     "abilityProps": [
      "dash"
     ],
-    "note": "팀당 최대 2명에게만 제시"
+    "note": "돌진 스킬 보유 챔피언에게만 (실측 5종 동일 패턴). 팀당 최대 2명에게만 제시 (공식 — 1인 시뮬 범위 밖이라 note로만). 근거: STUDY §3-1, eligibility-notes.json classBias(dash)·otherRestrictions"
    }
   },
   {
@@ -2529,18 +3085,22 @@
    "nameKo": "메아리 시전",
    "nameEn": "Echo Cast",
    "tier": "prismatic",
+   "category": "ability",
    "descKo": "스킬 하나를 강화해, 시전 시 대상으로 지정할 수 없는 분신이 커서 방향으로 최대 500유닛 이동한 뒤 0.25초 후 같은 스킬을 따라 시전합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_prismatic.png",
    "enabled": true,
    "arenaOrigin": false,
    "tags": [],
-   "restrictions": {}
+   "restrictions": {
+    "note": "실측: 징크스·브랜드 제외 관측 (큐레이션 게이트 추정) — 근거 불충분으로 이진 미이식, 기록만. 근거: eligibility-notes.json abilityAugments (11 §3-9)"
+   }
   },
   {
    "apiName": "ARAM_EmpoweredByTheFaithful",
    "nameKo": "신념을 통한 강화",
    "nameEn": "Empowered By The Faithful",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "아군 챔피언에게 치유나 보호막을 부여하면 8초 동안 축복합니다. 축복받은 아군이 적 챔피언에게 피해를 입힐 때마다 헌신 중첩을 얻고(최대 50), 최대 중첩 시 충격파를 방출해 주변 적에게 50~300(레벨 비례)(+치유 및 보호막 효과의 750%) 마법 피해를 입힙니다. 최대 체력 대비 치유 및 보호막 효과의 25% 이하인 적 챔피언은 처형됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/empoweredbythefaithful_large.png",
    "enabled": true,
@@ -2552,13 +3112,23 @@
     "execute",
     "aoe"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "classRequired": [
+     "Support"
+    ],
+    "note": "아군 힐/실드 계열 — Support 클래스 + 킷에 힐/실드 보유(OR) 이중 게이트. ⚠ 근사: classRequired [Support]만으로는 DDragon 태그상 Support인 브랜드가 통과 — 실측(11 §3-4, empirical)은 킷에 힐/실드 있는 소라카만 등재라 abilityProps [heal,shield]를 추가. 근거: STUDY §3-1, eligibility-notes.json classBias.allyHealShield",
+    "abilityProps": [
+     "heal",
+     "shield"
+    ]
+   }
   },
   {
    "apiName": "EmpyreanPromise",
    "nameKo": "창공의 서약",
    "nameEn": "Empyrean Promise",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "소환사 주문 하나를 창공의 서약(경계 태세)으로 교체하고, 치유 및 보호막 효과 15%를 얻습니다. 경계 태세: 대상 아군 챔피언에게 돌진하며 자신과 대상에게 100~250(레벨 비례)(+주문력의 100%)(+추가 체력의 10%) 보호막을 3초 동안 부여합니다(20초 재사용 대기시간, 사거리 2000).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/empyreampromise_large.png",
    "enabled": true,
@@ -2569,13 +3139,23 @@
     "shield",
     "dash"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "classRequired": [
+     "Support"
+    ],
+    "note": "아군 힐/실드 계열 — Support 클래스 + 킷에 힐/실드 보유(OR) 이중 게이트. ⚠ 근사: classRequired [Support]만으로는 DDragon 태그상 Support인 브랜드가 통과 — 실측(11 §3-4, empirical)은 킷에 힐/실드 있는 소라카만 등재라 abilityProps [heal,shield]를 추가. 근거: STUDY §3-1, eligibility-notes.json classBias.allyHealShield",
+    "abilityProps": [
+     "heal",
+     "shield"
+    ]
+   }
   },
   {
    "apiName": "ARAM_EndlessHunt",
    "nameKo": "앙파상",
    "nameEn": "En Passant",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "2000유닛 내 적 챔피언의 급소가 보입니다. 급소 방향을 바라보며 기본 공격이나 스킬로 피해를 입히면 급소가 소모되어 대상 최대 체력의 6%(+중첩당 1.5%) 고정 피해를 입히고, 50~200(레벨 비례)(+잃은 체력의 5%)을 회복하며, 2초에 걸쳐 사라지는 이동 속도 50%(+중첩당 5%)를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/dashing_large.png",
    "enabled": true,
@@ -2592,6 +3172,7 @@
    "nameKo": "유레카",
    "nameEn": "Eureka",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "주문력의 30%에 해당하는 스킬 가속을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/eureka_large.png",
    "enabled": true,
@@ -2599,13 +3180,24 @@
    "tags": [
     "ap"
    ],
-   "restrictions": {}
+   "favoredClasses": [
+    "Mage",
+    "Support"
+   ],
+   "restrictions": {
+    "classRequired": [
+     "Mage",
+     "Support"
+    ],
+    "note": "AP 코어 — 이진 제외(실측 empirical: 징크스·제드·다리우스 구조적 부재 011010, 11 §3-2). ⚠ 근사: classRequired [Mage,Support]로 근사(카타리나류 AP 하이브리드는 Mage 태그로 보존, 다리우스 Fighter+Tank 차단). 근거: STUDY §3-4 3단계, eligibility-notes.json classBias.ap. 예외: Phenomenal Evil은 징크스 포함(개별 게이트 상이)이라 미이식 — 가중치 유지"
+   }
   },
   {
    "apiName": "ARAM_FanTheHammer",
    "nameKo": "탄환 세례",
    "nameEn": "Fan the Hammer",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "각 방위(750 범위)의 적 챔피언에 대한 다음 기본 공격이 미사일 5발을 추가 발사합니다(방향당 5초 재사용 대기시간). 각 미사일은 8~51(레벨 비례)(+추가 공격력의 14%) 물리 피해를 입히고, 이동 거리에 비례해 최대 50% 강해지며, 치명타와 적중 효과(20%)가 적용됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/fanthehammer_large.png",
    "enabled": true,
@@ -2622,6 +3214,7 @@
    "nameKo": "요정 마법",
    "nameEn": "Fey Magic",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "궁극기로 피해를 입힌 적을 2초 동안 무해한 동물로 변이시키고 무장 해제합니다. 변이 중 기본 이동 속도가 60 감소합니다(대상당 15초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/feymagic_large.png",
    "enabled": true,
@@ -2637,6 +3230,7 @@
    "nameKo": "최종 형태",
    "nameEn": "Final Form",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "궁극기 시전 시 10초 동안 강화되어 최대 체력의 50% 보호막, 모든 피해 흡혈 20%, 이동 속도 30%를 얻습니다(20초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/finalform_large.png",
    "enabled": true,
@@ -2654,6 +3248,7 @@
    "nameKo": "거인 학살자",
    "nameEn": "Giant Slayer",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "크기가 75% 작아지고 이동 속도 20%를 얻습니다. 추가로 자신보다 큰 적 챔피언에게 크기 차이에 따라 10~30% 추가 피해를 입힙니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/giantslayer_large.png",
    "enabled": true,
@@ -2668,6 +3263,7 @@
    "nameKo": "유리 대포",
    "nameEn": "Glass Cannon",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "최대 체력이 70%로 고정(초과·회복 불가)되는 대신, 가하는 모든 피해(방어 적용 전)의 25%(근접)/15%(원거리)에 해당하는 추가 고정 피해를 입힙니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/glasscannon_large.png",
    "enabled": true,
@@ -2680,6 +3276,7 @@
    "nameKo": "골드 강탈",
    "nameEn": "Goldrend",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "적 챔피언에게 기본 공격이나 스킬로 피해를 입히면 50~150(레벨 비례)(+추가 공격력의 40%)(+주문력의 20%) 추가 마법 피해를 입히고, 30골드와 1.5초 동안 이동 속도 25%를 얻습니다(챔피언당 30초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/goldrend_large.png",
    "enabled": true,
@@ -2695,6 +3292,7 @@
    "nameKo": "거인",
    "nameEn": "Goliath",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "체력 35%, 적응형 능력치 15%, 크기 50% 증가를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/goliath_large.png",
    "enabled": true,
@@ -2709,6 +3307,7 @@
    "nameKo": "남작의 도움",
    "nameEn": "Hand of Baron",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "변형된 내셔 남작의 손길을 얻어 적응형 능력치가 25% 증가하고, 주변 아군 미니언이 크게 강화됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/handofbaron_large.png",
    "enabled": true,
@@ -2725,6 +3324,7 @@
    "nameKo": "열의",
    "nameEn": "Hellbent",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "적 챔피언에게 기본 공격이나 스킬을 적중시킬 때마다 부활 중첩을 얻습니다(최대 10, 6초 유지). 최대 중첩 시 치명적인 피해를 받으면 4초 후 최대 체력의 35~75%(레벨 비례)로 부활하고(90초 재사용 대기시간), 15초 동안 적응형 능력치·이동 속도·모든 피해 흡혈이 크게 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/hellbent_large.png",
    "enabled": true,
@@ -2741,6 +3341,7 @@
    "nameKo": "도박꾼",
    "nameEn": "High Roller",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "주변에서 죽는 적이 1.5% 확률로 능력치 모루를 떨어뜨립니다. 주운 모루는 다음에 상점 이용이 가능해질 때 소모됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/highroller_large.png",
    "enabled": true,
@@ -2753,6 +3354,7 @@
    "nameKo": "신성한 눈덩이",
    "nameEn": "Holy Snowball",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "표식의 돌진 사용 후 도착 시 1.5초 동안 무적이 됩니다. 표식 재사용 대기시간이 스킬 가속 100만큼 감소합니다. 표식 미장착 시 교체 안내가 표시됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/goldensnowball_large.png",
    "enabled": true,
@@ -2768,6 +3370,7 @@
    "nameKo": "지옥의 전도체",
    "nameEn": "Infernal Conduit",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "스킬이 적 챔피언에게 3초 동안 매초 2~20(레벨 비례)(+추가 공격력의 4.6%)(+주문력의 2%) 마법 피해를 입히는 화상을 남깁니다(무한 중첩). 자신의 화상 효과가 피해 틱마다 기본 스킬 재사용 대기시간을 0.08초씩 감소시킵니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/infernalconduit_large.png",
    "enabled": true,
@@ -2783,6 +3386,7 @@
    "nameKo": "무한 반복",
    "nameEn": "Infinite Recursion",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "스킬 가속 60을 얻고, 챔피언 처치에 관여할 때마다 3씩 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/infiniterecursion_large.png",
    "enabled": true,
@@ -2797,6 +3401,7 @@
    "nameKo": "보석 건틀릿",
    "nameEn": "Jeweled Gauntlet",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "스킬이 치명타(145% + 추가 치명타 피해)로 적중할 수 있습니다. 추가로 치명타 확률 25%(+주문력 100당 4.5%)를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/jeweledgauntlet_large.png",
    "enabled": true,
@@ -2812,6 +3417,7 @@
    "nameKo": "나는 왕이다",
    "nameEn": "King Me",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "적 팀 진영의 관문 또는 사출기에 처음 도달하면 왕이 되어, 무작위 프리즘 등급 증강 1개를 얻고 보유한 첫 전설 아이템이 1000골드 가치만큼 강화됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/kingme_large.png",
    "enabled": true,
@@ -2826,6 +3432,7 @@
    "nameKo": "미친 과학자",
    "nameEn": "Mad Scientist",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "이 증강 획득 시와 부활할 때마다, '적응형 능력치 30%+체력 20%+크기 40% 증가' 또는 '스킬 가속 70+이동 속도 40%+크기 40% 감소' 중 하나를 무작위로 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/madscientist_large.png",
    "enabled": true,
@@ -2841,6 +3448,7 @@
    "nameKo": "결투의 대가",
    "nameEn": "Master of Duality",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "기본 공격 적중 시 주문력 6~18(레벨 비례)을, 스킬 피해 시 공격력 3~9(레벨 비례)를 5초 동안 얻습니다(무한 중첩, 갱신됨).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/masterofduality_large.png",
    "enabled": true,
@@ -2850,13 +3458,24 @@
     "ad",
     "ap"
    ],
-   "restrictions": {}
+   "favoredClasses": [
+    "Mage",
+    "Support"
+   ],
+   "restrictions": {
+    "classRequired": [
+     "Mage",
+     "Support"
+    ],
+    "note": "AP 코어 — 이진 제외(실측 empirical: 징크스·제드·다리우스 구조적 부재 011010, 11 §3-2). ⚠ 근사: classRequired [Mage,Support]로 근사(카타리나류 AP 하이브리드는 Mage 태그로 보존, 다리우스 Fighter+Tank 차단). 근거: STUDY §3-4 3단계, eligibility-notes.json classBias.ap. 예외: Phenomenal Evil은 징크스 포함(개별 게이트 상이)이라 미이식 — 가중치 유지"
+   }
   },
   {
    "apiName": "ARAM_Multishot",
    "nameKo": "다중 공격",
    "nameEn": "Multishot",
    "tier": "prismatic",
+   "category": "ability",
    "descKo": "특정 스킬의 미사일을 적 챔피언에게 여러 번 적중시키는 퀘스트를 받습니다. 6단계의 퀘스트를 완료할 때마다 그 스킬이 미사일을 부채꼴로 1발씩 추가 발사합니다(같은 대상 추가 적중은 30% 피해).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_prismatic.png",
    "enabled": true,
@@ -2866,10 +3485,10 @@
     "aoe"
    ],
    "restrictions": {
-    "abilityProps": [
+    "abilityPropsAll": [
      "projectile"
     ],
-    "note": "투사체(미사일) 스킬 필요"
+    "note": "투사체(미사일) 스킬 필요 (스킬 단위 AND). 벨코즈는 전용 예외 스펠 존재 (datamined — kiwi.bin AdditionalSpells). 실측: 6명 중 브랜드·제드만. 근거: eligibility-notes.json abilityAugments·championSpecific"
    }
   },
   {
@@ -2877,6 +3496,7 @@
    "nameKo": "신비한 주먹",
    "nameEn": "Mystic Punch",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "기본 공격 적중 시 스킬의 남은 재사용 대기시간이 1.25초 감소합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/mysticpunch_large.png",
    "enabled": true,
@@ -2891,6 +3511,7 @@
    "nameKo": "불길한 서약",
    "nameEn": "Ominous Pact",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "스킬 시전에 현재 체력의 5%가 소모되는 대신, 잃은 체력에 비례해 최대 75~150(레벨 비례)의 주문력, 최대 50의 이동 속도, 최대 20%의 모든 피해 흡혈을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/wisdomofages_large.png",
    "enabled": true,
@@ -2900,13 +3521,24 @@
     "move",
     "heal"
    ],
-   "restrictions": {}
+   "favoredClasses": [
+    "Mage",
+    "Support"
+   ],
+   "restrictions": {
+    "classRequired": [
+     "Mage",
+     "Support"
+    ],
+    "note": "AP 코어 — 이진 제외(실측 empirical: 징크스·제드·다리우스 구조적 부재 011010, 11 §3-2). ⚠ 근사: classRequired [Mage,Support]로 근사(카타리나류 AP 하이브리드는 Mage 태그로 보존, 다리우스 Fighter+Tank 차단). 근거: STUDY §3-4 3단계, eligibility-notes.json classBias.ap. 예외: Phenomenal Evil은 징크스 포함(개별 게이트 상이)이라 미이식 — 가중치 유지"
+   }
   },
   {
    "apiName": "ARAM_OmniSoul",
    "nameKo": "전능의 영혼",
    "nameEn": "Omni Soul",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "무작위 드래곤 영혼 3개를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/omnisoul_large.png",
    "enabled": true,
@@ -2919,18 +3551,30 @@
    "nameKo": "과충전",
    "nameEn": "Overloaded",
    "tier": "prismatic",
+   "category": "ability",
    "descKo": "스킬 하나를 강화해, 다른 스킬을 시전할 때마다 그 스킬의 재사용 대기시간이 초기화됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_prismatic.png",
    "enabled": true,
    "arenaOrigin": false,
    "tags": [],
-   "restrictions": {}
+   "restrictions": {
+    "spellExclude": {
+     "Katarina": [
+      "E"
+     ],
+     "Shaco": [
+      "E"
+     ]
+    },
+    "note": "스킬 슬롯 단위 게이트: 카타리나 E·샤코 E 부적격 (공식 26.15 버그픽스). 근거: eligibility-notes.json championSpecific"
+   }
   },
   {
    "apiName": "ARAM_PandorasBox",
    "nameKo": "판도라의 상자",
    "nameEn": "Pandora's Box",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "무작위 프리즘 등급 증강 1개를 얻습니다. 추가로 현재 보유한 증강들이 모두 완전히 무작위한 프리즘 등급 증강으로 변합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/pandoras_box_large.png",
    "enabled": true,
@@ -2943,6 +3587,7 @@
    "nameKo": "바늘꽂이",
    "nameEn": "Pin Cushion",
    "tier": "prismatic",
+   "category": "ability",
    "descKo": "지속시간 기반 효과가 있는 스킬 하나를 강화해, 지속 중 기본 공격이 적 챔피언에게 중첩을 쌓습니다. 지속시간이 끝나면 중첩을 소모해 중첩당 20~60(레벨 비례) 물리 피해를 입히고, 소모한 중첩당 이동 속도 10을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/symphonyofwar_large.png",
    "enabled": true,
@@ -2951,7 +3596,10 @@
     "onhit"
    ],
    "restrictions": {
-    "note": "지속시간형 효과가 있는 스킬 필요"
+    "abilityPropsAll": [
+     "durationEffect"
+    ],
+    "note": "지속시간형 효과가 있는 스킬 필요 (스킬 단위 AND). 근거: eligibility-notes.json abilityAugments"
    }
   },
   {
@@ -2959,6 +3607,7 @@
    "nameKo": "포로 쇄도",
    "nameEn": "Poro Stampede",
    "tier": "prismatic",
+   "category": "quest",
    "descKo": "주변에 포로 간식이 주기적으로 나타납니다. 간식으로 포로를 먹이면 포로 사랑 중첩을 얻고, 5중첩 시 포로 돌격 소환사 주문을 얻습니다. 9단계의 퀘스트를 완료할 때마다 포로 돌격의 포로 물결이 1회 추가됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/questporocharge_large.png",
    "enabled": true,
@@ -2974,6 +3623,7 @@
    "nameKo": "퀸카",
    "nameEn": "Prom Queen",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "주기적으로 매혹적인 질주를 자동 시전해 6초 동안 유체화와 이동 속도 50%를 얻고, 부딪힌 적을 넘어뜨려 1.5초 동안 매혹합니다(35초 재사용 대기시간). 발동 2.5초 전에 티아라가 내려옵니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/promqueen_large.png",
    "enabled": true,
@@ -2989,6 +3639,7 @@
    "nameKo": "프로틴 음료",
    "nameEn": "Protein Shake",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "치유 및 보호막 효과 25%(+추가 방어력 100당 35%)(+추가 마법 저항력 100당 35%)를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/proteinshake_large.png",
    "enabled": true,
@@ -3005,6 +3656,7 @@
    "nameKo": "양자 연산",
    "nameEn": "Quantum Computing",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "적 챔피언이 650유닛 내에 오면 강화된 전술 소탕을 자동 시전해, 0.75초 후 650 반경에 200~350(레벨 비례)(+추가 공격력의 75%)(+주문력의 45%) 물리 피해를 입힙니다(30초 재사용 대기시간). 바깥 테두리에 맞은 적은 최대 체력 비례 추가 피해와 80% 둔화를 받고, 자신은 그 추가 피해의 80%를 회복합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/quantumcomputing_large.png",
    "enabled": false,
@@ -3020,6 +3672,7 @@
    "nameKo": "이케시아의 몰락",
    "nameEn": "Quest: Icathia's Fall",
    "tier": "prismatic",
+   "category": "quest",
    "descKo": "바미의 불씨를 얻고, 불사르기 아이템 제한을 무시하고 공허한 광휘와 태양불꽃 방패를 구매할 수 있습니다. 퀘스트: 두 아이템 모두 획득. 보상: 두 아이템이 공허 불사르기로 합쳐집니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/quest_voidimmolation_large.png",
    "enabled": true,
@@ -3036,6 +3689,7 @@
    "nameKo": "신발 수집가",
    "nameEn": "Quest: Sneakerhead",
    "tier": "prismatic",
+   "category": "quest",
    "descKo": "장화 아이템별 과제(기본 공격 25회, 300걸음 달리기, 스킬 20회 시전 등 6종)를 무작위 순서로 수행하는 퀘스트를 받습니다. 모두 완료하면 자르반 1세의 장화를 얻습니다. 이 증강 보유 중에는 장화를 구매할 수 없습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/sneakerhead_large.png",
    "enabled": false,
@@ -3051,6 +3705,7 @@
    "nameKo": "우르프의 챔피언",
    "nameEn": "Quest: Urf's Champion",
    "tier": "prismatic",
+   "category": "quest",
    "descKo": "퀘스트: 챔피언 처치 18회 관여. 보상: 황금 뒤집개를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/quest_urfschampion_large.png",
    "enabled": true,
@@ -3066,6 +3721,7 @@
    "nameKo": "우글렛의 마녀 모자",
    "nameEn": "Quest: Wooglet's Witchcap",
    "tier": "prismatic",
+   "category": "quest",
    "descKo": "쓸데없이 큰 지팡이를 얻습니다. 퀘스트: 라바돈의 죽음모자와 존야의 모래시계 획득. 보상: 두 아이템이 우글렛의 마녀 모자로 합쳐집니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/quest_woogletswitchcap_large.png",
    "enabled": true,
@@ -3074,13 +3730,24 @@
     "quest",
     "ap"
    ],
-   "restrictions": {}
+   "favoredClasses": [
+    "Mage",
+    "Support"
+   ],
+   "restrictions": {
+    "classRequired": [
+     "Mage",
+     "Support"
+    ],
+    "note": "AP 코어 — 이진 제외(실측 empirical: 징크스·제드·다리우스 구조적 부재 011010, 11 §3-2). ⚠ 근사: classRequired [Mage,Support]로 근사(카타리나류 AP 하이브리드는 Mage 태그로 보존, 다리우스 Fighter+Tank 차단). 근거: STUDY §3-4 3단계, eligibility-notes.json classBias.ap. 예외: Phenomenal Evil은 징크스 포함(개별 게이트 상이)이라 미이식 — 가중치 유지"
+   }
   },
   {
    "apiName": "ARAM_DivineDomain",
    "nameKo": "초월 의식",
    "nameEn": "Rite of Ascension",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "피해를 입힌 지 3초 안에 적 챔피언 처치에 관여하면 대상이 정수를 남깁니다. 정수를 기본 공격해 흡수하면 그 위치로 순간이동해 이동 속도 100%를 얻고, 75~300(레벨 비례)(+추가 공격력의 50%)(+주문력의 25%)을 회복하며(잃은 체력에 비례해 최대 2배), 기본 스킬 재사용 대기시간이 초기화됩니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/glasscannon_large.png",
    "enabled": true,
@@ -3097,6 +3764,7 @@
    "nameKo": "최상급 조준경 부착",
    "nameEn": "Scopiest Weapons",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "기본 공격 사거리 250(근접) / 150(원거리)를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/scopiestweapons_large.png",
    "enabled": true,
@@ -3111,6 +3779,7 @@
    "nameKo": "주문 분산",
    "nameEn": "Spell Split",
    "tier": "prismatic",
+   "category": "ability",
    "descKo": "미사일이 있는 스킬 하나를 강화해, 미사일이 적 적중·최대 사거리 도달·재시전 시 둘로 갈라져 양쪽 수직 방향으로 날아가며 같은 효과를 적용합니다(같은 대상 추가 적중은 30% 피해).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_prismatic.png",
    "enabled": true,
@@ -3119,10 +3788,10 @@
     "aoe"
    ],
    "restrictions": {
-    "abilityProps": [
+    "abilityPropsAll": [
      "projectile"
     ],
-    "note": "투사체(미사일) 스킬 필요"
+    "note": "투사체(미사일) 스킬 필요 (스킬 단위 AND). 실측: 6명 중 브랜드·제드만 등재. 근거: eligibility-notes.json abilityAugments"
    }
   },
   {
@@ -3130,6 +3799,7 @@
    "nameKo": "영혼 폭탄",
    "nameEn": "Spirit Bomb",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "치유와 보호막 누적량이 200~2000(레벨 비례)에 도달하면 머리 위에 모인 원기 폭탄을 가장 부상당한 아군에게 던집니다. 폭발 시 475 반경 내 아군을 잃은 체력의 5~15%(레벨 비례)(+주문력 100당 3%)만큼 회복시키고, 현재 체력의 10~25%(레벨 비례)에 해당하는 보호막을 부여합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/spiritbomb_large.png",
    "enabled": true,
@@ -3139,13 +3809,23 @@
     "heal",
     "shield"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "classRequired": [
+     "Support"
+    ],
+    "note": "아군 힐/실드 계열 — Support 클래스 + 킷에 힐/실드 보유(OR) 이중 게이트. ⚠ 근사: classRequired [Support]만으로는 DDragon 태그상 Support인 브랜드가 통과 — 실측(11 §3-4, empirical)은 킷에 힐/실드 있는 소라카만 등재라 abilityProps [heal,shield]를 추가. 근거: STUDY §3-1, eligibility-notes.json classBias.allyHealShield",
+    "abilityProps": [
+     "heal",
+     "shield"
+    ]
+   }
   },
   {
    "apiName": "SquishySlappyGrab",
    "nameKo": "말랑 찰싹 손",
    "nameEn": "Squishy Slappy Grab",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "적 챔피언이 450유닛 내에 오면 1.5초 후 말랑 찰싹 손을 뻗어 800유닛 내 모든 적 챔피언과 4초 동안 사슬로 연결합니다(35초 재사용 대기시간). 연결 중 다음 기본 공격이 모든 대상을 자신 쪽으로 끌어당겨 30~100(레벨 비례)(+추가 체력의 10%) 마법 피해와 0.25초 기절을 가하고, 끌어온 적당 보호막을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/squishyslappygrab_large.png",
    "enabled": true,
@@ -3162,6 +3842,7 @@
    "nameKo": "능력치 더하기 능력치 더하기 능력치!",
    "nameEn": "Stats on Stats on Stats!",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "능력치 모루 4개를 얻습니다(골드·프리즘 모루 확률 증가). 추가로 다음 증강 선택 라운드에서 슬롯당 리롤 1회를 더 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/statsonstatsonstats_large.png",
    "enabled": true,
@@ -3174,6 +3855,7 @@
    "nameKo": "도망갈 수 없어",
    "nameEn": "Stuck in Here With Me",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "궁극기 시전 시 2초 동안 최대 500유닛까지 커지는 오라를 얻고, 지속시간 후 오라 안의 모든 적을 2초 동안 도발하며 같은 시간 동안 받는 피해가 50% 감소합니다(30초 재사용 대기시간). 추가로 궁극기 가속 30을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/stuckinherewithme_large.png",
    "enabled": true,
@@ -3183,6 +3865,11 @@
     "cc",
     "tank"
    ],
+   "favoredClasses": [
+    "Fighter",
+    "Tank",
+    "Assassin"
+   ],
    "restrictions": {}
   },
   {
@@ -3190,6 +3877,7 @@
    "nameKo": "방출 역장",
    "nameEn": "Surge Field",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "궁극기 시전 시 발밑에 역장 지대(300 반경)를 생성합니다. 지대 안에 있는 동안 스킬 가속 50과 이동 속도 40%를 얻고, 적 챔피언에게 피해를 입히면 그 피해(방어 적용 전)의 20%에 해당하는 추가 마법 피해 미사일을 발사합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/surgefield_large.png",
    "enabled": true,
@@ -3206,6 +3894,7 @@
    "nameKo": "전장의 교향곡",
    "nameEn": "Symphony of War",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "정복자와 치명적 속도 핵심 룬을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/symphonyofwar_large.png",
    "enabled": true,
@@ -3221,6 +3910,7 @@
    "nameKo": "탭 댄서",
    "nameEn": "Tap Dancer",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "적 챔피언과 미니언 기본 공격 적중 시 이동 속도 10을 5초 동안 얻습니다(무한 중첩, 갱신됨). 추가로 총 이동 속도의 10%에 해당하는 공격 속도를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/tapdancer_large.png",
    "enabled": true,
@@ -3230,6 +3920,9 @@
     "as",
     "move"
    ],
+   "favoredClasses": [
+    "Marksman"
+   ],
    "restrictions": {}
   },
   {
@@ -3237,6 +3930,7 @@
    "nameKo": "거인의 결의",
    "nameEn": "Titan's Resolve",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "피해를 주거나 받을 때마다 중첩을 얻습니다(지속 피해 제외, 6초 유지). 10중첩마다 적응형 능력치 15~45(레벨 비례), 방어력·마법 저항력 5~10, 크기 10%, 강인함 8%를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/iamthejuggernaut_large.png",
    "enabled": true,
@@ -3253,6 +3947,7 @@
    "nameKo": "전환: 혼돈",
    "nameEn": "Transmute: Chaos",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "완전히 무작위한 증강 2개를 얻습니다(현재 선택지의 다른 2개는 제외).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/transmutechaos_large.png",
    "enabled": true,
@@ -3265,6 +3960,7 @@
    "nameKo": "지옥불 난사 발동",
    "nameEn": "Triggered Inferno",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "서로 다른 적을 때릴 때마다 스타일 중첩을 얻어(최대 7) 중첩당 이동 속도 약 4~5%를 얻습니다. 최대 중첩 시 2.25초 동안 주변 적에게 총격을 난사해 발당 20~40(레벨 비례)(+공격력의 40%)(+주문력의 25%) 물리 피해를 입힙니다(대상당 최대 10발, 체력 30% 이하 적에게는 2배, 15초 재사용 대기시간).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/madscientist_large.png",
    "enabled": true,
@@ -3280,6 +3976,7 @@
    "nameKo": "3연발",
    "nameEn": "Tripleshot",
    "tier": "prismatic",
+   "category": "ability",
    "descKo": "대상 지정 미사일 스킬 하나를 강화해, 주 대상 근처의 적 2명에게도 미사일을 발사합니다(같은 대상 추가 적중은 30% 피해).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/genericabilityaugmenticon_prismatic.png",
    "enabled": true,
@@ -3292,7 +3989,7 @@
      "targeted",
      "projectile"
     ],
-    "note": "대상 지정이면서 투사체인 스킬 필요(AND 조건). 근사: 챔피언 단위 속성 합집합 기준이라 같은 스킬 하나가 두 속성을 모두 갖는지는 판정 불가"
+    "note": "대상 지정이면서 투사체인 같은 스킬 하나 필요 (스킬 단위 AND — spells[i].props 기반 판정, 구스키마면 합집합 폴백). 실측: 브랜드 R·말파이트 Q만(위키 적격 목록과 일치). 근거: eligibility-notes.json abilityAugments"
    }
   },
   {
@@ -3300,6 +3997,7 @@
    "nameKo": "궁극기 봇",
    "nameEn": "Ult Bot",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "스킬 가속이 궁극기에만 적용되는 대신, 스킬 가속 100을 얻고 스킬 가속의 효율이 50% 증가합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/skipthebasic_large.png",
    "enabled": true,
@@ -3314,6 +4012,7 @@
    "nameKo": "궁극의 각성",
    "nameEn": "Ultimate Awakening",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "궁극기 시전 시 모든 기본 스킬의 재사용 대기시간이 초기화되고 15초 동안 기본 스킬 가속 300을 얻습니다(20초 재사용 대기시간). 추가로 궁극기 가속 30을 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/zerohour_large.png",
    "enabled": true,
@@ -3328,6 +4027,7 @@
    "nameKo": "궁극기 대변혁",
    "nameEn": "Ultimate Revolution",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "궁극기 시전 시 효과가 시작되거나 끝나면 재사용 대기시간이 초기화됩니다(75초 재사용 대기시간, 사망 시 초기화).",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/ultimaterevolution_large.png",
    "enabled": true,
@@ -3342,6 +4042,7 @@
    "nameKo": "궁극의 히드라",
    "nameEn": "Ultra Hydra",
    "tier": "prismatic",
+   "category": "quest",
    "descKo": "히드라 아이템 제한을 무시하고 티아맷과 히드라 아이템들을 구매할 수 있으며, 전설 히드라 구매 시 티아맷을 무료로 얻습니다. 퀘스트: 신성 모독의 히드라·굶주린 히드라·거대한 히드라 획득. 보상: 셋이 울트라 히드라로 합쳐집니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/ultrahydra_large.png",
    "enabled": true,
@@ -3351,13 +4052,26 @@
     "ad",
     "aoe"
    ],
-   "restrictions": {}
+   "favoredClasses": [
+    "Marksman",
+    "Fighter",
+    "Assassin"
+   ],
+   "restrictions": {
+    "classRequired": [
+     "Marksman",
+     "Fighter",
+     "Assassin"
+    ],
+    "note": "AD/크리 코어 — 이진 제외(실측 empirical: 브랜드·말파이트·소라카 구조적 부재, 11 §3-1). ⚠ 근사: \"mage/enchanter/tank(주문형) 제외\"를 classRequired [Marksman,Fighter,Assassin]로 근사(6인 패턴 100101 일치). 근거: STUDY §3-4 3단계, eligibility-notes.json classBias.adCrit"
+   }
   },
   {
    "apiName": "Upgrade_SwordOfBlossom",
    "nameKo": "꽃피는 새벽의 검 업그레이드",
    "nameEn": "Upgrade Sword of Blossoming Dawn",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "꽃피는 새벽의 검을 강화해 박하 효과의 회복이 250% 증가합니다. 추가로 공격 속도 100%를 얻습니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/kiwi/augments/icons/upgrademikaelsblessing_large.png",
    "enabled": true,
@@ -3373,6 +4087,7 @@
    "nameKo": "바람전달자의 축복",
    "nameEn": "Windspeaker's Blessing",
    "tier": "prismatic",
+   "category": "normal",
    "descKo": "자신 또는 아군이 주고받는 치유와 보호막이 대상에게 3초 동안 방어력과 마법 저항력 30~60(레벨 비례)을 부여합니다.",
    "icon": "https://raw.communitydragon.org/latest/game/assets/ux/cherry/augments/icons/windspeakersblessing_large.png",
    "enabled": true,
@@ -3383,7 +4098,12 @@
     "shield",
     "tank"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "abilityProps": [
+     "heal"
+    ],
+    "note": "근사: 실측에서 소라카+다리우스(셀프힐 Q)만 등재 — 조건을 \"킷 내 회복 보유\"로 추정해 abilityProps=heal로 이식. 근거: eligibility-notes.json classBias(selfHealCircle), research/raw/11-empirical-pools.md §4-3"
+   }
   }
  ]
 }

@@ -51,6 +51,60 @@ ok(badAug === 0, '무결성: combos 증강 apiName 전부 augments.json에 존�
 ok(badItem === 0, '무결성: 시너지 아이템 id 전부 items.json에 존재 (불일치 ' + badItem + '건)');
 ok(badChamp === 0, '무결성: combos 챔피언 id 전부 champions.json에 존재 (불일치 ' + badChamp + '건)');
 
+// ---- 2.5) 실데이터 풀 게이트 검증 (2차 스터디 실측 패턴 재현 — AUGMENT-POOLS-STUDY.md §3) ----
+{
+  const byId = (id) => champData.champions.find((c) => c.id === id);
+  const zed = byId('Zed');
+  const malphite = byId('Malphite');
+  const jinx = byId('Jinx');
+  const soraka = byId('Soraka');
+  ok(zed && malphite && jinx && soraka, '풀 게이트: 검증 챔피언 4명 존재');
+
+  // 검증 기준 1: 제드(기력)에게 마나 증강 3종 절대 미제시
+  const zedPool = new Set(eligibleAugments(augData.augments, zed).map((a) => a.apiName));
+  for (const mana of ['ARAM_Overflow', 'ARAM_Juiced', 'ARAM_MindtoMatter']) {
+    ok(augNames.has(mana), '풀 게이트: 마나 증강 실존 — ' + mana);
+    ok(!zedPool.has(mana), '풀 게이트: 제드 풀에 ' + mana + ' 부재 (requiresMana)');
+  }
+
+  // 검증 기준 6: 챔피언별 풀 크기 비대칭 — 말파이트 풀 > 징크스 풀 방향성
+  const malPool = eligibleAugments(augData.augments, malphite);
+  const jinxPool = eligibleAugments(augData.augments, jinx);
+  ok(malPool.length > jinxPool.length,
+    '풀 게이트: 말파이트 풀(' + malPool.length + ') > 징크스 풀(' + jinxPool.length + ')');
+
+  // 검증 기준 4: Spin To Win은 화이트리스트 챔피언에게만 — 소라카 풀에 부재
+  ok(augNames.has('ARAM_SpinToWin'), '풀 게이트: ARAM_SpinToWin 실존');
+  const sorakaPool = new Set(eligibleAugments(augData.augments, soraka).map((a) => a.apiName));
+  ok(!sorakaPool.has('ARAM_SpinToWin'), '풀 게이트: 소라카 풀에 ARAM_SpinToWin 부재 (championWhitelist)');
+
+  // 슬롯 고정/스킬 제외 연동: enhancedSkill이 restrictions.slot·spellExclude를 존중하는지
+  // (근사: 스킬 지정은 "적격 스킬 중 무작위" — draft.js presentAugment 주석 참조)
+  const bread = augData.augments.find((a) => a.apiName === 'ARAM_BreadAndButter');
+  const recursion = augData.augments.find((a) => a.apiName === 'ARAM_SpecializedRecursion');
+  const yasuo = byId('Yasuo');
+  if (bread && bread.restrictions && bread.restrictions.slot && zed) {
+    let slotOk = true;
+    for (let s = 0; s < 10; s++) {
+      const g = newGame({ augments: [bread], champion: zed, seed: 1000 + s });
+      const round = nextRound(g);
+      const got = round.slots[0] && round.slots[0].enhancedSkill;
+      if (!got || got.key !== bread.restrictions.slot) slotOk = false;
+    }
+    ok(slotOk, '스킬 증강: restrictions.slot 고정 (Bread And Butter → ' + bread.restrictions.slot + ')');
+  }
+  if (recursion && yasuo) {
+    let exclOk = true;
+    for (let s = 0; s < 30; s++) {
+      const g = newGame({ augments: [recursion], champion: yasuo, seed: 2000 + s });
+      const round = nextRound(g);
+      const got = round.slots[0] && round.slots[0].enhancedSkill;
+      if (!got || got.key === 'E') exclOk = false; // 야스오 E 부적격 (공식 26.14 버그픽스)
+    }
+    ok(exclOk, '스킬 증강: spellExclude 존중 (야스오×Specialized Recursion에서 E 미지정, 30시드)');
+  }
+}
+
 // ---- 3) 에코로 4라운드 자동 진행 ----
 const ekko = champData.champions.find((c) => c.id === 'Ekko');
 ok(!!ekko, '챔피언: 에코(Ekko) 존재');
