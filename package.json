@@ -1,0 +1,13 @@
+{
+  "name": "jeungbaram",
+  "private": true,
+  "version": "0.1.0",
+  "description": "ARAM: Mayhem(증바람) 드래프트 시뮬레이터 — 순수 정적 웹 (빌드/의존성 없음). 이 package.json은 Node에서 docs/js/*.js를 ES 모듈로 import하기 위한 type 선언용.",
+  "type": "module",
+  "scripts": {
+    "test:draft": "node scripts/test-draft.mjs",
+    "test:recommend": "node scripts/test-recommend.mjs",
+    "test:e2e": "node scripts/test-e2e.mjs",
+    "test": "node scripts/test-draft.mjs && node scripts/test-recommend.mjs && node scripts/test-e2e.mjs"
+  }
+}

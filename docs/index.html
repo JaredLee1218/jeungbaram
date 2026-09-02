@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>증바람 시뮬레이터</title>
+  <meta name="description" content="무작위 총력전: 아수라장 — 증강 드래프트 시뮬레이터. 챔피언을 고르고 4라운드 증강을 뽑으면 꿀잼 플레이스타일을 추천합니다.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='0.9em'%20font-size='90'%3E%F0%9F%8C%80%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./css/app.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1 class="app-title">증바람 시뮬레이터</h1>
+    <p class="app-subtitle">무작위 총력전: 아수라장 증강 드래프트</p>
+  </header>
+
+  <main id="app" class="app-main">
+
+    <!-- 로딩 -->
+    <div id="screen-loading" class="screen screen-loading" aria-live="polite">
+      <div class="spinner" aria-hidden="true"></div>
+      <p>데이터를 불러오는 중...</p>
+    </div>
+
+    <!-- 에러 -->
+    <div id="screen-error" class="screen screen-error" hidden>
+      <p class="error-icon" aria-hidden="true">⚠️</p>
+      <p id="error-msg" class="error-msg">데이터를 불러오지 못했습니다.</p>
+      <button id="btn-retry" class="btn btn-primary" type="button">다시 시도</button>
+    </div>
+
+    <!-- ① 챔피언 선택 -->
+    <section id="screen-select" class="screen" hidden aria-label="챔피언 선택">
+      <div class="select-controls">
+        <input id="champ-search" class="search-input" type="search"
+               placeholder="챔피언 이름 검색 (예: 아리)" autocomplete="off"
+               aria-label="챔피언 이름 검색">
+        <div id="role-chips" class="chips" role="group" aria-label="역할 필터"></div>
+      </div>
+      <div id="champ-grid" class="champ-grid"></div>
+      <p id="champ-empty" class="empty-msg" hidden>검색 결과가 없습니다.</p>
+    </section>
+
+    <!-- ② 드래프트 -->
+    <section id="screen-draft" class="screen" hidden aria-label="증강 드래프트">
+      <ol id="draft-progress" class="progress" aria-label="드래프트 진행"></ol>
+      <div class="draft-head">
+        <div id="draft-champ" class="draft-champ"></div>
+        <span id="tier-badge" class="tier-badge"></span>
+      </div>
+      <div id="aug-cards" class="aug-cards"></div>
+      <div class="draft-actions">
+        <button id="btn-golden" class="btn btn-golden" type="button">✨ 황금 리롤 (게임당 1회)</button>
+        <p id="golden-hint" class="golden-hint" hidden>
+          한 단계 높은 등급으로 바꿀 카드를 탭하세요
+          <button id="btn-golden-cancel" class="link-btn" type="button">취소</button>
+        </p>
+      </div>
+      <div class="history">
+        <span class="history-label">선택한 증강</span>
+        <div id="history-bar" class="history-bar"></div>
+      </div>
+    </section>
+
+    <!-- ③ 결과 -->
+    <section id="screen-result" class="screen" hidden aria-label="결과 및 추천">
+      <div id="result-summary" class="result-summary"></div>
+      <div id="result-body" class="result-body"></div>
+      <div class="result-actions">
+        <button id="btn-share" class="btn btn-primary" type="button">🔗 공유 링크 복사</button>
+        <button id="btn-again" class="btn" type="button">같은 챔피언으로 다시</button>
+        <button id="btn-restart" class="btn" type="button">처음부터</button>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    <p>※ 증강 등급 등장 확률과 챔피언별 증강 필터는 <strong>추정치</strong>입니다.</p>
+    <p>팬 제작 시뮬레이터입니다. Riot Games와 무관하며, Riot Games는 본 프로젝트를 보증하지 않습니다.</p>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>

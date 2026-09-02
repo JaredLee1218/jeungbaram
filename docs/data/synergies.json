@@ -1,0 +1,1067 @@
+{
+  "combos": [
+    {
+      "title": "블루투스 불칼 갱플랭크",
+      "champions": ["Gangplank"],
+      "augments": ["ARAM_EtherealWeapon"],
+      "matchType": "any",
+      "whyFun": "커뮤니티 공인 '블루투스 불칼'. E로 술통 심고 Q로 원격 폭파하면 두 칸 밖에서 몰왕 온힛이 터진다. 술통이 곧 무선 딜링 단말기.",
+      "items": [3153, 3078, 3031],
+      "skills": "E 술통 2연결 후 Q 원격 폭파 — 온힛이 술통 사거리로 배달된다",
+      "styleTags": ["원콤", "포킹", "날먹"],
+      "source": "kr"
+    },
+    {
+      "title": "기본으로 돌아가기 갱플랭크",
+      "champions": ["Gangplank"],
+      "augments": ["ARAM_BacktoBasics"],
+      "matchType": "any",
+      "whyFun": "궁이 봉인되지만 술통 연쇄마다 증폭이 곱연산 — 3~4연통이면 풀피 딜러가 원콤. '기돌 갱플 만나고 2주 접었다'는 간증이 있는 그 조합.",
+      "items": [3031, 3070, 3508],
+      "skills": "Q-E 술통 연쇄 폭파, 궁 없는 대신 술통이 궁",
+      "styleTags": ["원콤", "포킹"],
+      "source": "kr"
+    },
+    {
+      "title": "기돌 라이즈",
+      "champions": ["Ryze"],
+      "augments": ["ARAM_BacktoBasics"],
+      "matchType": "any",
+      "whyFun": "'기돌 라이즈 더럽게 아프고' — 외길 칼바람에선 궁 유틸 손해가 거의 없다. 기본기 35% 증폭을 EQ 연타에 전부 싣는다.",
+      "items": [3003, 3110, 3070],
+      "skills": "E 묻히고 Q 연타 — 플럭스 튕길수록 이득",
+      "styleTags": ["무한딜", "포킹"],
+      "source": "kr"
+    },
+    {
+      "title": "온몸에 화상 브랜드",
+      "champions": ["Brand"],
+      "augments": ["ARAM_InfernalConduit"],
+      "matchType": "any",
+      "whyFun": "'브랜드 한정 압도적 0티어.' 패시브+리안드리+전도체 3중 화상에, 화상 틱마다 쿨까지 돌아온다. 아수라장이 온몸에 화상.",
+      "items": [6653, 3116, 3089],
+      "skills": "W-E-Q로 도트 유지, 궁은 한타 개막 신호탄",
+      "styleTags": ["무한딜", "광역"],
+      "source": "kr"
+    },
+    {
+      "title": "도트 전도체 패밀리",
+      "champions": ["Malzahar", "Lillia", "Hwei", "Naafiri"],
+      "augments": ["ARAM_InfernalConduit"],
+      "matchType": "any",
+      "whyFun": "도트 틱이 많은 챔이면 전도체가 무한 스택 화상 + 쿨 환급 엔진이 된다. 사기증강 리스트 단골 라인업.",
+      "items": [6653, 3116, 3165],
+      "skills": "도트 최대한 여러 명에게 발라두고 유지",
+      "styleTags": ["무한딜", "광역"],
+      "source": "kr"
+    },
+    {
+      "title": "스탯 루프 라이즈",
+      "champions": ["Ryze"],
+      "augments": ["ARAM_MindtoMatter", "ARAM_Overflow", "ARAM_Eureka"],
+      "matchType": "any",
+      "whyFun": "마나→체력→AP로 도는 스탯 루프. '라이즈 증강 잘 뜬 판, 혼자 1:5 이기고 쌉캐리' 실화 후기 보유. 라이즈는 망할 수가 없다.",
+      "items": [3003, 3070, 3110],
+      "skills": "마나템부터 몰아 사고 EQ 무한 순환",
+      "styleTags": ["성장", "무한딜"],
+      "source": "kr"
+    },
+    {
+      "title": "무한 Q 말 헤카림",
+      "champions": ["Hecarim"],
+      "augments": ["ARAM_EtherealWeapon", "ARAM_MysticPunch"],
+      "matchType": "any",
+      "whyFun": "Q에 몰왕이 터지고, 평타가 쿨을 돌리고, 다시 Q. arammayhem 공인 'God Tier' 콤보 — 조립되면 게임이 끝난다.",
+      "items": [3153, 3004, 3078],
+      "skills": "Q-평타-Q 루프, E 개돌은 마무리용",
+      "styleTags": ["무한딜", "질주"],
+      "source": "kr"
+    },
+    {
+      "title": "가스에 몰왕 묻는 신지드",
+      "champions": ["Singed"],
+      "augments": ["ARAM_EtherealWeapon"],
+      "matchType": "any",
+      "whyFun": "'소문난 신지드' — 독 가스 틱마다 온힛이 묻는다. 그냥 뛰기만 해도 뒤에서 몰왕이 터지는 마라톤 딜러.",
+      "items": [3153, 4633, 3116],
+      "skills": "Q 켜고 적진 관통 마라톤, W로 길막",
+      "styleTags": ["질주", "무한딜", "난입"],
+      "source": "kr"
+    },
+    {
+      "title": "핵 던지는 술통 그라가스",
+      "champions": ["Gragas"],
+      "augments": ["ARAM_EtherealWeapon"],
+      "matchType": "any",
+      "whyFun": "'그라가스 R에 W도 묻고 리치베인까지 묻어서 핵 던지고 다님' — 원거리 궁 한 방에 온힛·주문검 총출동.",
+      "items": [3100, 3089, 3152],
+      "skills": "W 켜고 R 투척 — 궁이 곧 핵",
+      "styleTags": ["원콤", "포킹"],
+      "source": "kr"
+    },
+    {
+      "title": "패시브 3타 에코·리븐",
+      "champions": ["Ekko", "Riven"],
+      "augments": ["ARAM_EtherealWeapon"],
+      "matchType": "any",
+      "whyFun": "'에코는 EQ에 패시브 3타 터지고, 리븐 QQQ에 다 터지고' — 스킬 난사가 곧 평타 난사가 되는 환무의 정석.",
+      "items": [3100, 3115, 3157],
+      "skills": "스킬 콤보에 온힛 전부 끼워 넣기",
+      "styleTags": ["원콤", "암살"],
+      "source": "kr"
+    },
+    {
+      "title": "평타 두 대 원딜",
+      "champions": ["Vayne", "KogMaw", "Tristana"],
+      "augments": ["ARAM_DualWield"],
+      "matchType": "any",
+      "whyFun": "'원딜 전용 0티어. 공속 25%에 평타가 2대씩 날라가는 미친 효과' — 몰왕·크라켄·구인수가 두 번씩 터진다.",
+      "items": [3153, 6672, 3124],
+      "skills": "온힛템 몰아 사고 평타만 끊기지 않게",
+      "styleTags": ["무한딜", "카이팅"],
+      "source": "kr"
+    },
+    {
+      "title": "태풍 GOAT 세나",
+      "champions": ["Senna"],
+      "augments": ["ARAM_Typhoon", "ARAM_EtherealWeapon"],
+      "matchType": "any",
+      "whyFun": "'세나는 태풍 실버증강인데 무조건 먹으셈. 거의 프리즘급' — 평타마다 미사일 한 발 더, 영혼 스택은 무한 성장.",
+      "items": [3031, 3036, 3094],
+      "skills": "Q 포킹으로 영혼 수급, 평타는 항상 두 발",
+      "styleTags": ["성장", "포킹"],
+      "source": "kr"
+    },
+    {
+      "title": "증강 안 떠도 사기 카사딘",
+      "champions": ["Kassadin"],
+      "augments": ["ARAM_MindtoMatter", "ARAM_Overflow", "ARAM_Eureka", "UltimateAwakening", "ARAM_CantTouchThis", "ARAM_UltimateUnstoppable"],
+      "matchType": "any",
+      "whyFun": "'카사딘은 증강 잘 안 떠도 ㅈㄴ 좋음' — 마나 루프에 각성까지 뜨면 리프트워크가 딸깍이 되고 상대는 재앙을 맞는다.",
+      "items": [3003, 3157, 3070],
+      "skills": "16레벨부터 궁 난사 — 점멸이 기본 이동기",
+      "styleTags": ["암살", "존버", "성장"],
+      "source": "kr"
+    },
+    {
+      "title": "걸어다니는 재난 문도",
+      "champions": ["DrMundo"],
+      "augments": ["FinalForm", "ARAM_TankEngine", "ARAM_Goliath"],
+      "matchType": "any",
+      "whyFun": "'문도 최종형태 상대해봤는데 재앙이더라.' 킬마다 커지는 몸집, 궁 켜면 반피 실드+흡혈 — 베인으로 30초 프리딜 해야 잡힌다.",
+      "items": [3083, 3084, 3065],
+      "skills": "궁 켜고 걸어 들어가면 끝 — 도망은 상대가 간다",
+      "styleTags": ["존버", "탱킹"],
+      "source": "kr"
+    },
+    {
+      "title": "프로틴 서렌 세트",
+      "champions": ["KSante", "Zac", "DrMundo", "Chogath"],
+      "augments": ["ARAM_ProteinShake", "ARAM_TankEngine", "ARAM_Quest_SteelYourHeart"],
+      "matchType": "any",
+      "whyFun": "'프로틴음료+탱크엔진+강철심장+인내심 = 서렌.' 실드를 뚫을 수가 없는데 그 실드를 팀한테도 준다.",
+      "items": [3084, 3083, 3075],
+      "skills": "하트스틸 박치기 쿨마다 — 스택이 곧 승리",
+      "styleTags": ["존버", "탱킹"],
+      "source": "kr"
+    },
+    {
+      "title": "회복이 곧 딜, 죽순",
+      "champions": ["Maokai", "Warwick", "Mordekaiser"],
+      "augments": ["ARAM_CircleofDeath"],
+      "matchType": "any",
+      "whyFun": "회복량의 70%가 근처 적에게 그대로 딜 — 피 차는 소리가 상대 비명이다. 옴니뱀프 템은 판정을 덮어쓰니 금지.",
+      "items": [3083, 3065, 3748],
+      "skills": "회복 스킬을 적 앞에서 쓴다 — 힐이 곧 딜사이클",
+      "styleTags": ["존버", "무한딜", "탱킹"],
+      "source": "kr"
+    },
+    {
+      "title": "부활 폭발 자크",
+      "champions": ["Zac"],
+      "augments": ["ARAM_CircleofDeath", "ARAM_ProteinShake"],
+      "matchType": "any",
+      "whyFun": "'죽순 먹은 자크가 그냥 1대5 하더라' — 쪼개졌다 붙을 때마다 풀회복 = 광역 폭발. 죽으러 들어가는 게 이니시다.",
+      "items": [3083, 3065, 8020],
+      "skills": "E 진입 후 한복판에서 패시브 부활 — 부활이 궁이다",
+      "styleTags": ["난입", "존버", "광역"],
+      "source": "en"
+    },
+    {
+      "title": "피돼지 물리 마법사 초가스",
+      "champions": ["Chogath"],
+      "augments": ["ARAM_escAPADe"],
+      "matchType": "any",
+      "whyFun": "'피돼지 초가스로 마법사(물리) 집으면 걸어다니는 재난' — 탱템 두르고도 스킬이 물리로 아프게 꽂힌다. 증바람에서만 느낄 수 있는 맛.",
+      "items": [3083, 3084, 3748],
+      "skills": "Q-W 콤보 후 R로 꿀꺽 — 몸집은 계속 커진다",
+      "styleTags": ["탱킹", "원콤"],
+      "source": "kr"
+    },
+    {
+      "title": "사거리 200의 광전사",
+      "champions": ["Graves", "Samira", "Urgot", "Tristana", "Aphelios"],
+      "augments": ["ARAM_DrawYourSword"],
+      "matchType": "any",
+      "whyFun": "'검뽑 그브도 ㅈㄴ 말 안 됨' — 사거리 200 대신 공격력·체력·공속·생흡 몰빵. aramgg 승률 60% T1의 근접 원딜 개조 키트.",
+      "items": [3153, 3072, 3748],
+      "skills": "붙는 순간 이긴다 — 수풀과 벽 뒤에서 급습",
+      "styleTags": ["원콤", "난입"],
+      "source": "kr"
+    },
+    {
+      "title": "발밑에 모터 단 원딜",
+      "champions": ["Jinx", "Yunara"],
+      "augments": ["ARAM_TapDancer"],
+      "matchType": "any",
+      "whyFun": "온힛마다 이속 무한 중첩 + 이속의 10%가 공속으로 — 때릴수록 빨라지고 빨라질수록 세지는 선순환. 단, 2원딜 조합에선 금지라는 칼갤 팁.",
+      "items": [3046, 3094, 6672],
+      "skills": "평타 끊지 말고 계속 무빙 — 스택이 곧 생존",
+      "styleTags": ["카이팅", "질주"],
+      "source": "kr"
+    },
+    {
+      "title": "좌절감 GOAT 처형 시간",
+      "champions": ["Nasus", "KogMaw", "Anivia"],
+      "augments": ["ARAM_ItsKillingTime"],
+      "matchType": "any",
+      "whyFun": "'처형시간 코그모보다 좌절감 준 캐릭은 없었다. 천꾸 제이스조차..' — 궁마다 전원 표식, 5초 뒤 저장딜이 통째로 폭발.",
+      "items": [3115, 3135, 3116],
+      "skills": "궁 켜고 최대한 많이 때리기 — 5초 뒤 정산",
+      "styleTags": ["무한딜", "광역"],
+      "source": "kr"
+    },
+    {
+      "title": "죽고 싶어도 못 죽는 소나",
+      "champions": ["Sona", "Milio", "Karma"],
+      "augments": ["ARAM_WindspeakersBlessing"],
+      "matchType": "any",
+      "whyFun": "'소나가 먹음 죽고 싶어도 못 죽음' — 힐·실드마다 아군에게 저항 30~60을 덧바른다. 딜러가 갑자기 브루저가 됨.",
+      "items": [3222, 3107, 3504],
+      "skills": "힐·실드를 쿨마다 돌리기 — 아군 체력바 관리자",
+      "styleTags": ["서포팅", "존버"],
+      "source": "kr"
+    },
+    {
+      "title": "강심히드라몰왕 카타리나",
+      "champions": ["Katarina"],
+      "augments": ["ARAM_Firebrand"],
+      "matchType": "any",
+      "whyFun": "'카타로 피흡증강 뜨면 강심+히드라+몰왕 가보셈. 당한 건데 답이 없더라' — 평타 화상 무한 스택에 단검 온힛까지.",
+      "items": [3084, 3074, 3153],
+      "skills": "E 진입 → 단검-평타 루프 → R 청소",
+      "styleTags": ["난입", "암살", "원콤"],
+      "source": "kr"
+    },
+    {
+      "title": "죽어도 궁, 카서스",
+      "champions": ["Karthus"],
+      "augments": ["ARAM_UltimateRevolution"],
+      "matchType": "any",
+      "whyFun": "'궁 두 번 떨구는 카서스 개 역겨움' — 2번 쓰는 것보다 죽을 때마다 궁 쿨이 도는 게 더 무섭다. 죽음이 딜사이클.",
+      "items": [3089, 3135, 3157],
+      "skills": "궁은 한타 개막과 마무리 두 번 — 죽어도 손해가 아니다",
+      "styleTags": ["광역", "존버"],
+      "source": "kr"
+    },
+    {
+      "title": "스킬이 치명타로 2.5배",
+      "champions": ["Smolder", "Lucian", "Jhin", "Corki", "Viego"],
+      "augments": ["ARAM_JeweledGauntlet"],
+      "matchType": "any",
+      "whyFun": "'스킬 대미지가 거의 2.5배는 세지기 때문에 개꿀' — 보석 건틀릿에 치명타 템만 쌓으면 스킬샷이 저격총이 된다.",
+      "items": [3031, 3508, 3036],
+      "skills": "치확 100% 맞추고 주력기 딸깍",
+      "styleTags": ["원콤", "포킹"],
+      "source": "kr"
+    },
+    {
+      "title": "취약 건틀릿 루시안",
+      "champions": ["Lucian"],
+      "augments": ["ARAM_JeweledGauntlet", "ARAM_Vulnerability"],
+      "matchType": "any",
+      "whyFun": "궁이 치명타로 들어간다 — 취약+인피 곱연산으로 '풀궁이 화면을 청소한다'는 그 빌드.",
+      "items": [3031, 3046, 3036],
+      "skills": "한타 개막에 R 채널링 — 탄막이 전부 크리티컬",
+      "styleTags": ["원콤", "광역"],
+      "source": "en"
+    },
+    {
+      "title": "구경만 해도 이기는 아이번",
+      "champions": ["Ivern", "Zyra", "Annie"],
+      "augments": ["ARAM_Minionmancer"],
+      "matchType": "any",
+      "whyFun": "'아이번+소환물 증강이 개꿀잼 ㅋㅋㅋ' — 데이지·식물·티버가 40% 강화되어 대신 싸운다. 나는 뒤에서 관전.",
+      "items": [3116, 6617, 3157],
+      "skills": "소환물 먼저 던지고 유틸만 돌리기",
+      "styleTags": ["존버", "소환물"],
+      "source": "kr"
+    },
+    {
+      "title": "무한 알파 마스터 이",
+      "champions": ["MasterYi"],
+      "augments": ["ARAM_MysticPunch", "ARAM_Dashing"],
+      "matchType": "any",
+      "whyFun": "평타마다 쿨 1.25초 — 스킬가속 임계 넘으면 알파가 사실상 무쿨. 알파 중엔 아무도 나를 못 때린다.",
+      "items": [3124, 3153, 3091],
+      "skills": "Q-평타-Q 루프, 위험하면 또 Q",
+      "styleTags": ["무한딜", "암살"],
+      "source": "en"
+    },
+    {
+      "title": "돌진 175 가속 4인방",
+      "champions": ["Fizz", "Qiyana", "KSante", "Kalista"],
+      "augments": ["ARAM_Dashing"],
+      "matchType": "any",
+      "whyFun": "'돌진기에 왕창 쿨감 — 미친 놈이 된다' — 이동기가 거의 무쿨이라 술래잡기 자체가 성립하지 않는다.",
+      "items": [3142, 3078],
+      "skills": "이동기를 평타처럼 — 들어갔다 나왔다 반복",
+      "styleTags": ["질주", "암살", "난입"],
+      "source": "kr"
+    },
+    {
+      "title": "양자 연산 개틀링",
+      "champions": ["Nocturne", "Riven", "Vi", "JarvanIV", "Camille", "Udyr"],
+      "augments": ["ARAM_QuantumComputing"],
+      "matchType": "any",
+      "whyFun": "'첫 증강 GOAT. 초반엔 터질 때마다 반피씩 나감' — 붙기만 하면 자동으로 광역 슬래시+회복. (라이엇이 자꾸 잠그는 문제아)",
+      "items": [3074, 3053, 3748],
+      "skills": "적 근처 650 안에 서 있기 — 나머지는 자동",
+      "styleTags": ["난입", "광역"],
+      "source": "kr"
+    },
+    {
+      "title": "AP 1500 다단 중첩 베이가",
+      "champions": ["Veigar", "Smolder"],
+      "augments": ["ARAM_StackosaurusRex", "ARAM_PhenomenalEvil"],
+      "matchType": "any",
+      "whyFun": "스택 획득 +100% — '20분에 AP 1500' 무한 성장. 인벤 기자도 '쉴새 없이 스킬 난사'로 꼽은 성장 몰빵 로망.",
+      "items": [3089, 3135, 3157],
+      "skills": "스택 스킬을 쿨마다 — 미니언한테도 아끼지 말 것",
+      "styleTags": ["성장", "원콤"],
+      "source": "kr"
+    },
+    {
+      "title": "차가운 냉기 궤도 아솔",
+      "champions": ["AurelionSol", "Ashe"],
+      "augments": ["ARAM_IceCold", "ARAM_StackosaurusRex"],
+      "matchType": "any",
+      "whyFun": "슬로우에 -75 추가 — 아솔 궤도·애쉬 화살에 걸리면 걸어서는 못 나간다. 다단중첩까지 겹치면 스택 우주 개발.",
+      "items": [3116, 6653, 3089],
+      "skills": "라일라이 두르고 E 궤도 유지 — 맵 전체가 늪",
+      "styleTags": ["카이팅", "광역", "성장"],
+      "source": "kr"
+    },
+    {
+      "title": "빵과 버터 그랩 장인",
+      "champions": ["Thresh", "Blitzcrank"],
+      "augments": ["ARAM_BreadAndButter"],
+      "matchType": "any",
+      "whyFun": "Q에 100 스킬가속 — 그랩이 쿨마다 날아온다. 맞을 때까지 던지면 언젠가 맞는다. 그게 빵과 버터.",
+      "items": [3107, 3068],
+      "skills": "부쉬에서 Q 각 재기 — 빗나가도 금방 또 온다",
+      "styleTags": ["CC", "날먹"],
+      "source": "kr"
+    },
+    {
+      "title": "빵 시리즈 포킹 제이스",
+      "champions": ["Jayce"],
+      "augments": ["ARAM_BreadAndButter", "ARAM_BreadAndCheese"],
+      "matchType": "any",
+      "whyFun": "천꾸가 삭제된 지금 제이스의 남은 낭만 — Q 가속포 포킹이 쉴 새 없이 날아간다. 백도어 각도 덤.",
+      "items": [3142, 6694, 3004],
+      "skills": "E게이트+Q 가속포 무한 반복",
+      "styleTags": ["포킹"],
+      "source": "kr"
+    },
+    {
+      "title": "노련한 저격수 포킹단",
+      "champions": ["Morgana", "MissFortune", "Mel", "Velkoz", "Varus"],
+      "augments": ["ARAM_SkilledSniper"],
+      "matchType": "any",
+      "whyFun": "600유닛 밖에서 맞히면 쿨 80% 환급 — 원거리 스킬샷이 기관총이 된다. 스탠딩 메이지 구원 증강.",
+      "items": [6655, 4646, 3135],
+      "skills": "최대 사거리에서만 쏘기 — 가까이 오면 오히려 손해",
+      "styleTags": ["포킹"],
+      "source": "kr"
+    },
+    {
+      "title": "마법 미사일 사막 황제",
+      "champions": ["Azir", "Aurora"],
+      "augments": ["ARAM_MagicMissile"],
+      "matchType": "any",
+      "whyFun": "스킬 맞을 때마다 최대체력 비례 고정딜 미사일 3발 — 병사 쿡쿡이가 전부 유도탄을 부른다.",
+      "items": [3115, 3089, 4645],
+      "skills": "원거리에서 스킬 리듬 유지 — 거리 멀수록 미사일이 아프다",
+      "styleTags": ["포킹", "무한딜"],
+      "source": "kr"
+    },
+    {
+      "title": "요정 마법 다람쥐 공장",
+      "champions": ["Anivia", "Ornn"],
+      "augments": ["ARAM_FeyMagic"],
+      "matchType": "any",
+      "whyFun": "궁에 맞으면 전원 다람쥐로 변신+무장해제 — 애니비아 눈보라가 동물원 개장 버튼이 된다.",
+      "items": [6653, 3116, 3110],
+      "skills": "궁 장판을 한타 한복판에 — 변신 동안 팀이 정리",
+      "styleTags": ["CC", "광역"],
+      "source": "kr"
+    },
+    {
+      "title": "잔혹 행위 혜성 폭격단",
+      "champions": ["Leona", "Rell", "Nautilus", "Lissandra", "Amumu", "Taliyah"],
+      "augments": ["ARAM_Cruelty"],
+      "matchType": "any",
+      "whyFun": "CC 걸 때마다 혜성 낙하 — CC 많은 챔이면 하늘에서 딜이 쏟아진다. '역겨움 GOAT' 포텐 간 그 증강.",
+      "items": [3068, 8020, 3075],
+      "skills": "CC를 아끼지 말고 순환 — 혜성이 딜을 대신한다",
+      "styleTags": ["CC", "광역"],
+      "source": "kr"
+    },
+    {
+      "title": "1v5 철마 렐",
+      "champions": ["Rell"],
+      "augments": ["ARAM_Cruelty", "ARAM_TankEngine"],
+      "matchType": "any",
+      "whyFun": "CC마다 혜성, 킬마다 거대화 — '렐의 증강 풀이 유난히 깔끔하다'는 영어권 평가 그대로 말 타고 들어가 혼자 다 한다.",
+      "items": [3068, 8020, 3084],
+      "skills": "W 낙마 이니시 → 전원 CC 순환",
+      "styleTags": ["CC", "탱킹", "난입"],
+      "source": "en"
+    },
+    {
+      "title": "최종 형태 아트록스",
+      "champions": ["Aatrox"],
+      "augments": ["FinalForm", "ARAM_SlapAround"],
+      "matchType": "any",
+      "whyFun": "궁 켜면 최대체력 50% 실드+흡혈 20% — 세계 종말자가 진짜로 안 죽는다. CC 맞힐 때마다 적응형 스택은 덤.",
+      "items": [3053, 3072, 3074],
+      "skills": "궁 켜고 Q 3연타 — 실드 남을 때까지 안 빠짐",
+      "styleTags": ["존버", "난입"],
+      "source": "kr"
+    },
+    {
+      "title": "우르프의 챔피언 이렐리아",
+      "champions": ["Irelia"],
+      "augments": ["ARAM_Quest_UrfsChampion"],
+      "matchType": "any",
+      "whyFun": "킬 관여 18회 = 황금 뒤집개 지급 — '이렐리아는 우르프 챔피언'이라는 커뮤니티 공식(?) 인증 조합.",
+      "items": [3153, 3091, 3078],
+      "skills": "Q 리셋 각 보며 킬 관여 셔틀런",
+      "styleTags": ["성장", "난입"],
+      "source": "kr"
+    },
+    {
+      "title": "거학 유레카 블라디",
+      "champions": ["Vladimir"],
+      "augments": ["ARAM_GiantSlayer", "ARAM_Eureka", "ARAM_Quest_WoogletsWitchcap", "ARAM_Goliath"],
+      "matchType": "any",
+      "whyFun": "피통과 AP가 같이 구르는 흡혈 눈덩이 — 몸이 작아지든 커지든 Q 한 모금이 점점 세진다.",
+      "items": [4633, 3089, 4629],
+      "skills": "Q 쿨마다 흡혈, 궁+E는 한타 정산용",
+      "styleTags": ["성장", "존버"],
+      "source": "kr"
+    },
+    {
+      "title": "무한 W 블라디미르",
+      "champions": ["Vladimir"],
+      "augments": ["ARAM_InfernalConduit"],
+      "matchType": "any",
+      "whyFun": "화상 틱마다 쿨 환급 — 스킬가속 쌓이면 피의 웅덩이가 끊기지 않는다. 잡을 수 없는 웅덩이.",
+      "items": [4633, 4629, 3089],
+      "skills": "2인 이상 적중 각에서 W — 들어갔다 잠수 반복",
+      "styleTags": ["무한딜", "존버"],
+      "source": "en"
+    },
+    {
+      "title": "결투의 대가 유나라",
+      "champions": ["Yunara"],
+      "augments": ["ARAM_MasterofDuality", "ARAM_DualWield"],
+      "matchType": "any",
+      "whyFun": "평타로 AP, 스킬로 AD를 무한 스택 — Q 다중 히트 유나라가 스택 공장장이 된다. 양잡까지 겹치면 두 배.",
+      "items": [6672, 3124, 3115],
+      "skills": "평타와 스킬을 번갈아 — 둘 다 스택이다",
+      "styleTags": ["성장", "카이팅"],
+      "source": "kr"
+    },
+    {
+      "title": "광휘 업글 딸깍 이즈리얼",
+      "champions": ["Ezreal"],
+      "augments": ["ARAM_Upgrade_Sheen", "ARAM_JeweledGauntlet"],
+      "matchType": "any",
+      "whyFun": "Q 한 대마다 최대체력 4% 추가딜+자힐 — 안 그래도 얄미운 이즈 Q가 저격총이 된다. 딸깍 포킹의 완성형.",
+      "items": [3078, 3004, 3508],
+      "skills": "Q 쿨마다 딸깍 — E는 도주 보험",
+      "styleTags": ["포킹", "날먹"],
+      "source": "kr"
+    },
+    {
+      "title": "대지의 영혼 세라핀",
+      "champions": ["Seraphine"],
+      "augments": ["ARAM_MountainSoul"],
+      "matchType": "any",
+      "whyFun": "세라핀 더블 캐스트에 대지 영혼 실드가 계속 얹힌다 — 노트 몇 개 치면 팀 전체가 돌갑옷.",
+      "items": [6617, 6620, 3107],
+      "skills": "W-노트-스킬 순환으로 실드 유지",
+      "styleTags": ["서포팅", "존버"],
+      "source": "kr"
+    },
+    {
+      "title": "소나타 오케스트라",
+      "champions": ["Sona", "Nami", "Seraphine"],
+      "augments": ["Sonata", "ARAM_SonicBoom", "ARAM_WindspeakersBlessing"],
+      "matchType": "any",
+      "whyFun": "힐·버프 줄 때마다 음속 폭발 광역 고정딜 — 서포터가 서 있기만 해도 딜이 나온다. 나무위키 나미 공인 세트.",
+      "items": [6616, 3504, 6617],
+      "skills": "버프·힐을 최전선 아군에게 — 폭발은 자동",
+      "styleTags": ["서포팅", "광역"],
+      "source": "kr"
+    },
+    {
+      "title": "삐뽀삐뽀 구급차",
+      "champions": ["Sona", "Milio"],
+      "augments": ["ARAM_WeeWooWeeWoo", "ARAM_AllForYou"],
+      "matchType": "any",
+      "whyFun": "피 없는 아군 쪽으로 달릴수록 이속과 힐이 같이 오른다 — 사이렌 켜고 출동하는 구급차 서포터.",
+      "items": [3504, 6617, 3222],
+      "skills": "빈사 아군에게 풀악셀 — 도착하면 만병통치",
+      "styleTags": ["서포팅", "질주"],
+      "source": "en"
+    },
+    {
+      "title": "회전목마 믹서기",
+      "champions": ["Garen", "Darius", "MonkeyKing", "Katarina"],
+      "augments": ["ARAM_SpinToWin", "ARAM_BladeWaltz"],
+      "matchType": "any",
+      "whyFun": "회전 스킬 30% 증뎀+쿨감에 검무 점멸 난무까지 — E 켜고 적진 한복판에서 믹서기를 돌린다.",
+      "items": [3053, 3068, 3748],
+      "skills": "진입 → 회전 → 검무로 한 바퀴 더",
+      "styleTags": ["난입", "광역"],
+      "source": "kr"
+    },
+    {
+      "title": "이케시아 태양 레오나",
+      "champions": ["Leona"],
+      "augments": ["ARAM_Quest_VoidImmolation"],
+      "matchType": "any",
+      "whyFun": "'레오나 이케시아 증강 가니까 좋더라' — 불사르기 3종 합체 퀘스트. 완성되면 서 있는 자리가 용암이 된다.",
+      "items": [3068, 3075, 3110],
+      "skills": "E-Q로 물고 최대한 오래 붙어 있기",
+      "styleTags": ["탱킹", "CC"],
+      "source": "kr"
+    },
+    {
+      "title": "불길한 서약 역배 러너",
+      "champions": ["Singed", "Swain", "Vladimir"],
+      "augments": ["OminousPact"],
+      "matchType": "any",
+      "whyFun": "체력을 태워 AP·이속·흡혈로 — 피가 없을수록 세진다. 빈사로 뛰어다니는 신지드는 그 자체로 심리전.",
+      "items": [4633, 3116, 3065],
+      "skills": "반피 이하를 유지하며 난입 — 죽기 직전이 전성기",
+      "styleTags": ["난입", "존버", "질주"],
+      "source": "kr"
+    },
+    {
+      "title": "Hide on bush 티모",
+      "champions": ["Teemo"],
+      "augments": ["BrushPower", "Nightstalking"],
+      "matchType": "any",
+      "whyFun": "부쉬 안 20% 증뎀 — 증강 이름부터 페이커 밈이다. 티모가 들면 밈이 아니라 범죄가 된다.",
+      "items": [3115, 6653, 3116],
+      "skills": "부쉬에서 대기 → 실명 딸깍 → 다시 부쉬",
+      "styleTags": ["날먹", "존버"],
+      "source": "kr"
+    },
+    {
+      "title": "우당탕탕 CC 재벌",
+      "champions": ["Aatrox", "Thresh", "Zac"],
+      "augments": ["ARAM_SlapAround"],
+      "matchType": "any",
+      "whyFun": "이동불가 CC마다 적응형 능력치 무한 스택 — CC 셔틀이 어느새 딜러가 되어 있다. 인벤 공인 활용법.",
+      "items": [3053, 3083, 3068],
+      "skills": "CC기를 쿨마다 명중 — 스택 통장 잔고 확인",
+      "styleTags": ["CC", "성장"],
+      "source": "kr"
+    },
+    {
+      "title": "원버튼 처형 판테온",
+      "champions": ["Pantheon"],
+      "augments": ["ARAM_Quest_SteelYourHeart"],
+      "matchType": "any",
+      "whyFun": "하트스틸 스택 증폭 — 체력 2만5천 찍으면 W가 최대체력 100% 물리 피해. 점프 한 번에 사람이 지워진다.",
+      "items": [3084, 3083, 3748],
+      "skills": "W 점프 딸깍이 처형 버튼 — 체력템만 산다",
+      "styleTags": ["원콤", "탱킹", "날먹"],
+      "source": "en"
+    },
+    {
+      "title": "체력이 AD 되는 피오라",
+      "champions": ["Fiora"],
+      "augments": ["ARAM_Quest_SteelYourHeart", "ARAM_TankEngine"],
+      "matchType": "any",
+      "whyFun": "무한 체력 스택 피오라 — 급소 한 번이 최대체력 % 고정딜이라 탱커일수록 빨리 녹는 역설.",
+      "items": [3084, 3074, 3053],
+      "skills": "급소 방향 잡고 Q 콕콕 — 체력이 곧 딜",
+      "styleTags": ["성장", "결투"],
+      "source": "en"
+    },
+    {
+      "title": "무한 반격 잭스·피오라",
+      "champions": ["Jax", "Fiora"],
+      "augments": ["ARAM_MysticPunch"],
+      "matchType": "any",
+      "whyFun": "평타마다 쿨 1.25초 환급 — E 반격·응수가 상시 유지되는 영구 회피 탱커. 때리면 때릴수록 안 맞는다.",
+      "items": [3124, 3078, 3153],
+      "skills": "평타 루프로 E 쿨 돌리기 — 반격 각만 재면 됨",
+      "styleTags": ["결투", "무한딜"],
+      "source": "en"
+    },
+    {
+      "title": "야요형제 무한 Q",
+      "champions": ["Yasuo", "Yone"],
+      "augments": ["ARAM_MysticPunch", "ARAM_SoulSiphon"],
+      "matchType": "any",
+      "whyFun": "Q가 평타 판정이라 신비한 주먹으로 쿨이 삭제된다 — 무한 Q에 치명타 흡혈까지. 야스오가 전체 승률 1위(56.6%)인 이유.",
+      "items": [3031, 3153, 3046],
+      "skills": "Q-평타-Q 무한, 3Q 토네이도에 궁 연계",
+      "styleTags": ["무한딜", "난입"],
+      "source": "en"
+    },
+    {
+      "title": "무한 폭탄 시계공",
+      "champions": ["Zilean", "MissFortune"],
+      "augments": ["ARAM_Archmage"],
+      "matchType": "any",
+      "whyFun": "스킬 쓰면 다른 스킬 쿨 30% 환급 — Q가 W를, W가 Q를 돌리는 무한 폭탄 체인. 스킬가속이 쌓이면 탄막 게임이 된다.",
+      "items": [4629, 3089, 3157],
+      "skills": "QWQW 리듬 유지 — 폭탄 두 개면 스턴",
+      "styleTags": ["무한딜", "포킹"],
+      "source": "en"
+    },
+    {
+      "title": "탄환 세례 샷건 베인",
+      "champions": ["Vayne", "Gnar"],
+      "augments": ["ARAM_FanTheHammer", "ARAM_DualWield", "ARAM_TapDancer"],
+      "matchType": "any",
+      "whyFun": "평타 1회에 온힛 5방+은화살 다중 프록 — 탱커가 평타 한 방에 증발하는 하이라이트 영상 제조기.",
+      "items": [3085, 3153, 6672],
+      "skills": "방향 바꿔가며 평타 — 샷건은 재장전이 없다",
+      "styleTags": ["원콤", "카이팅"],
+      "source": "en"
+    },
+    {
+      "title": "무적 도발 갈리오",
+      "champions": ["Galio"],
+      "augments": ["SoulEater", "ARAM_Cruelty", "PressureCooker"],
+      "matchType": "any",
+      "whyFun": "속박마다 체력 무한 스택+도발 후 버티기 — 나무위키 공인 갈리오 3종 세트(잔혹 행위·찜솥·우당탕탕)의 현대판.",
+      "items": [8020, 3065, 3068],
+      "skills": "W 도발 풀차지 — 맞아주는 게 딜이다",
+      "styleTags": ["탱킹", "CC", "존버"],
+      "source": "en"
+    },
+    {
+      "title": "번개 무한 루프 블리츠",
+      "champions": ["Blitzcrank"],
+      "augments": ["ARAM_EtherealWeapon"],
+      "matchType": "any",
+      "whyFun": "R 패시브 번개가 온힛을 부르고 온힛이 다시 번개를 부른다 — 그랩 한 번에 연쇄 감전 쇼.",
+      "items": [3068, 3157, 8020],
+      "skills": "Q 그랩 → E 어퍼컷 → 번개는 자동",
+      "styleTags": ["CC", "무한딜"],
+      "source": "en"
+    },
+    {
+      "title": "힐이 핵폭탄 트린다미어",
+      "champions": ["Tryndamere"],
+      "augments": ["ARAM_CircleofDeath"],
+      "matchType": "any",
+      "whyFun": "Q 회복의 70%가 마법 피해 — AP 계수가 커서 후반엔 Q 딸깍이 3000딜. 힐 버튼이 처형 버튼.",
+      "items": [3089, 3135, 4645],
+      "skills": "피 빠질 때까지 버티고 적 옆에서 Q",
+      "styleTags": ["원콤", "날먹"],
+      "source": "en"
+    },
+    {
+      "title": "공포의 허수아비 적응형",
+      "champions": ["Fiddlesticks", "Gragas"],
+      "augments": ["ARAM_ADAPt"],
+      "matchType": "any",
+      "whyFun": "보너스 AD까지 AP로 환산+AP 15% 증폭 — 공포 대상에게 Q가 체력 %딜로 꽂히고, 그라가스는 W 감쇄가 태산이 된다.",
+      "items": [3089, 3135, 3157],
+      "skills": "부쉬 매복 → 궁 난입 → 공포 연계",
+      "styleTags": ["광역", "암살"],
+      "source": "en"
+    },
+    {
+      "title": "더블 궁 눈덩이 이니시",
+      "champions": ["Amumu", "Leona", "Malphite"],
+      "augments": ["ARAM_UltimateRevolution", "BiggestSnowballEver"],
+      "matchType": "any",
+      "whyFun": "한 한타에 궁 두 번+눈덩이는 핵폭탄 — 이니시에이터의 로망 풀코스. 눈덩이 맞으면 그날 한타는 끝나 있다.",
+      "items": [3068, 8020, 3075],
+      "skills": "눈덩이 → 궁 → 궁이 또 옴 → 또 궁",
+      "styleTags": ["CC", "광역", "난입"],
+      "source": "en"
+    },
+    {
+      "title": "우물 저격수 세나",
+      "champions": ["Senna", "Caitlyn"],
+      "augments": ["ARAM_ScopiestWeapons", "ARAM_StackosaurusRex"],
+      "matchType": "any",
+      "whyFun": "안개 스택 증폭에 사거리 +150 — '자기 우물에서 적을 때린다'는 영어권 명언의 주인공. 포탑도 어그로 없이 철거.",
+      "items": [3031, 3094, 3036],
+      "skills": "최대 사거리 유지 — 화면 밖에서 정산",
+      "styleTags": ["포킹", "성장", "날먹"],
+      "source": "en"
+    },
+    {
+      "title": "궤도 처형 아우렐리온 솔",
+      "champions": ["AurelionSol"],
+      "augments": ["ShrinkEngine", "ARAM_StackosaurusRex"],
+      "matchType": "any",
+      "whyFun": "스택이 E 처형선을 끌어올린다 — 이론상 스택 3653이면 체력 100% 처형. 극후반 스케일링의 로망 그 자체.",
+      "items": [6653, 3089, 3116],
+      "skills": "Q 채널링으로 스택 농사 — 후반에 별이 떨어진다",
+      "styleTags": ["성장", "광역"],
+      "source": "en"
+    },
+    {
+      "title": "최대체력 증발 온힛 트리오",
+      "champions": ["Aurora", "Varus", "Udyr"],
+      "augments": ["ARAM_EtherealWeapon"],
+      "matchType": "any",
+      "whyFun": "패시브 3링·W 중첩이 스킬로 터진다 — AP 쌓으면 최대체력 %딜이라 탱커가 오히려 더 빨리 녹는다.",
+      "items": [3115, 3124, 4645],
+      "skills": "패시브 중첩 관리가 딜사이클의 전부",
+      "styleTags": ["무한딜", "카이팅"],
+      "source": "en"
+    },
+    {
+      "title": "궁극의 각성 아리",
+      "champions": ["Ahri"],
+      "augments": ["UltimateAwakening"],
+      "matchType": "any",
+      "whyFun": "궁 쓰면 기본기 쿨 전부 초기화+가속 300 — 세 번 점멸하는 동안 매혹과 화염구가 두 세트 나간다.",
+      "items": [4645, 3152, 3089],
+      "skills": "궁 첫 대시에 스킬 리필 — 콤보를 두 바퀴 돌려라",
+      "styleTags": ["암살", "무한딜"],
+      "source": "kr"
+    },
+    {
+      "title": "도박꾼 하이롤",
+      "champions": [],
+      "augments": ["ARAM_HighRoller", "ARAM_TransmutePrismatic", "ARAM_PandorasBox"],
+      "matchType": "any",
+      "whyFun": "승률 64% 운빨 도파민 — 모루가 떨어질 때의 뽕맛으로 게임한다. '내가 하면 씹존잼'의 표본.",
+      "items": [],
+      "skills": "정신 나간 하이롤 기도 — 모루는 밟으면 내 것",
+      "styleTags": ["도박", "날먹"],
+      "source": "kr"
+    },
+    {
+      "title": "거인 학살자 실 진",
+      "champions": ["Jhin", "Vayne"],
+      "augments": ["ARAM_GiantSlayer"],
+      "matchType": "any",
+      "whyFun": "내 몸은 75% 작아지고 나보다 큰 적에게 최대 30% 증뎀 — 탱크 엔진으로 커진 상대일수록 4번째 탄환이 아프다.",
+      "items": [3031, 3036, 3094],
+      "skills": "커진 탱커부터 저격 — 작아서 잘 안 맞는다",
+      "styleTags": ["카이팅", "결투"],
+      "source": "kr"
+    }
+  ],
+  "tagRules": [
+    {
+      "ifAugmentTags": ["onhit"],
+      "ifChampTags": ["Marksman"],
+      "playstyle": "온힛 효과가 두 배로 일하는 평타 위주 카이팅 — 공속템부터 뽑고 평타를 절대 끊지 마라.",
+      "items": [3153, 6672, 3124, 3085],
+      "priority": 9
+    },
+    {
+      "ifAugmentTags": ["onhit"],
+      "ifChampTags": ["Fighter"],
+      "playstyle": "붙어서 평타를 섞는 브루저 온힛 — 몰왕과 마법사의 최후로 지속딜과 유지력을 동시에.",
+      "items": [3153, 3091, 3748],
+      "priority": 7
+    },
+    {
+      "ifAugmentTags": ["onhit"],
+      "ifChampTags": ["Mage"],
+      "playstyle": "스킬에 온힛이 묻는 순간 내셔·리치베인이 딜템이 된다 — 스킬 난사가 곧 평타 난사.",
+      "items": [3115, 3100, 3124],
+      "priority": 6
+    },
+    {
+      "ifAugmentTags": ["as"],
+      "ifChampTags": ["Marksman"],
+      "playstyle": "공속을 딜로 바꾸는 정석 원딜 — 2코어 전엔 사리고 완성되면 DPS 기계.",
+      "items": [3124, 3046, 3115],
+      "priority": 7
+    },
+    {
+      "ifAugmentTags": ["crit"],
+      "ifChampTags": ["Marksman"],
+      "playstyle": "치명타 스택 원딜 — 인피니티 엣지 타이밍에 세상이 바뀐다. 치확 증강이면 템 순서를 앞당겨라.",
+      "items": [3031, 3046, 3036],
+      "priority": 9
+    },
+    {
+      "ifAugmentTags": ["crit"],
+      "ifChampTags": ["Mage"],
+      "playstyle": "스킬 치명타 각 — 보석 건틀릿류를 집었다면 한 방 AP로 몰빵해 스킬샷을 저격총으로.",
+      "items": [3089, 4645, 3135],
+      "priority": 7
+    },
+    {
+      "ifAugmentTags": ["ap", "aoe"],
+      "ifChampTags": ["Mage"],
+      "playstyle": "광역 AP 폭격 — 한타 개막에 전부 쏟아붓고 존야로 정산. 미니언 웨이브도 스킬 하나로 지운다.",
+      "items": [6655, 3089, 3157],
+      "priority": 8
+    },
+    {
+      "ifAugmentTags": ["ap"],
+      "ifChampTags": ["Assassin"],
+      "playstyle": "AP 암살 — 로켓 벨트로 진입해 한 콤보에 지우고 존야로 빠진다.",
+      "items": [3152, 4645, 3157],
+      "priority": 6
+    },
+    {
+      "ifAugmentTags": ["ad"],
+      "ifChampTags": ["Assassin"],
+      "playstyle": "치명적인 한 콤보의 AD 암살 — 방관을 쌓고 물몸부터 순삭.",
+      "items": [3142, 6694, 6676],
+      "priority": 7
+    },
+    {
+      "ifAugmentTags": ["dot"],
+      "ifChampTags": ["Mage"],
+      "playstyle": "도트 화상 스택 — 리안드리+라일라이 발라두고 도망만 다녀도 이긴다.",
+      "items": [6653, 3116, 3165],
+      "priority": 8
+    },
+    {
+      "ifAugmentTags": ["dot"],
+      "ifChampTags": ["Tank"],
+      "playstyle": "몸에 불 두른 탱커 — 태양불꽃 계열로 서 있기만 해도 딜교 이득.",
+      "items": [3068, 8020],
+      "priority": 5
+    },
+    {
+      "ifAugmentTags": ["tank"],
+      "ifChampTags": ["Tank"],
+      "playstyle": "체력·저항 무한 스택 — 하트스틸 박치기가 곧 승리 플랜. 커질수록 강해진다.",
+      "items": [3084, 3083, 3075, 3065],
+      "priority": 9
+    },
+    {
+      "ifAugmentTags": ["tank"],
+      "ifChampTags": ["Fighter"],
+      "playstyle": "죽지 않는 딜탱 — 스테락+거대한 히드라로 앞라인에서 버티며 광역딜.",
+      "items": [3053, 3748, 3065],
+      "priority": 6
+    },
+    {
+      "ifAugmentTags": ["heal"],
+      "ifChampTags": ["Support"],
+      "playstyle": "힐 증폭 서포터 — 아군 체력바를 고장 낸다. 죽어가는 아군이 풀피로 부활하는 마술.",
+      "items": [3222, 3107, 3504, 6617],
+      "priority": 9
+    },
+    {
+      "ifAugmentTags": ["shield"],
+      "ifChampTags": ["Support"],
+      "playstyle": "실드 서포터 — 터지기 직전에 씌우는 맛. 실드 증폭 증강이면 딜러가 안 죽는다.",
+      "items": [6616, 6620, 3504],
+      "priority": 7
+    },
+    {
+      "ifAugmentTags": ["heal"],
+      "ifChampTags": ["Fighter"],
+      "playstyle": "흡혈 브루저 — 회복 증폭 증강과 피바라기로 한타 한복판에서 풀피 유지.",
+      "items": [3072, 3074, 3053],
+      "priority": 6
+    },
+    {
+      "ifAugmentTags": ["move"],
+      "ifChampTags": ["Marksman"],
+      "playstyle": "이속 카이팅 — 맞으면서 때리는 게 아니라 안 맞으면서 때린다.",
+      "items": [3046, 3094, 6672],
+      "priority": 6
+    },
+    {
+      "ifAugmentTags": ["move"],
+      "ifChampTags": ["Assassin", "Fighter"],
+      "playstyle": "이속으로 사이드 각을 잡고 급습 — 도주기 없는 적부터 문다.",
+      "items": [3142, 3078],
+      "priority": 5
+    },
+    {
+      "ifAugmentTags": ["cc"],
+      "ifChampTags": ["Tank", "Support"],
+      "playstyle": "CC 연계 이니시 — 하나 물면 팀이 끝낸다. CC 보상 증강이면 CC를 아끼지 마라.",
+      "items": [3068, 3110, 8020],
+      "priority": 8
+    },
+    {
+      "ifAugmentTags": ["cc"],
+      "ifChampTags": ["Mage"],
+      "playstyle": "CC 메이지 — 속박 적중이 곧 킬각. 잔혹 행위류 CC 보상 증강과 궁합 최고.",
+      "items": [3116, 6653],
+      "priority": 6
+    },
+    {
+      "ifAugmentTags": ["dash"],
+      "ifChampTags": ["Assassin"],
+      "playstyle": "돌진 쿨감 암살 — 진입·처치·재진입 무한 루프. 이동기가 평타가 된다.",
+      "items": [3142, 6694],
+      "priority": 7
+    },
+    {
+      "ifAugmentTags": ["ult"],
+      "ifChampTags": [],
+      "playstyle": "궁극기 중심 운영 — 궁 쿨마다 한타를 강제해라. 궁이 두 배로 일하는 증강이다.",
+      "items": [3157, 3089],
+      "priority": 6
+    },
+    {
+      "ifAugmentTags": ["mana"],
+      "ifChampTags": ["Mage"],
+      "playstyle": "마나 스택 — 여신의 눈물부터, 대천사 완성부터가 진짜 게임 시작.",
+      "items": [3003, 3070, 3110],
+      "priority": 8
+    },
+    {
+      "ifAugmentTags": ["mana"],
+      "ifChampTags": ["Marksman", "Fighter"],
+      "playstyle": "마나무네 스택 — 무라마나 변신이 파워 스파이크. 스킬 반복으로 눈물을 빨리 채워라.",
+      "items": [3004, 3508],
+      "priority": 7
+    },
+    {
+      "ifAugmentTags": ["gold"],
+      "ifChampTags": [],
+      "playstyle": "골드 불리기 — 남보다 빠른 코어템 타이밍으로 스노볼. 킬·포탑 골드를 우선 챙겨라.",
+      "items": [3031, 3089],
+      "priority": 5
+    },
+    {
+      "ifAugmentTags": ["onkill"],
+      "ifChampTags": ["Assassin", "Marksman"],
+      "playstyle": "킬 스노볼 — 한 킬이 다음 킬을 부른다. 앞서기 시작하면 끝까지 밟아라.",
+      "items": [3142, 4646],
+      "priority": 7
+    },
+    {
+      "ifAugmentTags": ["execute"],
+      "ifChampTags": [],
+      "playstyle": "마무리 일격 — 빈사 적부터 정리해 연쇄 이득. 처형선 밑으로 내리는 게 콤보의 목표.",
+      "items": [6676, 3036],
+      "priority": 6
+    },
+    {
+      "ifAugmentTags": ["poke"],
+      "ifChampTags": ["Mage", "Marksman"],
+      "playstyle": "포킹 소모전 — 한타 전에 반피 만들고 시작. 사거리 밖에서만 딜교한다.",
+      "items": [6655, 4646, 3094],
+      "priority": 8
+    },
+    {
+      "ifAugmentTags": ["aoe"],
+      "ifChampTags": ["Tank", "Fighter"],
+      "playstyle": "광역 난전 — 최대한 많이 맞히는 각으로 진입. 외길 칼바람에선 광역이 왕이다.",
+      "items": [3748, 3068],
+      "priority": 5
+    },
+    {
+      "ifAugmentTags": ["summoner"],
+      "ifChampTags": [],
+      "playstyle": "소환사 주문 빌드 — 점멸·표식 쿨마다 변수 창출. 스펠이 스킬 하나 더 생긴 셈.",
+      "items": [],
+      "priority": 4
+    },
+    {
+      "ifAugmentTags": ["quest"],
+      "ifChampTags": [],
+      "playstyle": "퀘스트 완수형 — 초반은 숙제 시간, 완성되는 순간부터 보상 타임. 조건을 미니언에게도 채워라.",
+      "items": [],
+      "priority": 4
+    },
+    {
+      "ifAugmentTags": ["support"],
+      "ifChampTags": ["Support"],
+      "playstyle": "유틸 서포터 — 내가 크는 게 아니라 팀을 키운다. 버프·오라 아이템 우선.",
+      "items": [4005, 3504, 3107],
+      "priority": 7
+    }
+  ],
+  "_unresolved": [
+    {
+      "combo": "천꾸 제이스/가렌/카타리나/드레이븐/제리/그레이브즈 + 천천히 꾸준히",
+      "reason": "Slow and Steady(천천히, 꾸준히)는 V26.12에서 삭제되어 현행 KIWI 증강 목록(222종)에 없음 — '나오면 오픈' 밈의 주인공이었으나 매핑 불가",
+      "source": "kr"
+    },
+    {
+      "combo": "샤코/진/키아나/니코/제드 + 광대 대학",
+      "reason": "Clown College(광대 대학)는 위키 기준 비활성화 상태이며 현행 KIWI 증강 목록에 등재되어 있지 않음",
+      "source": "kr"
+    },
+    {
+      "combo": "람머스/벨베스 + 깊은 상처",
+      "reason": "Gash(깊은 상처)는 V26.12에서 삭제됨",
+      "source": "kr"
+    },
+    {
+      "combo": "자헨 + 저주의 화염",
+      "reason": "Feel the Burn(저주의 화염)은 V26.12에서 삭제됨",
+      "source": "kr"
+    },
+    {
+      "combo": "케이틀린 + 재충전",
+      "reason": "ReEnergize(재충전)는 V26.12에서 삭제됨",
+      "source": "kr"
+    },
+    {
+      "combo": "아리/블리츠크랭크 + 처형자",
+      "reason": "Executioner(처형자)는 V26.12에서 삭제됨",
+      "source": "kr"
+    },
+    {
+      "combo": "갈리오/탱커 + 부정 행위 (+탱크 엔진)",
+      "reason": "Cheating(부정 행위)은 무한 중첩 악용으로 V26.12에서 삭제됨",
+      "source": "kr"
+    },
+    {
+      "combo": "판테온 + 원형낫",
+      "reason": "'원형낫'이 가리키는 현행 증강/아이템을 특정할 수 없음(연구 노트에도 미확인 표시)",
+      "source": "kr"
+    },
+    {
+      "combo": "포로발사기 + 잔혹 행위 (포텐 간 불쾌 조합)",
+      "reason": "Poro Blaster(포로 발사기)는 V26.12에서 삭제됨 — 잔혹 행위 단독 조합은 combos에 수록",
+      "source": "kr"
+    },
+    {
+      "combo": "소나/유미/룰루 계열 + 미카엘 증강",
+      "reason": "Upgrade Mikael's Blessing(미카엘의 축복 업그레이드)은 V26.12에서 삭제됨",
+      "source": "kr"
+    },
+    {
+      "combo": "쌍버프 (범용 실버 추천)",
+      "reason": "Buff Buddies(쌍버프)는 V26.12에서 삭제됨",
+      "source": "kr"
+    },
+    {
+      "combo": "잭스 + Dusk and Dawn / 블리츠크랭크 + Twin Flames",
+      "reason": "영어권 자료의 'Dusk and Dawn', 'Twin Flames'는 현행 KIWI 증강 목록·CDragon 레지스트리에서 대조 실패(구 hex/세트 명칭으로 추정)",
+      "source": "en"
+    },
+    {
+      "combo": "베이가/세나/스몰더 + Stackasaurus Rex 세트 / 소나 + Wee Woo Wee Woo 세트 (세트 보너스 전제 조합)",
+      "reason": "증강 세트(Trait) 시스템은 V26.12에서 폐지됨 — 동명 개별 증강(다단 중첩·삐뽀삐뽀) 기반 조합으로 대체하여 combos에 수록",
+      "source": "en"
+    }
+  ]
+}

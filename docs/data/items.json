@@ -1,0 +1,1147 @@
+{
+ "_note": "ARAM(map12) 구매 가능 완성 아이템 + 2단계 신발 + 수호자 시작템 큐레이션. tags는 설명 텍스트 키워드 기반 근사치(augments.json과 동일 어휘).",
+ "version": "16.17.1",
+ "items": [
+  {
+   "id": 3031,
+   "nameKo": "무한의 대검",
+   "tags": [
+    "crit",
+    "ad"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3031.png"
+  },
+  {
+   "id": 3089,
+   "nameKo": "라바돈의 죽음모자",
+   "tags": [
+    "ap"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3089.png"
+  },
+  {
+   "id": 3072,
+   "nameKo": "피바라기",
+   "tags": [
+    "ad",
+    "heal",
+    "shield"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3072.png"
+  },
+  {
+   "id": 3078,
+   "nameKo": "삼위일체",
+   "tags": [
+    "onhit",
+    "as",
+    "ad",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3078.png"
+  },
+  {
+   "id": 2501,
+   "nameKo": "지배자의 피갑옷",
+   "tags": [
+    "ad"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/2501.png"
+  },
+  {
+   "id": 3036,
+   "nameKo": "도미닉 경의 인사",
+   "tags": [
+    "crit",
+    "ad"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3036.png"
+  },
+  {
+   "id": 3074,
+   "nameKo": "굶주린 히드라",
+   "tags": [
+    "onhit",
+    "ad",
+    "heal",
+    "aoe"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3074.png"
+  },
+  {
+   "id": 3748,
+   "nameKo": "거대한 히드라",
+   "tags": [
+    "onhit",
+    "ad"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3748.png"
+  },
+  {
+   "id": 6333,
+   "nameKo": "죽음의 무도",
+   "tags": [
+    "ad",
+    "tank",
+    "heal"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6333.png"
+  },
+  {
+   "id": 6631,
+   "nameKo": "발걸음 분쇄기",
+   "tags": [
+    "as",
+    "ad",
+    "move",
+    "cc",
+    "aoe"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6631.png"
+  },
+  {
+   "id": 3157,
+   "nameKo": "존야의 모래시계",
+   "tags": [
+    "ap",
+    "tank"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3157.png"
+  },
+  {
+   "id": 3053,
+   "nameKo": "스테락의 도전",
+   "tags": [
+    "ad",
+    "shield"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3053.png"
+  },
+  {
+   "id": 3095,
+   "nameKo": "폭풍갈퀴",
+   "tags": [
+    "crit",
+    "as",
+    "ad",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3095.png"
+  },
+  {
+   "id": 3139,
+   "nameKo": "헤르메스의 시미터",
+   "tags": [
+    "ad",
+    "tank",
+    "heal",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3139.png"
+  },
+  {
+   "id": 3153,
+   "nameKo": "몰락한 왕의 검",
+   "tags": [
+    "onhit",
+    "as",
+    "ad",
+    "heal",
+    "cc"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3153.png"
+  },
+  {
+   "id": 4645,
+   "nameKo": "그림자불꽃",
+   "tags": [
+    "crit",
+    "ap"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/4645.png"
+  },
+  {
+   "id": 6665,
+   "nameKo": "해신 작쇼",
+   "tags": [
+    "tank"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6665.png"
+  },
+  {
+   "id": 2510,
+   "nameKo": "황혼과 새벽",
+   "tags": [
+    "onhit",
+    "as",
+    "ap",
+    "heal"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/2510.png"
+  },
+  {
+   "id": 2517,
+   "nameKo": "끝없는 갈망",
+   "tags": [
+    "ad",
+    "heal"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/2517.png"
+  },
+  {
+   "id": 3083,
+   "nameKo": "워모그의 갑옷",
+   "tags": [
+    "tank",
+    "heal"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3083.png"
+  },
+  {
+   "id": 3156,
+   "nameKo": "맬모셔스의 아귀",
+   "tags": [
+    "ad",
+    "tank",
+    "heal",
+    "shield"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3156.png"
+  },
+  {
+   "id": 3161,
+   "nameKo": "쇼진의 창",
+   "tags": [
+    "ad"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3161.png"
+  },
+  {
+   "id": 4633,
+   "nameKo": "균열 생성기",
+   "tags": [
+    "ap",
+    "heal"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/4633.png"
+  },
+  {
+   "id": 6610,
+   "nameKo": "갈라진 하늘",
+   "tags": [
+    "crit",
+    "ad",
+    "heal"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6610.png"
+  },
+  {
+   "id": 3508,
+   "nameKo": "정수 약탈자",
+   "tags": [
+    "crit",
+    "onhit",
+    "ad",
+    "mana"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3508.png"
+  },
+  {
+   "id": 3032,
+   "nameKo": "윤 탈 야생화살",
+   "tags": [
+    "crit",
+    "onhit",
+    "as",
+    "ad"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3032.png"
+  },
+  {
+   "id": 3033,
+   "nameKo": "필멸자의 운명",
+   "tags": [
+    "crit",
+    "ad"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3033.png"
+  },
+  {
+   "id": 3071,
+   "nameKo": "칠흑의 양날 도끼",
+   "tags": [
+    "onhit",
+    "ad",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3071.png"
+  },
+  {
+   "id": 3073,
+   "nameKo": "실험적 마공학판",
+   "tags": [
+    "as",
+    "ad",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3073.png"
+  },
+  {
+   "id": 3084,
+   "nameKo": "강철심장",
+   "tags": [
+    "tank"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3084.png"
+  },
+  {
+   "id": 3087,
+   "nameKo": "스태틱의 단검",
+   "tags": [
+    "onhit",
+    "as",
+    "ad",
+    "ap",
+    "move",
+    "aoe"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3087.png"
+  },
+  {
+   "id": 3102,
+   "nameKo": "밴시의 장막",
+   "tags": [
+    "ap",
+    "tank"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3102.png"
+  },
+  {
+   "id": 3124,
+   "nameKo": "구인수의 격노검",
+   "tags": [
+    "onhit",
+    "as",
+    "ad",
+    "ap"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3124.png"
+  },
+  {
+   "id": 3135,
+   "nameKo": "공허의 지팡이",
+   "tags": [
+    "ap"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3135.png"
+  },
+  {
+   "id": 3137,
+   "nameKo": "무덤꽃",
+   "tags": [
+    "ap",
+    "heal"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3137.png"
+  },
+  {
+   "id": 3146,
+   "nameKo": "마법공학 총검",
+   "tags": [
+    "ad",
+    "ap",
+    "heal",
+    "cc"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3146.png"
+  },
+  {
+   "id": 3181,
+   "nameKo": "선체파괴자",
+   "tags": [
+    "ad",
+    "move",
+    "aoe"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3181.png"
+  },
+  {
+   "id": 3302,
+   "nameKo": "경계",
+   "tags": [
+    "onhit",
+    "as",
+    "ad",
+    "ap"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3302.png"
+  },
+  {
+   "id": 3814,
+   "nameKo": "밤의 끝자락",
+   "tags": [
+    "ad"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3814.png"
+  },
+  {
+   "id": 4629,
+   "nameKo": "우주의 추진력",
+   "tags": [
+    "ap",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/4629.png"
+  },
+  {
+   "id": 6609,
+   "nameKo": "화공 펑크 사슬검",
+   "tags": [
+    "ad"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6609.png"
+  },
+  {
+   "id": 6653,
+   "nameKo": "리안드리의 고통",
+   "tags": [
+    "ap",
+    "dot"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6653.png"
+  },
+  {
+   "id": 6672,
+   "nameKo": "크라켄 학살자",
+   "tags": [
+    "onhit",
+    "as",
+    "ad",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6672.png"
+  },
+  {
+   "id": 6673,
+   "nameKo": "불멸의 철갑궁",
+   "tags": [
+    "crit",
+    "ad",
+    "shield"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6673.png"
+  },
+  {
+   "id": 6676,
+   "nameKo": "징수의 총",
+   "tags": [
+    "crit",
+    "ad",
+    "execute",
+    "onkill",
+    "gold"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6676.png"
+  },
+  {
+   "id": 6694,
+   "nameKo": "세릴다의 원한",
+   "tags": [
+    "ad",
+    "cc"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6694.png"
+  },
+  {
+   "id": 6699,
+   "nameKo": "벼락폭풍검",
+   "tags": [
+    "ad"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6699.png"
+  },
+  {
+   "id": 2504,
+   "nameKo": "케이닉 루컨",
+   "tags": [
+    "tank",
+    "shield"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/2504.png"
+  },
+  {
+   "id": 3003,
+   "nameKo": "대천사의 지팡이",
+   "tags": [
+    "onhit",
+    "ap",
+    "mana"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3003.png"
+  },
+  {
+   "id": 3004,
+   "nameKo": "마나무네",
+   "tags": [
+    "onhit",
+    "ad",
+    "mana"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3004.png"
+  },
+  {
+   "id": 3039,
+   "nameKo": "아트마의 심판",
+   "tags": [
+    "crit",
+    "tank"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3039.png"
+  },
+  {
+   "id": 3100,
+   "nameKo": "리치베인",
+   "tags": [
+    "onhit",
+    "ap",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3100.png"
+  },
+  {
+   "id": 3115,
+   "nameKo": "내셔의 이빨",
+   "tags": [
+    "onhit",
+    "as",
+    "ap"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3115.png"
+  },
+  {
+   "id": 3742,
+   "nameKo": "망자의 갑옷",
+   "tags": [
+    "tank",
+    "move",
+    "cc"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3742.png"
+  },
+  {
+   "id": 6662,
+   "nameKo": "얼어붙은 건틀릿",
+   "tags": [
+    "onhit",
+    "tank",
+    "cc"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6662.png"
+  },
+  {
+   "id": 6692,
+   "nameKo": "월식",
+   "tags": [
+    "ad",
+    "shield"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6692.png"
+  },
+  {
+   "id": 8010,
+   "nameKo": "핏빛 저주",
+   "tags": [
+    "ap"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/8010.png"
+  },
+  {
+   "id": 3165,
+   "nameKo": "모렐로노미콘",
+   "tags": [
+    "ap"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3165.png"
+  },
+  {
+   "id": 6698,
+   "nameKo": "불경한 히드라",
+   "tags": [
+    "ad",
+    "aoe"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6698.png"
+  },
+  {
+   "id": 2502,
+   "nameKo": "끝없는 절망",
+   "tags": [
+    "tank",
+    "heal",
+    "aoe"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/2502.png"
+  },
+  {
+   "id": 2503,
+   "nameKo": "어둠불꽃 횃불",
+   "tags": [
+    "ap",
+    "mana"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/2503.png"
+  },
+  {
+   "id": 2522,
+   "nameKo": "실체화 장비",
+   "tags": [
+    "ap",
+    "shield",
+    "mana"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/2522.png"
+  },
+  {
+   "id": 2523,
+   "nameKo": "마법광학 장치 C44",
+   "tags": [
+    "crit",
+    "ad"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/2523.png"
+  },
+  {
+   "id": 3068,
+   "nameKo": "태양불꽃 방패",
+   "tags": [
+    "tank",
+    "aoe"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3068.png"
+  },
+  {
+   "id": 3091,
+   "nameKo": "마법사의 최후",
+   "tags": [
+    "onhit",
+    "as",
+    "tank"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3091.png"
+  },
+  {
+   "id": 3142,
+   "nameKo": "요우무의 유령검",
+   "tags": [
+    "ad",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3142.png"
+  },
+  {
+   "id": 3179,
+   "nameKo": "그림자 검",
+   "tags": [
+    "ad",
+    "aoe"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3179.png"
+  },
+  {
+   "id": 4004,
+   "nameKo": "망령 해적검",
+   "tags": [
+    "ad",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/4004.png"
+  },
+  {
+   "id": 4401,
+   "nameKo": "대자연의 힘",
+   "tags": [
+    "tank",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/4401.png"
+  },
+  {
+   "id": 4646,
+   "nameKo": "폭풍 쇄도",
+   "tags": [
+    "ap",
+    "move",
+    "aoe",
+    "gold"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/4646.png"
+  },
+  {
+   "id": 6664,
+   "nameKo": "공허한 광휘",
+   "tags": [
+    "tank",
+    "aoe",
+    "onkill"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6664.png"
+  },
+  {
+   "id": 6655,
+   "nameKo": "루덴의 메아리",
+   "tags": [
+    "ap",
+    "mana",
+    "aoe"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6655.png"
+  },
+  {
+   "id": 6696,
+   "nameKo": "원칙의 원형낫",
+   "tags": [
+    "ad"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6696.png"
+  },
+  {
+   "id": 3065,
+   "nameKo": "정령의 형상",
+   "tags": [
+    "tank",
+    "shield"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3065.png"
+  },
+  {
+   "id": 3118,
+   "nameKo": "악의",
+   "tags": [
+    "ap",
+    "mana",
+    "dot"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3118.png"
+  },
+  {
+   "id": 3143,
+   "nameKo": "란두인의 예언",
+   "tags": [
+    "crit",
+    "tank",
+    "cc",
+    "aoe"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3143.png"
+  },
+  {
+   "id": 4628,
+   "nameKo": "지평선의 초점",
+   "tags": [
+    "ap"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/4628.png"
+  },
+  {
+   "id": 2512,
+   "nameKo": "악마사냥꾼의 화살",
+   "tags": [
+    "crit",
+    "as",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/2512.png"
+  },
+  {
+   "id": 3046,
+   "nameKo": "유령 무희",
+   "tags": [
+    "crit",
+    "as",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3046.png"
+  },
+  {
+   "id": 3085,
+   "nameKo": "루난의 허리케인",
+   "tags": [
+    "crit",
+    "onhit",
+    "as",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3085.png"
+  },
+  {
+   "id": 3094,
+   "nameKo": "고속 연사포",
+   "tags": [
+    "crit",
+    "as",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3094.png"
+  },
+  {
+   "id": 3152,
+   "nameKo": "마법공학 로켓 벨트",
+   "tags": [
+    "ap",
+    "move",
+    "dash"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3152.png"
+  },
+  {
+   "id": 6675,
+   "nameKo": "나보리 명멸검",
+   "tags": [
+    "crit",
+    "as",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6675.png"
+  },
+  {
+   "id": 8020,
+   "nameKo": "심연의 가면",
+   "tags": [
+    "tank",
+    "aoe"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/8020.png"
+  },
+  {
+   "id": 2525,
+   "nameKo": "원형질 안전벨트",
+   "tags": [
+    "tank",
+    "heal",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/2525.png"
+  },
+  {
+   "id": 3116,
+   "nameKo": "라일라이의 수정홀",
+   "tags": [
+    "ap",
+    "cc"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3116.png"
+  },
+  {
+   "id": 6657,
+   "nameKo": "영겁의 지팡이",
+   "tags": [
+    "ap",
+    "heal",
+    "mana"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6657.png"
+  },
+  {
+   "id": 3110,
+   "nameKo": "얼어붙은 심장",
+   "tags": [
+    "as",
+    "tank",
+    "mana",
+    "aoe"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3110.png"
+  },
+  {
+   "id": 6621,
+   "nameKo": "새벽심장",
+   "tags": [
+    "ap",
+    "shield",
+    "mana"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6621.png"
+  },
+  {
+   "id": 6695,
+   "nameKo": "독사의 송곳니",
+   "tags": [
+    "ad",
+    "shield"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6695.png"
+  },
+  {
+   "id": 3075,
+   "nameKo": "가시 갑옷",
+   "tags": [
+    "tank"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3075.png"
+  },
+  {
+   "id": 3119,
+   "nameKo": "혹한의 손길",
+   "tags": [
+    "onhit",
+    "tank",
+    "mana"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3119.png"
+  },
+  {
+   "id": 4005,
+   "nameKo": "제국의 명령",
+   "tags": [
+    "ap",
+    "cc",
+    "mana"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/4005.png"
+  },
+  {
+   "id": 2524,
+   "nameKo": "밴들파이프",
+   "tags": [
+    "as",
+    "tank",
+    "move",
+    "cc",
+    "aoe",
+    "support"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/2524.png"
+  },
+  {
+   "id": 3107,
+   "nameKo": "구원",
+   "tags": [
+    "ap",
+    "heal",
+    "shield",
+    "mana",
+    "support"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3107.png"
+  },
+  {
+   "id": 3109,
+   "nameKo": "기사의 맹세",
+   "tags": [
+    "tank",
+    "heal",
+    "support"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3109.png"
+  },
+  {
+   "id": 3222,
+   "nameKo": "미카엘의 축복",
+   "tags": [
+    "tank",
+    "shield",
+    "mana",
+    "support"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3222.png"
+  },
+  {
+   "id": 6616,
+   "nameKo": "흐르는 물의 지팡이",
+   "tags": [
+    "ap",
+    "heal",
+    "shield",
+    "mana",
+    "support"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6616.png"
+  },
+  {
+   "id": 2065,
+   "nameKo": "슈렐리아의 군가",
+   "tags": [
+    "ap",
+    "move",
+    "mana",
+    "aoe",
+    "support"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/2065.png"
+  },
+  {
+   "id": 3050,
+   "nameKo": "지크의 융합",
+   "tags": [
+    "tank",
+    "cc",
+    "aoe"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3050.png"
+  },
+  {
+   "id": 3190,
+   "nameKo": "강철의 솔라리 펜던트",
+   "tags": [
+    "tank",
+    "shield",
+    "aoe",
+    "support"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3190.png"
+  },
+  {
+   "id": 3504,
+   "nameKo": "불타는 향로",
+   "tags": [
+    "onhit",
+    "as",
+    "ap",
+    "heal",
+    "shield",
+    "move",
+    "mana",
+    "support"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3504.png"
+  },
+  {
+   "id": 6617,
+   "nameKo": "월석 재생기",
+   "tags": [
+    "ap",
+    "heal",
+    "shield",
+    "mana",
+    "support"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6617.png"
+  },
+  {
+   "id": 6620,
+   "nameKo": "헬리아의 메아리",
+   "tags": [
+    "ap",
+    "heal",
+    "shield",
+    "mana",
+    "support"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/6620.png"
+  },
+  {
+   "id": 4003,
+   "nameKo": "생명선",
+   "tags": [
+    "ad",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/4003.png"
+  },
+  {
+   "id": 3111,
+   "nameKo": "헤르메스의 발걸음",
+   "tags": [
+    "tank",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3111.png"
+  },
+  {
+   "id": 3047,
+   "nameKo": "판금 장화",
+   "tags": [
+    "tank",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3047.png"
+  },
+  {
+   "id": 3006,
+   "nameKo": "광전사의 군화",
+   "tags": [
+    "as",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3006.png"
+  },
+  {
+   "id": 3020,
+   "nameKo": "마법사의 신발",
+   "tags": [
+    "ap",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3020.png"
+  },
+  {
+   "id": 3008,
+   "nameKo": "탐욕의 군화",
+   "tags": [
+    "heal",
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3008.png"
+  },
+  {
+   "id": 3009,
+   "nameKo": "신속의 장화",
+   "tags": [
+    "move",
+    "cc"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3009.png"
+  },
+  {
+   "id": 2051,
+   "nameKo": "수호자의 뿔피리",
+   "tags": [
+    "tank"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/2051.png"
+  },
+  {
+   "id": 3112,
+   "nameKo": "수호자의 보주",
+   "tags": [
+    "ap",
+    "heal",
+    "mana"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3112.png"
+  },
+  {
+   "id": 3177,
+   "nameKo": "수호자의 검",
+   "tags": [
+    "ad"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3177.png"
+  },
+  {
+   "id": 3184,
+   "nameKo": "수호자의 망치",
+   "tags": [
+    "ad",
+    "heal"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3184.png"
+  },
+  {
+   "id": 3158,
+   "nameKo": "명석함의 아이오니아 장화",
+   "tags": [
+    "move"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3158.png"
+  },
+  {
+   "id": 3070,
+   "nameKo": "여신의 눈물",
+   "tags": [
+    "mana"
+   ],
+   "icon": "https://ddragon.leagueoflegends.com/cdn/16.17.1/img/item/3070.png"
+  }
+ ]
+}
