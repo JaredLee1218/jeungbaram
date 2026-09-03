@@ -13,13 +13,14 @@
 | category=normal | 186 |
 | funTier 분포 (S/A/B/C/D) | 23/40/57/90/15 |
 | funTier 근거 미등재 유추분 (B/C 한정) | 87 |
-| 이진 restrictions 필드 보유(이번 이식으로 부여/갱신) | 57 |
+| 이진 restrictions 필드 보유(이번 이식으로 부여/갱신) | 68 |
 | 가중치 필드(favored/disfavoredClasses) 보유 | 32 |
 | map 이식: spellPin (챔피언×증강 지정 확정) | 86 |
 | map 이식: spellExclude 항목(챔피언×스킬) | 14 |
 | map 이식: championExclude 신규 | 0 |
 | map 이식 보류(사유 있음) | 4 |
 | map pin 확정 불가(다중 스킬 적격) | 4 |
+| 풀 게이트(class-tier-adjust confirmed) 적용 증강 | 11 |
 
 ## ability-augment-map 이식 상세 (3차 실매핑, 306건 중)
 
@@ -155,6 +156,14 @@
 - **ARAM_SkilledSniper rangedOnly 제거**: 근접 Locke Q offered(official, 26.15) 반증 → favoredClasses(Mage/Marksman) 강등.
 - **Spin To Win 화이트리스트**: raw/15 §2-1 검증 수정본(22챔피언·28스킬)에서 스크립트 파생 — 챔피언 집합은 종전과 동일, 근거 등급을 community(위키 편집자 실측)로 정정하고 단일 QWER 스킬 확정 챔피언에는 spellPin 부여.
 
+## 풀 게이트 (4차 전수조사 — research/data/class-tier-adjust.json poolGateCandidates)
+
+- **ad-crit-core-dmg-gate (confirmed)**: AD/크리 코어 10종에 dmg=ap 챔피언 championExclude (Qiyana·Belveth는 dmg 근사 오류 면제). 근거: mm 2026-09-03 아리 전행 부재 + raw/11 양소스 부재.
+- **mana-core-gate (confirmed)**: 기존 MANA_GATE(requiresMana)와 동일 — 목록 일치 검증만 수행.
+- **phenomenal-evil-melee-ad-gate (confirmed)**: 극악무도에 dmg=ad·근접 챔피언 championExclude. 근거: raw/11 111010 + mm 애쉬 708게임 제시.
+- **crit-stat-family-ap-gate (deferred)**: 미이식 — 표시 강등(displayTier)만, 26.18 재실측 후 판단.
+- 태풍·검을 뽑아라·양손잡이·탭 댄서·신비한 주먹은 아리 실제 제시 관측(19~97게임)이라 게이트 금지 — 산출물 caveats 준수.
+
 ## 판단 기록 (근사·보류)
 
 - **OceanSoul 미이식**: 마나 태그 계열이나 실측 6명 전원 등재 — STUDY §3-1 "보류" 지시대로 requiresMana 미부여.
@@ -183,11 +192,11 @@
 |---|---|---|---|
 | ARAM_ADAPt | 적응형 능력치 | favoredClasses=Mage/Support, disfavoredClasses=Marksman/Assassin/Fighter | empirical(가중치) |
 | WardingWeapon | 적응형 와드 | category=ability, spellExclude, spellExclude(map), note | official — 26.15 버그픽스 |
-| ARAM_BluntForce | 육중한 힘 | favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(가중치) |
+| ARAM_BluntForce | 육중한 힘 | championExclude(풀게이트 ad-crit-core-dmg-gate 59명), favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(그룹 게이트) |
 | DoubleDefense | 보강 | category=ability, abilityPropsAll=shield, spellPin(1건), note | official — 위키 원문 |
 | ARAM_Deft | 능수능란 | favoredClasses=Marksman | empirical(가중치) |
 | DoubleStrike | 2연속 공격 | category=ability, abilityPropsAll=empoweredAttack, note | official — 위키 원문 |
-| ARAM_escAPADe | 마법사 (물리) | favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(가중치) |
+| ARAM_escAPADe | 마법사 (물리) | championExclude(풀게이트 ad-crit-core-dmg-gate 59명), favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(그룹 게이트) |
 | ItsGoTime | 출발할 시간 | category=ability, abilityPropsAll=durationEffect, spellPin(3건), note | official — 위키 원문 |
 | ARAM_Juiced | 도취 | requiresMana, note | empirical + datamined |
 | ARAM_LightemUp | 불을 밝혀 | favoredClasses=Marksman | empirical(가중치) |
@@ -202,8 +211,8 @@
 | ARAM_TankItOrLeaveIt | 확률적 방어 | favoredClasses=Marksman | empirical(가중치) |
 | TrustyWeapon | 믿음직한 무기 | category=ability, spellExclude, spellExclude(map), note | official — 26.15 버그픽스 |
 | ARAM_Typhoon | 태풍 | favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(가중치) |
-| ARAM_Upgrade_Collector | 징수의 총 업그레이드 | favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(가중치) |
-| Upgrade_DeathDance | 죽음의 무도 업그레이드 | favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(가중치) |
+| ARAM_Upgrade_Collector | 징수의 총 업그레이드 | championExclude(풀게이트 ad-crit-core-dmg-gate 59명), favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(그룹 게이트) |
+| Upgrade_DeathDance | 죽음의 무도 업그레이드 | championExclude(풀게이트 ad-crit-core-dmg-gate 59명), favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(그룹 게이트) |
 | ARAM_Upgrade_Immolate | 불사르기 업그레이드 | meleeOnly, note | empirical — 근접 3인만(11 §3-8) |
 | ARAM_Upgrade_ZH | 존야 업그레이드 | favoredClasses=Mage/Support, disfavoredClasses=Marksman/Assassin/Fighter | empirical(가중치) |
 | ARAM_WitchfulThinking | 사악한 정신 | favoredClasses=Mage/Support, disfavoredClasses=Marksman/Assassin/Fighter | empirical(가중치) |
@@ -215,8 +224,8 @@
 | ARAM_BreadAndJam | 빵과 잼 | category=ability, slot, note | official — 위키 원문 |
 | ChainReaction | 연쇄 반응 | category=ability, abilityPropsAll=knockback, spellPin(4건), note | official — 위키 원문 |
 | BloodMoneyBurn | 타오르는 이자 | championExclude, championExclude(map), note | official — 26.14 패치노트 |
-| CriticalMissile | 치명적 미사일 | favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(가중치) |
-| CriticalRhythm | 치명적 리듬 | favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(가중치) |
+| CriticalMissile | 치명적 미사일 | championExclude(풀게이트 ad-crit-core-dmg-gate 59명), favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(그룹 게이트) |
+| CriticalRhythm | 치명적 리듬 | championExclude(풀게이트 ad-crit-core-dmg-gate 59명), favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(그룹 게이트) |
 | ARAM_BangBang | 로켓 배송 | category=quest, rangedOnly, note | empirical |
 | ARAM_Impassable | 넘을 수 없는 벽 | abilityProps=immobilize, note | empirical + datamined |
 | ARAM_ItsCritical | 치명적인 공격 | favoredClasses=Marksman | empirical(가중치) |
@@ -225,7 +234,7 @@
 | MercysStrike | 자비의 일격 | category=ability, classRequired=Support, classRequired, note | official — 26.15 버그픽스 |
 | ARAM_OutlawsGrit | 무법자의 투지 | abilityProps=dash, note | empirical |
 | ARAM_Overflow | 범람 | requiresMana, note | empirical + datamined |
-| ARAM_PhenomenalEvil | 극악무도 | favoredClasses=Mage/Support | empirical(가중치) |
+| ARAM_PhenomenalEvil | 극악무도 | championExclude(풀게이트 phenomenal-evil-melee-ad-gate 45명), favoredClasses=Mage/Support | empirical(그룹 게이트) |
 | PressureCooker | 압력솥 | category=quest | category 분류 |
 | ARAM_SpecializedRecursion | 가속 추구 | category=ability, spellExclude, spellExclude(map), spellPin(2건), note | official — 26.14/26.15 버그픽스 + datamined(Trait_NotBenefitFromHaste) |
 | SpecializedEmpowerment | 위력 추구 | category=ability, spellExclude, spellExclude(map), spellPin(1건), note | official — 26.15 버그픽스 |
@@ -239,9 +248,9 @@
 | SoulEater | 영혼의 포식자 | abilityProps=immobilize, note | empirical + datamined |
 | Terraind | 지형 생성됨 | category=ability, abilityPropsAll=terrain, spellPin(6건), note | official — 위키 원문 |
 | ARAM_Terror | 공포 | category=ability | category 분류 |
-| ARAM_Upgrade_IE | 무한의 대검 업그레이드 | favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(가중치) |
-| Upgrade_Ravenous | 굶주린 히드라 업그레이드 | favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(가중치) |
-| Upgrade_SunderedSky | 갈라진 하늘 업그레이드 | favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(가중치) |
+| ARAM_Upgrade_IE | 무한의 대검 업그레이드 | championExclude(풀게이트 ad-crit-core-dmg-gate 59명), favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(그룹 게이트) |
+| Upgrade_Ravenous | 굶주린 히드라 업그레이드 | championExclude(풀게이트 ad-crit-core-dmg-gate 59명), favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(그룹 게이트) |
+| Upgrade_SunderedSky | 갈라진 하늘 업그레이드 | championExclude(풀게이트 ad-crit-core-dmg-gate 59명), favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(그룹 게이트) |
 | VoidDash | 공허 돌진 | category=ability, abilityPropsAll=dash, note | official — 위키 원문 |
 | ARAM_Vulnerability | 취약 | favoredClasses=Marksman | empirical(가중치) |
 | ARAM_WeeWooWeeWoo | 삐뽀삐뽀 | classRequired=Support, note | empirical |
@@ -274,5 +283,5 @@
 | ARAM_TapDancer | 탭 댄서 | favoredClasses=Marksman | empirical(가중치) |
 | SpellVolley | 3연발 | category=ability, abilityPropsAll=targeted+projectile, spellPin(2건), note | official + empirical |
 | ARAM_UltimateRevolution | 궁극기 대변혁 | spellPin(1건) | ability-augment-map 이식 |
-| Quest_UltraHydra | 궁극의 히드라 | category=quest, favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(가중치) |
+| Quest_UltraHydra | 궁극의 히드라 | category=quest, championExclude(풀게이트 ad-crit-core-dmg-gate 59명), favoredClasses=Marksman/Fighter/Assassin, disfavoredClasses=Mage/Support/Tank | empirical(그룹 게이트) |
 | ARAM_WindspeakersBlessing | 바람전달자의 축복 | abilityProps=heal, note | empirical(조건 해석은 추정) |

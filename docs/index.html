@@ -66,14 +66,9 @@
       </div>
       <!-- 라운드 확률 스트립 (draft.js 확률 API 부재 시 JS가 비워 둔다 — 방어적) -->
       <div id="odds-strip" class="odds-strip-wrap"></div>
+      <!-- 황금 리롤은 자동 발동(G-AUTO — research/raw/19)이라 버튼이 없다.
+           발동 시 해당 카드에 "✨ 황금 리롤!" 배지가 JS로 붙는다. -->
       <div id="aug-cards" class="aug-cards"></div>
-      <div class="draft-actions">
-        <button id="btn-golden" class="btn btn-golden" type="button">✨ 황금 리롤 (게임당 1회)</button>
-        <p id="golden-hint" class="golden-hint" hidden>
-          한 단계 높은 등급으로 바꿀 카드를 탭하세요
-          <button id="btn-golden-cancel" class="link-btn" type="button">취소</button>
-        </p>
-      </div>
       <div class="history">
         <span class="history-label">선택한 증강</span>
         <div id="history-bar" class="history-bar"></div>

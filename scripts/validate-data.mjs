@@ -293,6 +293,77 @@ for (const a of augments) {
   }
 }
 
+// ===== 5-7. tier-adjust.json 검증 (클래스 문맥 티어 조정표 — 위반 시 exit 1) =====
+// 생성: scripts/enrich-tier-adjust.cjs (원본: research/data/class-tier-adjust.json, 수작업 편집 금지)
+// 소비: recommend.js displayTier(augment, champion, adjust) — 어휘·문법이 어긋나면 조정이 조용히 무시되므로 여기서 잡는다
+{
+  log('\n=== tier-adjust.json ===');
+  const adj = load('tier-adjust.json');
+  const rules = Array.isArray(adj.rules) ? adj.rules : (issues.push('tier-adjust: rules가 배열이 아님'), []);
+  const perAug = Array.isArray(adj.perAugment) ? adj.perAugment : (issues.push('tier-adjust: perAugment가 배열이 아님'), []);
+  log('rules: ' + rules.length + ' / perAugment: ' + perAug.length);
+
+  const ADJ_TIERS = new Set(['S', 'A', 'B', 'C', 'D']);
+  const ARCHETYPES = new Set(['apMage', 'adMarksman', 'tank', 'adAssassin', 'support', 'fighter']);
+  const ADJ_DMG = new Set(['ad', 'ap', 'mixed']);
+  const CHAMP_TAG_VOCAB = new Set(['Fighter', 'Tank', 'Mage', 'Assassin', 'Marksman', 'Support']);
+  const ADJUST_RE = /^(cap:[SABCD]|down:\d+|up:\d+)$/;
+  const augTagVocab = new Set();
+  for (const a of augments) for (const t of (a.tags || [])) augTagVocab.add(t);
+
+  const ruleIds = new Set();
+  for (const r of rules) {
+    const id = r && r.id;
+    if (typeof id !== 'string' || !id) { issues.push('tier-adjust rule: id 누락'); continue; }
+    if (ruleIds.has(id)) issues.push(`tier-adjust rule ${id}: id 중복`);
+    ruleIds.add(id);
+    if (!Array.isArray(r.ifAugmentTags) || !r.ifAugmentTags.length) {
+      issues.push(`tier-adjust rule ${id}: ifAugmentTags 비어 있음`);
+    }
+    for (const k of ['ifAugmentTags', 'unlessAugmentTags']) {
+      for (const t of (r[k] || [])) {
+        if (!augTagVocab.has(t)) issues.push(`tier-adjust rule ${id}: ${k} 태그 어휘 위반 "${t}"`);
+      }
+    }
+    if (r.forDmg !== null && r.forDmg !== undefined && !ADJ_DMG.has(r.forDmg)) {
+      issues.push(`tier-adjust rule ${id}: forDmg 어휘 위반 "${r.forDmg}"`);
+    }
+    for (const c of (r.forClasses || [])) {
+      if (!ARCHETYPES.has(c)) issues.push(`tier-adjust rule ${id}: forClasses 아키타입 어휘 위반 "${c}"`);
+    }
+    if (!ADJUST_RE.test(r.adjust || '')) issues.push(`tier-adjust rule ${id}: adjust 문법 위반 "${r.adjust}"`);
+    // 챔피언 측 제외 가드 (2026-09-03 V2 클래스 스위프 확장 — 선택 필드)
+    if (r.unlessDmg !== null && r.unlessDmg !== undefined && !ADJ_DMG.has(r.unlessDmg)) {
+      issues.push(`tier-adjust rule ${id}: unlessDmg 어휘 위반 "${r.unlessDmg}"`);
+    }
+    for (const t of (r.unlessChampionTags || [])) {
+      if (!CHAMP_TAG_VOCAB.has(t)) issues.push(`tier-adjust rule ${id}: unlessChampionTags 어휘 위반 "${t}"`);
+    }
+    // dead rule 방지: 증강 측 조건을 충족하는 활성 증강이 1종 이상 존재해야 한다
+    const anyAug = augments.some(a => a.enabled !== false &&
+      (r.ifAugmentTags || []).some(t => (a.tags || []).includes(t)) &&
+      !(r.unlessAugmentTags || []).some(t => (a.tags || []).includes(t)));
+    if (!anyAug) issues.push(`tier-adjust rule ${id}: 매칭되는 활성 증강 0종 (dead rule)`);
+  }
+
+  const paSeen = new Set();
+  for (const p of perAug) {
+    const n = p && p.apiName;
+    if (typeof n !== 'string' || !augSet.has(n)) { issues.push(`tier-adjust perAugment: 미실존 apiName ${JSON.stringify(n)}`); continue; }
+    if (paSeen.has(n)) issues.push(`tier-adjust perAugment ${n}: 중복 항목`);
+    paSeen.add(n);
+    const ov = p.overrides;
+    if (typeof ov !== 'object' || ov === null || Array.isArray(ov) || !Object.keys(ov).length) {
+      issues.push(`tier-adjust perAugment ${n}: overrides는 비어 있지 않은 객체여야 함`);
+      continue;
+    }
+    for (const [arch, tier] of Object.entries(ov)) {
+      if (!ARCHETYPES.has(arch)) issues.push(`tier-adjust perAugment ${n}: overrides 아키타입 어휘 위반 "${arch}"`);
+      if (!ADJ_TIERS.has(tier)) issues.push(`tier-adjust perAugment ${n}: overrides 티어 어휘 위반 "${tier}"`);
+    }
+  }
+}
+
 // ===== 6. funrank.json 검증 (꿀잼 티어 — 위반 시 exit 1) =====
 log('\n=== funrank.json ===');
 const funData = load('funrank.json');

@@ -1,0 +1,445 @@
+{
+  "_meta": {
+    "title": "클래스 문맥 티어 조정표 (displayTier) + 풀 게이트 후보 — 225종 전수조사 산출물",
+    "collectedAt": "2026-09-03",
+    "patch": "26.17",
+    "purpose": "전역 funTier를 챔피언 문맥(아키타입 6종)으로 조정하는 규칙표. enrich 스크립트가 기계 이식한다(수작업 금지). 예: 태풍(전역 S)은 AP 딜러에게 C로 표시.",
+    "tierScale": [
+      "S",
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "archetypes": [
+      "apMage",
+      "adMarksman",
+      "tank",
+      "adAssassin",
+      "support",
+      "fighter"
+    ],
+    "archetypeDerivation": {
+      "doc": "champions.json의 tags[0](주 태그)와 dmg로 결정론 유도. 의사코드: t0=tags[0]; t0==='Support'→'support'; t0==='Tank'→'tank'; t0==='Marksman'→(dmg==='ap'?'apMage':'adMarksman'); t0==='Mage'→'apMage'; t0==='Assassin'→(dmg==='ap'?'apMage':'adAssassin'); t0==='Fighter'→(dmg==='ap'?'apMage':'fighter'); 폴백: dmg==='ap'?'apMage':'fighter'",
+      "notes": [
+        "dmg==='mixed' 챔피언(42명: 아지르·트페·티모·케일·그웬·태릭·세나 등)은 forDmg 가드가 걸린 규칙에 전부 미적용 — AS 스케일 하이브리드 오폭 방지가 이 가드의 목적",
+        "근사: dmg는 DDragon info 격차 기반 근사(enrich-champions.cjs). 알려진 오분류: Qiyana(ap로 표기되나 실제 물리 암살자), Belveth(ap로 표기되나 실제 온힛 전사) — displayTier에서 이 2명은 apMage로 유도되어 AA 계열이 강등됨. 풀 게이트 적용 전 dmg 정정(Qiyana→ad, Belveth→mixed) 권고"
+      ]
+    },
+    "ruleSemantics": {
+      "match": "규칙은 (증강.tags ∩ ifAugmentTags ≠ ∅) AND (증강.tags ∩ unlessAugmentTags = ∅)일 때 그 증강에 적용. 챔피언 측은 (forDmg가 null이거나 champion.dmg===forDmg) AND (forClasses가 비었거나 archetype ∈ forClasses). 확장(2026-09-03 V2 스위프): 규칙에 unlessDmg가 있으면 champion.dmg===unlessDmg 챔피언에 미적용, unlessChampionTags가 있으면 champion.tags와 교집합이 있는 챔피언에 미적용 (하이브리드 예외 — Tank,Mage 말파이트류).",
+      "adjustGrammar": "cap:<T> = 표시 티어 상한을 T로(강등만, 승급 없음) / down:<n> = n단계 강등 / up:<n> = n단계 승급(up:0은 무변경 자리표시)",
+      "combine": "매칭된 모든 규칙 적용: 시작 t=funTier 인덱스 → up/down 합산 반영 → 모든 cap의 min(가장 낮은 상한) 적용. perAugment.overrides가 있으면 규칙 결과보다 우선.",
+      "displayOnly": "이 표는 표시(displayTier)와 routeTargets의 S 판정 문맥화 전용. 풀(eligibility) 변경은 poolGateCandidates만 근거로 구현팀이 별도 판단."
+    },
+    "sources": [
+      "research/raw/11-empirical-pools.md §3 (6챔피언 양소스 부재 패턴 — AD/크리 코어의 브·말·소 구조 부재, AP 코어의 징·제·다 구조 부재, 마나 3종의 제드 부재, 소라카의 평타 계열 부재)",
+      "research/raw/16-stats-ability-empirical.md (mm/op.gg/aramgg 계보와 표본 임계 — 't5·popular 0% 행은 적격성 근거로 쓰지 말 것')",
+      "research/raw/13-kr-pools-community.md §1-1(나무위키 킷 기반 제외표—아레나 기준), §1-3(증바람.com 픽률 편중), §3(디시·인벤 역할군 매핑: 원딜=양손잡이·탭댄서, 탱커=강철심장·찜솥, AP=우글렛·유레카)",
+      "research/raw/12-class-weighting.md (게임스컴 데브 2026 Noor Amin 강연: 클래스별 Optimal/Viable/Average/Invalid 4단계 — 본 조정표는 그 표시측 재현)",
+      "mayhemmeta.com 챔피언 페이지 재실측 2026-09-03 (아리 134행·럭스 113행·말파이트 136행·애쉬 133행 전량 파싱, patch=16.17) — 스크래치패드 mm-{ahri,lux,malphite,ashe}.json"
+    ],
+    "keyEvidence2026_09_03": {
+      "ahri": "AD/크리 코어(육중한 힘·무한의 대검 업글·치명적 미사일·치명적 리듬·징수의 총 업글·마법사(물리)·갈라진 하늘·궁극의 히드라) 전행 부재 = 구조 제외. 반면 태풍 44게임·양손잡이 27·탭 댄서 19·신비한 주먹 97·검을 뽑아라 21 = 드물게 실제 제시됨 → 이 계열은 게이트 금지, 표시 강등만",
+      "lux": "순수 Mage+Support는 평타 계열(태풍·양손잡이·탭 댄서·신비한 주먹·능수능란) 전행 부재 — 현행 classRequired[Marksman,Fighter,Assassin] 게이트와 정합",
+      "ashe": "AP 코어가 실제 제시되나(유레카 817게임·극악무도 708·적응형 능력치 598) 승률 36~45% — '제시되지만 나쁨' = 표시 강등 대상의 전형",
+      "malphite": "태풍·양손잡이·탭 댄서·능수능란·크리 스탯 전행 부재(raw/11 AMNET과 일치), AP 계열(광신자 657·유레카 1482)은 정상 제시"
+    },
+    "counts": {
+      "rules": 13,
+      "perAugment": 6,
+      "poolGateCandidates": {
+        "confirmed": 3,
+        "deferred": 1
+      }
+    }
+  },
+  "rules": [
+    {
+      "id": "aa-core-vs-apmage",
+      "ifAugmentTags": [
+        "onhit",
+        "as"
+      ],
+      "unlessAugmentTags": [
+        "ap"
+      ],
+      "forDmg": "ap",
+      "forClasses": [
+        "apMage"
+      ],
+      "adjust": "cap:C",
+      "reason": "평타(온힛/공속) 코어는 AP 딜러 빌드와 무관 — 태풍·양손잡이·탭 댄서·신비한 주먹·능수능란이 아리에게 S/A로 표시되던 문제의 직접 원인. ap 태그 동반(광신자·마법 명사수 등 AP 스케일 평타)은 유지.",
+      "evidence": "empirical",
+      "evidenceDetail": "mm 2026-09-03: 아리 태풍 44게임(0.23%)·양손잡이 27·탭 댄서 19 — 제시는 되나 픽 최하위; 럭스·말파이트는 전행 부재. raw/11 §3-1 'op.gg 전원 등재 = 징크스만 뽑는 계열'."
+    },
+    {
+      "id": "crit-core-vs-apmage",
+      "ifAugmentTags": [
+        "crit"
+      ],
+      "unlessAugmentTags": [
+        "ap"
+      ],
+      "forDmg": "ap",
+      "forClasses": [
+        "apMage"
+      ],
+      "adjust": "cap:C",
+      "reason": "치명타 스탯 코어(치명적인 공격·영혼 흡수·취약·한 발에 두 놈·치명적 가속)는 AP 딜러에게 무의미. AP 스케일 크리(보석 건틀릿·광신자·쌍둥이 불꽃)는 ap 태그로 보존.",
+      "evidence": "empirical",
+      "evidenceDetail": "mm 2026-09-03: 아리·럭스·말파이트 3챔프 모두 치명적인 공격·영혼 흡수·취약·한 발에 두 놈·치명적 가속 전행 부재. raw/11 §3-1 AMNET 브랜드 부재."
+    },
+    {
+      "id": "ad-core-vs-apmage",
+      "ifAugmentTags": [
+        "ad"
+      ],
+      "unlessAugmentTags": [
+        "ap",
+        "tank",
+        "heal"
+      ],
+      "forDmg": "ap",
+      "forClasses": [
+        "apMage"
+      ],
+      "adjust": "cap:D",
+      "reason": "순수 AD 코어(육중한 힘·마법사(물리)·전장의 교향곡·검을 뽑아라)는 AP 딜러에게 사실상 무효 — 실측상 대부분 구조 제외 대상이라 최하 표시. 적응형(ad+ap 동반)은 보존.",
+      "evidence": "empirical",
+      "evidenceDetail": "raw/11 §3-1 육중한 힘 100101/100101(브·말·소 제외, 높음) + mm 아리·럭스 전행 부재. 전장의 교향곡은 아리 19게임 관측 → 게이트 아닌 표시 강등."
+    },
+    {
+      "id": "aa-crit-ad-vs-support",
+      "ifAugmentTags": [
+        "onhit",
+        "as",
+        "crit",
+        "ad"
+      ],
+      "unlessAugmentTags": [
+        "ap",
+        "support",
+        "tank"
+      ],
+      "forDmg": "ap",
+      "forClasses": [
+        "support"
+      ],
+      "adjust": "cap:D",
+      "reason": "인챈터에게 평타/크리/AD 계열은 최하 표시. 자기 증강(자비의 일격 등 support 태그)과 방어 겸용(tank 태그)은 보존.",
+      "evidence": "empirical",
+      "evidenceDetail": "raw/11 §3-1: 양손잡이·탄환 세례·치명적 가속·끝없는 학살·열의 전부 '소라카만 양 소스 부재'(높음) — 인챈터 클래스 Invalid의 실측."
+    },
+    {
+      "id": "support-core-vs-ad-carries",
+      "ifAugmentTags": [
+        "support"
+      ],
+      "unlessAugmentTags": [
+        "ad",
+        "ap"
+      ],
+      "forDmg": "ad",
+      "forClasses": [
+        "adMarksman",
+        "adAssassin"
+      ],
+      "adjust": "cap:C",
+      "reason": "아군 치유/보호막 연계(바람전달자의 축복 등)는 힐/실드 없는 AD 캐리에게 무의미. 적응형 동반(남작의 손길)은 보존.",
+      "evidence": "empirical",
+      "evidenceDetail": "raw/11 §3-4: 힐/실드 파워류 '징크스·제드만 일관 제외'. mm 2026-09-03 애쉬: 바람전달자의 축복 전행 부재."
+    },
+    {
+      "id": "ap-core-vs-marksman",
+      "ifAugmentTags": [
+        "ap"
+      ],
+      "unlessAugmentTags": [
+        "ad",
+        "crit",
+        "onhit",
+        "tank"
+      ],
+      "forDmg": "ad",
+      "forClasses": [
+        "adMarksman"
+      ],
+      "adjust": "cap:C",
+      "reason": "순수 AP 코어(유레카·극악무도·지옥의 전도체·마도사의 주스 상자·사악한 정신)는 AD 원딜에게 저효율. 크리/온힛 동반(보석 건틀릿·마법 명사수)은 별도 판단.",
+      "evidence": "empirical",
+      "evidenceDetail": "mm 2026-09-03 애쉬: AP 코어가 실제 제시되나 승률 최악 — 우글렛 35.77%·사악한 정신 36.04%·극악무도 36.44%·적응형 능력치 39.63%·유레카 44.92% (표본 246~817게임)."
+    },
+    {
+      "id": "ap-core-vs-adassassin",
+      "ifAugmentTags": [
+        "ap"
+      ],
+      "unlessAugmentTags": [
+        "ad",
+        "crit",
+        "onhit",
+        "tank"
+      ],
+      "forDmg": "ad",
+      "forClasses": [
+        "adAssassin"
+      ],
+      "adjust": "cap:C",
+      "reason": "AD 암살자(제드류)에게 순수 AP 코어 강등. 평타/크리 계열은 강등하지 않음(마스터 이·야스오류 온힛/크리 암살자 실존).",
+      "evidence": "empirical",
+      "evidenceDetail": "raw/11 §4-6 제드 부재 25종에 ADAPt·유레카·극악무도·우글렛·불길한 서약·결투의 대가 등 AP 코어 집중(양 소스)."
+    },
+    {
+      "id": "ap-core-vs-fighter",
+      "ifAugmentTags": [
+        "ap"
+      ],
+      "unlessAugmentTags": [
+        "ad",
+        "crit",
+        "onhit",
+        "tank"
+      ],
+      "forDmg": "ad",
+      "forClasses": [
+        "fighter"
+      ],
+      "adjust": "cap:C",
+      "reason": "AD 전사에게 순수 AP 코어 강등. dmg==='ap'인 전사(모데카이저·릴리아·럼블)는 아키타입 유도에서 apMage로 빠지므로 오폭 없음.",
+      "evidence": "empirical",
+      "evidenceDetail": "raw/11 §4-6 다리우스 부재 17종이 AP·크리·저격 계열로 구성(ADAPt·유레카·사악한 정신·우글렛·광신자 등, 양 소스)."
+    },
+    {
+      "id": "aa-crit-core-vs-tank",
+      "ifAugmentTags": [
+        "onhit",
+        "as",
+        "crit"
+      ],
+      "unlessAugmentTags": [
+        "tank",
+        "ap"
+      ],
+      "forClasses": [
+        "tank"
+      ],
+      "adjust": "cap:C",
+      "reason": "탱커에게 평타/크리 코어 강등. 탱크 겸용(강타자·확률적 방어)과 AP 스케일(광신자 — 말파이트류 AP 탱커 실존)은 보존. forDmg 없음: mixed 탱커(말파이트)도 적용.",
+      "evidence": "empirical",
+      "evidenceDetail": "mm 2026-09-03 말파이트: 태풍·양손잡이·탭 댄서·능수능란·크리 스탯 전행 부재(136행 중). raw/11 §3-1 태풍 '말파이트만 양 소스 부재'."
+    },
+    {
+      "id": "ad-core-vs-tank",
+      "ifAugmentTags": [
+        "ad"
+      ],
+      "unlessAugmentTags": [
+        "tank",
+        "ap",
+        "heal"
+      ],
+      "forClasses": [
+        "tank"
+      ],
+      "adjust": "cap:C",
+      "reason": "탱커에게 순수 AD 코어 강등(육중한 힘·전장의 교향곡 등). 죽음의 무도 업글(tank 태그)류는 보존.",
+      "evidence": "empirical",
+      "evidenceDetail": "raw/11 §3-1 육중한 힘 브·말·소 제외(높음). mm 말파이트 전행 부재."
+    },
+    {
+      "id": "tank-core-vs-ad-carries",
+      "ifAugmentTags": [
+        "tank"
+      ],
+      "unlessAugmentTags": [
+        "ad",
+        "ap",
+        "crit",
+        "onhit",
+        "as"
+      ],
+      "forDmg": null,
+      "forClasses": [
+        "adMarksman",
+        "adAssassin"
+      ],
+      "adjust": "cap:C",
+      "reason": "탱 전용 코어(강철 같은 심장·탱크 엔진·거인·확고한 의지로·압력솥·이케시아의 몰락·정신 변환)는 AD 캐리(원딜·AD 암살자)의 꿀잼 축이 아님 — 공격 태그 동반 하이브리드(나 이제 폭주해 등 tank+ad/ap)는 보존.",
+      "evidence": "empirical",
+      "evidenceDetail": "V2 12명 스위프 2026-09-03: 애쉬·징크스·케이틀린·제드·탈론 전원에서 탱 전용 6종이 전역 S/A 그대로 잔존(강철 같은 심장 S·탱크 엔진 S 등) — 사용자 계약 '원딜에게 탱 전용 S·A 0건' 위반. raw/13 §3 역할군 매핑(탱커=강철심장·찜솥, 원딜=양손잡이·탭댄서)과 정합 — 탱 전용 계열은 탱커의 대표 픽이지 캐리의 축이 아니다."
+    },
+    {
+      "id": "support-core-boost",
+      "ifAugmentTags": [
+        "support"
+      ],
+      "unlessAugmentTags": [],
+      "forDmg": null,
+      "forClasses": [
+        "support"
+      ],
+      "adjust": "up:1",
+      "reason": "서포터 전용 계열은 서포터에게 대표 픽 — 전역 funTier(범용 기준 C/B)보다 한 단계 올려 '서포터의 S/A'를 보이게 한다.",
+      "evidence": "empirical",
+      "evidenceDetail": "raw/11 §3-4 소라카 픽률: 너만을 위해 15.3%·음속 폭발 14.8%·삐뽀삐뽀 12.3%·원기옥 12.9% — 전 증강 통틀어 최상위권. raw/16 §5 소라카 원기 회복 20.66%(스킬 증강 전체 1위)."
+    },
+    {
+      "id": "ap-core-vs-tank",
+      "ifAugmentTags": [
+        "ap"
+      ],
+      "unlessAugmentTags": [
+        "tank",
+        "heal",
+        "shield"
+      ],
+      "forDmg": null,
+      "unlessDmg": "ap",
+      "unlessChampionTags": [
+        "Mage"
+      ],
+      "forClasses": [
+        "tank"
+      ],
+      "adjust": "cap:C",
+      "reason": "순수 AP 코어(유레카·지옥의 전도체·보석 건틀릿·우글렛·극악무도·마법 미사일)는 AP 스케일 없는 정통 탱커(오른·람머스·세주아니·뽀삐)에게 무의미 — 단 AP 탱커(dmg=ap 아무무·초가스·자크)와 Mage 부태그 하이브리드(말파이트 — mm 실측 유레카 1482게임 정상 제시)는 AP 원콤이 실빌드라 unlessDmg/unlessChampionTags로 제외.",
+      "evidence": "empirical",
+      "evidenceDetail": "V2 12명 스위프 2026-09-03: 오른(순수 Tank·mixed)에서 지옥의 전도체 S·보석 건틀릿 S·마법 미사일 A·극악무도 A·이빨 요정 A 잔존 — 사용자 계약 '탱커에게 AP·크리 코어 S·A 0건' 위반. keyEvidence malphite(AP 정상 제시)와 충돌하지 않도록 Mage 하이브리드·AP 탱커는 챔피언 측 가드로 제외 — 말파이트 유레카 S 유지(test-recommend case8c 계약 보존)."
+    }
+  ],
+  "perAugment": [
+    {
+      "apiName": "ARAM_EtherealWeapon",
+      "overrides": {
+        "apMage": "A"
+      },
+      "reason": "환영 무기(스킬이 적중 효과 적용)는 onhit 태그지만 스킬 기반이라 AP 딜러에게 실사용됨 — aa-core-vs-apmage 규칙(cap:C)의 예외.",
+      "evidence": "empirical",
+      "evidenceDetail": "mm 2026-09-03 아리 410게임(2.11%)/wr 50.98 — 평타 계열 중 유일하게 유의미한 표본. arammayhem 큐레이션 콤보에 오로라(AP)×환영 무기 등재(raw/13 §3-4)."
+    },
+    {
+      "apiName": "ARAM_JeweledGauntlet",
+      "overrides": {
+        "adMarksman": "B"
+      },
+      "reason": "보석 건틀릿(스킬 치명타)은 crit 태그 가드로 규칙을 통과하지만 AD 원딜 실측 승률이 낮아 S→B로 완화 강등(루시안류 스킬 원딜 예외 여지 감안해 C까지는 내리지 않음).",
+      "evidence": "empirical",
+      "evidenceDetail": "mm 2026-09-03 애쉬 1592게임/wr 39.82. 반례: arammayhem 콤보 루시안×보석 건틀릿(raw/13 §3-4)."
+    },
+    {
+      "apiName": "ARAM_ProteinShake",
+      "overrides": {
+        "adMarksman": "C",
+        "adAssassin": "C"
+      },
+      "reason": "프로틴 음료(치유·보호막 효과 증폭)는 힐/실드 없는 AD 캐리에게 무의미 — 태그(heal+shield+tank)가 규칙망에 안 걸려 개별 지정.",
+      "evidence": "empirical",
+      "evidenceDetail": "raw/11 §3-4 '징크스·제드만 일관 제외'. mm 2026-09-03 애쉬 전행 부재."
+    },
+    {
+      "apiName": "ARAM_MindtoMatter",
+      "overrides": {
+        "adMarksman": "C"
+      },
+      "reason": "정신 변환(마나→체력)은 A티어지만 원딜 실측에서 제시 자체가 안 잡힘 — 태그(mana+tank)가 규칙망 밖이라 개별 지정.",
+      "evidence": "empirical",
+      "evidenceDetail": "mm 2026-09-03 애쉬 전행 부재(마나 챔피언인데도). raw/11 §3-3 AMNET 징크스 부재."
+    },
+    {
+      "apiName": "ARAM_Overflow",
+      "overrides": {
+        "adMarksman": "C"
+      },
+      "reason": "범람(마나 2배 소모·효과 증폭)도 동일 — 원딜 실측 부재, 태그(mana+heal+shield) 규칙망 밖.",
+      "evidence": "empirical",
+      "evidenceDetail": "mm 2026-09-03 애쉬 전행 부재. raw/11 §3-3 011010(징크스·제드 부재)."
+    },
+    {
+      "apiName": "ARAM_Upgrade_Sheen",
+      "overrides": {
+        "apMage": "B"
+      },
+      "reason": "광휘의 검 업그레이드는 onhit 태그지만 주문검 계열에 리치베인(AP 아이템)이 포함되어 AP 딜러에게 실사용 — aa-core-vs-apmage 규칙(cap:C)의 예외로 전역 funTier(B) 유지.",
+      "evidence": "empirical",
+      "evidenceDetail": "mm 2026-09-03 아리 195게임(1.0%)/wr 57.44 — 아리 전 증강 중 최상위권 승률. (반례: 럭스 wr 36.67/120게임 — B 유지가 상한, 승급은 안 함.)"
+    }
+  ],
+  "poolGateCandidates": [
+    {
+      "id": "ad-crit-core-dmg-gate",
+      "status": "confirmed",
+      "change": "현행 classRequired [Marksman,Fighter,Assassin]에 dmgExclude:'ap' 추가 (dmg==='ap' 챔피언 이진 제외 — 하이브리드 태그 구멍 봉쇄)",
+      "augments": [
+        "ARAM_BluntForce",
+        "ARAM_escAPADe",
+        "ARAM_Upgrade_Collector",
+        "Upgrade_DeathDance",
+        "CriticalMissile",
+        "CriticalRhythm",
+        "ARAM_Upgrade_IE",
+        "Upgrade_Ravenous",
+        "Upgrade_SunderedSky",
+        "Quest_UltraHydra"
+      ],
+      "evidence": "empirical",
+      "evidenceDetail": "mm 2026-09-03: Assassin 태그를 가진 아리(134행)에게 이 10종 전행 부재 — 실게임은 하이브리드 AP에게도 AD/크리 코어를 구조 제외함. raw/11 §3-1 브랜드·말파이트·소라카 양 소스 부재(높음). 현행 시뮬은 아리가 Assassin 태그로 게이트를 통과해 과포함.",
+      "conflictCheck": "ability-augment-map.json offered 287건(fidelity 221건 포함)에 이 10종 없음 — 충돌 없음(전부 스킬 증강이 아닌 일반 증강)",
+      "caveats": [
+        "Qiyana·Belveth는 dmg='ap'(DDragon 근사 오류)라 이 게이트에 오폭 — 적용 전 champions.json dmg 정정(Qiyana→ad, Belveth→mixed) 또는 게이트 예외 목록 필요",
+        "태풍·검을 뽑아라·양손잡이·탭 댄서·신비한 주먹은 아리에게 실제 제시 관측(19~97게임)이라 이 게이트에 포함 금지 — displayTier 강등으로만 처리"
+      ]
+    },
+    {
+      "id": "mana-core-gate",
+      "status": "confirmed",
+      "change": "usesMana===false 챔피언에게 이진 제외",
+      "augments": [
+        "ARAM_MindtoMatter",
+        "ARAM_Overflow",
+        "ARAM_Juiced"
+      ],
+      "evidence": "empirical",
+      "evidenceDetail": "raw/11 §3-3: 마나 3종 전부 제드(기력)만 양 소스 부재(높음). 나무위키 아레나 규칙 '마나 계열 — 마나 안 쓰는 챔피언 전부 제외'(raw/13 §1-1, 아수라장 적용은 실측으로 뒷받침).",
+      "conflictCheck": "offered 287건에 3종 없음 — 충돌 없음",
+      "caveats": [
+        "기력 챔피언 1명(제드) 표본 — 가렌류 무자원 챔피언 일반화는 근사: 표기 필요"
+      ]
+    },
+    {
+      "id": "phenomenal-evil-melee-ad-gate",
+      "status": "confirmed",
+      "change": "ARAM_PhenomenalEvil을 dmg==='ad' && ranged===false 챔피언에게 이진 제외 (현행 '가중치 유지' 주석의 승격)",
+      "augments": [
+        "ARAM_PhenomenalEvil"
+      ],
+      "evidence": "empirical",
+      "evidenceDetail": "raw/11 §3-2: 111010 양 소스 — 제드·다리우스(근접 AD) 제외, 징크스(원거리 AD) 포함. mm 2026-09-03 애쉬 708게임 제시 확인(원거리 AD 포함 재확인).",
+      "conflictCheck": "offered 287건에 없음 — 충돌 없음",
+      "caveats": [
+        "근사: 'AP 예외가 근접 AD만 찍는' 메커니즘 해석은 추정 — 원거리 AD 포함이 실측이므로 ranged 조건 필수"
+      ]
+    },
+    {
+      "id": "crit-stat-family-ap-gate",
+      "status": "deferred",
+      "change": "(보류) 크리/평타 스탯 8종의 dmgExclude:'ap' — 지금은 displayTier 강등만, 26.18 재실측 후 게이트 판단",
+      "augments": [
+        "ARAM_Deft",
+        "ARAM_ItsCritical",
+        "ARAM_DoubleTap",
+        "CritNCast",
+        "ARAM_FanTheHammer",
+        "ARAM_Firebrand",
+        "ARAM_SoulSiphon",
+        "ARAM_Vulnerability"
+      ],
+      "evidence": "empirical",
+      "evidenceDetail": "mm 2026-09-03: 아리·럭스·말파이트 3챔프 전행 부재(애쉬는 671~3622게임 정상 제시) — 구조 제외 정황. 단 raw/11 §3-1은 같은 계열을 'op.gg 전원 등재(잔재 의심), 낮음~중간'으로 판정했고 표본이 4챔프라 보류.",
+      "conflictCheck": "offered 287건에 8종 없음 — 게이트 시 충돌은 없음",
+      "caveats": [
+        "말파이트는 dmg='mixed'라 dmgExclude:'ap'로는 말파이트 부재를 재현 못 함 — 완전 재현은 클래스 기반 게이트가 필요해 증거 더 필요"
+      ]
+    }
+  ]
+}

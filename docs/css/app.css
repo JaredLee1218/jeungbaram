@@ -138,19 +138,8 @@ button {
 }
 .btn-primary:hover { border-color: var(--gold); }
 
-.btn-golden {
-  border-color: var(--gold);
-  color: var(--gold-bright);
-  background: linear-gradient(180deg, rgba(200, 170, 110, 0.18), rgba(200, 170, 110, 0.06));
-  box-shadow: 0 0 12px rgba(200, 170, 110, 0.2);
-}
-.btn-golden.armed {
-  animation: golden-pulse 1.1s ease-in-out infinite;
-}
-@keyframes golden-pulse {
-  0%, 100% { box-shadow: 0 0 8px rgba(200, 170, 110, 0.25); }
-  50%      { box-shadow: 0 0 20px rgba(200, 170, 110, 0.65); }
-}
+/* .btn-golden 계열 제거: 황금 리롤이 자동 발동(G-AUTO — research/raw/19)으로
+ * 바뀌며 버튼·armed 상태가 사라졌다. 발동 연출은 .aug-badge-golden이 담당. */
 
 .link-btn {
   border: none;
@@ -857,8 +846,8 @@ button {
  * funTier가 있으면 테두리를 티어색으로 전환한다. 희귀 등급은 상단 배지와
  * 카드 내 .aug-tier-label로 계속 보인다 — tier-* 클래스는 카드에 그대로
  * 남아 있어 .tier-prismatic .aug-tier-label 프리즘 그라데이션 텍스트도 유지.
- * tier-* 규칙보다 뒤에 두어 동점 특이도에서 이긴다 (골든 리롤 대기 시엔
- * 더 뒤의 .golden-armed .aug-card가 금색으로 덮는다 — 의도). */
+ * tier-* 규칙보다 뒤에 두어 동점 특이도에서 이긴다. 황금 리롤이 자동 발동한
+ * 슬롯은 더 뒤의 .aug-card.aug-golden이 금색 글로우만 얹는다 (테두리색 유지). */
 .aug-card.aug-fun-s,
 .aug-card.aug-fun-a,
 .aug-card.aug-fun-b,
@@ -898,6 +887,13 @@ button {
 .fun-chip-b { background: var(--funtier-b); }
 .fun-chip-c { background: var(--funtier-c); }
 .fun-chip-d { background: var(--funtier-d); }
+
+/* 문맥 조정(강등/승급)된 티어 칩 — 전역 funTier ≠ 이 챔피언 기준 티어.
+ * 과밀을 피해 점선 밑줄만 얹고, 상세는 title 툴팁("전역 X → 이 챔피언 기준 Y"). */
+.fun-chip-adj {
+  text-decoration: underline dotted 2px;
+  text-underline-offset: 2px;
+}
 
 /* 드래프트 카드에서는 우상단 코너 고정 (터치 방해 금지: pointer-events 차단) */
 .aug-card .fun-chip {
@@ -959,6 +955,39 @@ button {
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--gold);
+}
+
+/* ---- 황금 리롤 자동 발동 배지 (G-AUTO — research/raw/19) ----
+ * 리롤이 확률적으로 상급 등급으로 나온 슬롯에 붙는다. 좌상단 코너 고정
+ * (우상단은 .fun-chip 자리). 발동 직후 렌더에만 .flash가 붙어 1회 반짝 —
+ * 이후 재렌더에서는 정적 배지만 남는다. prefers-reduced-motion 사용자는
+ * 파일 끝의 전역 규칙이 애니메이션을 0.01ms로 죽여 정적 배지로 동작한다. */
+.aug-badge-golden {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 3px 9px;
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--gold-bright);
+  background: linear-gradient(180deg, rgba(200, 170, 110, 0.35), rgba(200, 170, 110, 0.12));
+  box-shadow: 0 0 10px rgba(200, 170, 110, 0.45);
+  pointer-events: none; /* 카드 탭 방해 금지 (.fun-chip과 동일) */
+}
+.aug-badge-golden.flash {
+  animation: golden-badge-pop 0.9s ease-out 1;
+}
+@keyframes golden-badge-pop {
+  0%   { transform: scale(0.5); opacity: 0; box-shadow: 0 0 0 rgba(200, 170, 110, 0); }
+  45%  { transform: scale(1.15); opacity: 1; box-shadow: 0 0 22px rgba(240, 230, 210, 0.9); }
+  100% { transform: scale(1); box-shadow: 0 0 10px rgba(200, 170, 110, 0.45); }
+}
+/* 발동 슬롯 카드: 테두리색(꿀잼 티어)은 유지하고 금색 글로우만 얹는다 */
+.aug-card.aug-golden {
+  box-shadow: 0 0 16px rgba(200, 170, 110, 0.5);
 }
 
 /* ---------- 픽 미리보기 스트립 ("이걸 고르면?") ----------
@@ -1042,30 +1071,10 @@ button {
   object-fit: contain;
 }
 
-/* 황금 리롤 대기 상태: 카드가 금색으로 맥동 */
-.golden-armed .aug-card {
-  animation: golden-pulse 1.1s ease-in-out infinite;
-  border-color: var(--gold);
-}
+/* (황금 리롤 버튼·armed·hint 스타일 제거 — 자동 발동 모델로 전환) */
 
 .btn-reroll { width: 100%; }
 .btn-reroll:disabled { text-decoration: line-through; }
-
-.draft-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 20px;
-}
-.draft-actions .btn-golden { width: 100%; }
-
-.golden-hint {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--gold);
-  text-align: center;
-}
 
 /* 히스토리 바 */
 .history {
@@ -1345,7 +1354,6 @@ button {
 
   .aug-cards { grid-template-columns: repeat(3, 1fr); align-items: stretch; }
   .aug-slot .aug-card { flex: 1; }
-  .draft-actions .btn-golden { width: auto; min-width: 280px; }
 
   .result-actions { flex-direction: row; justify-content: center; }
   .result-actions .btn { width: auto; }

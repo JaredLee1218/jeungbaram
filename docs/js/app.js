@@ -12,10 +12,14 @@
  * 부재 시 드래프트 카드는 기존 희귀 등급 테두리로 폴백한다.
  *
  * 공유 URL 형식: ?champ=<id>&seed=<정수>&picks=<라운드별 액션>-...&l9=1(선택)
- *   - 액션 2글자: p<슬롯>=선택, r<슬롯>=일반 리롤, g<슬롯>=황금 리롤
- *   - 예: picks=p2-r0p1-g2p0-p1
+ *   - 액션 2글자: p<슬롯>=선택, r<슬롯>=일반 리롤
+ *   - 예: picks=p2-r0p1-r2p0-p1
  *   - 리롤도 RNG를 소모하므로, 픽 인덱스와 함께 리롤 액션까지
  *     기록해야 같은 seed에서 같은 결과가 재현된다.
+ *   - 황금 리롤은 자동 발동(G-AUTO)이라 시드에 내재 — 별도 액션 인코딩 없음.
+ *     구버전 URL의 g<슬롯>(수동 황금 리롤) 액션은 무시(no-op)한다:
+ *     재해석하면 RNG 소비 순서가 붕괴해 이후 액션 재현이 전부 어긋난다
+ *     (research/raw/19-golden-reroll.md §9 — 크래시 없이 통과가 계약).
  *   - l9=1: 진행도 트랙 Lv9 보정(스킬 증강 확률 ↑) 켠 게임.
  *     하위 호환: 파라미터가 없으면 off (기존 공유 URL 재현성 유지).
  *
@@ -25,11 +29,13 @@
  * top-level await는 의도적으로 쓰지 않았다 (구형 브라우저 호환).
  * ============================================================ */
 
+/* goldenReroll named import 제거: 황금 리롤이 자동 발동(G-AUTO)으로 바뀌며
+ * draft.js에서 export 자체가 사라질 수 있다(B1 병렬) — named import는 export
+ * 부재 시 모듈 로드가 통째로 깨지므로(SyntaxError) 여기 두면 안 된다. */
 import {
   newGame,
   nextRound,
   rerollSlot,
-  goldenReroll,
   pickAugment,
 } from "./draft.js";
 import { recommend } from "./recommend.js";
@@ -38,10 +44,10 @@ import { recommend } from "./recommend.js";
  * 받아 typeof 체크한다. 부재 시 미리보기 스트립만 조용히 생략된다.
  * routeTargets(T2 병렬 작업 중)도 같은 이유로 네임스페이스 + typeof 방어. */
 import * as recommendApi from "./recommend.js";
-/* 확률 조회 API(drawDistribution/rerollDistribution/goldenDistribution/
- * hitProbability/skillOdds/remainingByTier — T1 완료분)도 네임스페이스로 받아
- * typeof 방어한다. 전부 순수 조회(rng 미소비)라 호출이 드래프트 결정론을
- * 건드리지 않는다 — 시드 재현 불변. */
+/* 확률 조회 API(drawDistribution/rerollDistribution/hitProbability/skillOdds/
+ * remainingByTier)와 자동 황금 리롤 상수(GOLDEN_REROLL_CHANCE)·문맥 티어
+ * displayTier(B1/B2 병렬)도 네임스페이스로 받아 typeof 방어한다. 조회는 전부
+ * 순수(rng 미소비)라 호출이 드래프트 결정론을 건드리지 않는다 — 시드 재현 불변. */
 import * as draftApi from "./draft.js";
 
 /* ---------------- 상수 ---------------- */
@@ -84,8 +90,7 @@ var state = {
   seed: null, // 이번 게임 시드
   game: null, // draft.js 게임 상태 (plain object)
   round: null, // 현재 라운드 { level, tier, slots, rerolled }
-  goldenUsed: false, // 황금 리롤 사용 여부 (UI 측 추적)
-  goldenArmed: false, // 황금 리롤 슬롯 선택 대기 중
+  goldenFlashSlot: null, // 방금 리롤에서 황금 리롤이 자동 발동한 슬롯 (1회성 반짝 연출용)
   actions: [], // 라운드별 액션 로그 [["p2"], ["r0","p1"], ...]
   search: "",
   roleFilter: null,
@@ -176,12 +181,20 @@ function loadData() {
     console.warn("funrank.json 로드 실패 — 꿀잼 랭킹 기능 없이 동작합니다.", err);
     return null;
   });
+  /* tier-adjust.json(문맥 티어 조정 규칙 — 전수조사 이식분)도 선택 데이터:
+   * 부재/파싱 실패 시 displayTier가 무조정 폴백(전역 funTier)하므로
+   * 티어 표시가 기존과 동일하게 동작한다 (방어적). */
+  var tierAdjustPromise = fetchJson("./data/tier-adjust.json").catch(function (err) {
+    console.warn("tier-adjust.json 로드 실패 — 전역 funTier로 표시합니다.", err);
+    return null;
+  });
   return Promise.all([
     fetchJson("./data/augments.json"),
     fetchJson("./data/champions.json"),
     fetchJson("./data/items.json"),
     fetchJson("./data/synergies.json"),
     funrankPromise,
+    tierAdjustPromise,
   ]).then(function (results) {
     return {
       augments: results[0].augments || [],
@@ -189,6 +202,7 @@ function loadData() {
       items: results[2].items || [],
       synergies: results[3] || { combos: [], tagRules: [] },
       funrank: buildFunrank(results[4]),
+      tierAdjust: results[5] && typeof results[5] === "object" ? results[5] : null,
     };
   });
 }
@@ -220,20 +234,70 @@ function funScoreOf(champ) {
   return isFinite(n) ? n : -1; // 점수 없는 챔피언은 꿀잼순에서 맨 뒤
 }
 
+/* ---- 클래스 문맥 티어 (recommend.js displayTier — typeof 방어) ----
+ * 전역 funTier는 "그 증강이 제일 잘 맞는 아키타입" 기준이라, AP 챔피언에게
+ * 태풍(원딜 S)이 S 테두리로 보이는 왜곡이 있었다. displayTier(augment,
+ * champion, tierAdjust)는 전역 funTier를 챔피언 아키타입 문맥으로 강등/승급한
+ * 표시 티어를 {tier, reason}으로 준다 (data/tier-adjust.json — 전수조사 이식분,
+ * research/data/class-tier-adjust.json 근거). reason은 칩 툴팁에 쓴다.
+ * 부재/실패/어휘 밖 반환이면 전역 funTier로 폴백. 확률 스트립이 분포 전 항목을
+ * 순회하며 부르므로 챔피언+증강 키로 메모한다 (규칙 데이터는 로드 후 불변). */
+var displayTierCache = new Map();
+
+function displayTierInfo(aug, champion) {
+  var globalTier = aug && AUG_FUN_TIER_CLASS[aug.funTier] ? aug.funTier : null;
+  var fallback = { tier: globalTier, reason: null };
+  var champ = champion || state.champion;
+  if (!aug || !champ) return fallback;
+  if (typeof recommendApi.displayTier !== "function") return fallback;
+  var key = champ.id + "|" + (aug.apiName || aug.nameKo || "");
+  if (displayTierCache.has(key)) return displayTierCache.get(key);
+  var info = fallback;
+  try {
+    var adjust = state.data ? state.data.tierAdjust : null;
+    var v = recommendApi.displayTier(aug, champ, adjust);
+    /* 반환 형태 방어: {tier, reason} 객체(계약) 또는 티어 문자열 둘 다 수용 */
+    if (v && typeof v === "object" && AUG_FUN_TIER_CLASS[v.tier]) {
+      info = { tier: v.tier, reason: typeof v.reason === "string" ? v.reason : null };
+    } else if (AUG_FUN_TIER_CLASS[v]) {
+      info = { tier: v, reason: null };
+    }
+  } catch (err) {
+    info = fallback; // 계산 실패 시 전역 티어 유지 (방어적)
+  }
+  displayTierCache.set(key, info);
+  return info;
+}
+
+function displayTierOf(aug, champion) {
+  return displayTierInfo(aug, champion).tier;
+}
+
 /* 증강 꿀잼 티어 칩 HTML ("" = 칩 없음).
+ * dispTier: 실제로 표시할 티어 (displayTier 결과 또는 조합 가동 승격 "S").
+ * globalTier: 전역 funTier — dispTier와 다르면 "문맥 조정" 미세 표기
+ *   (점선 밑줄 + title 툴팁 "전역 X → 이 챔피언 기준 Y"). 칩 안 글자는
+ *   한 글자를 유지해 과밀을 피한다 (계약의 표기 여부 판단 — 툴팁 채택).
  * labeled=false: 드래프트 카드용 — 카드 버튼 aria-label이 "꿀잼 티어 S"를
  *   이미 낭독하므로 칩 글자는 aria-hidden (중복 낭독 방지).
- * labeled=true: 결과 상세 카드용 — 낭독해 줄 상위 라벨이 없어
+ * labeled=true: 결과 상세·사전 카드용 — 낭독해 줄 상위 라벨이 없어
  *   칩 자체에 접근성 이름을 붙인다. */
-function augFunChipHtml(funTier, labeled) {
-  var cls = AUG_FUN_TIER_CLASS[funTier];
+function augFunChipHtml(dispTier, globalTier, labeled, reason) {
+  var cls = AUG_FUN_TIER_CLASS[dispTier];
   if (!cls) return "";
+  var adjusted = !!AUG_FUN_TIER_CLASS[globalTier] && globalTier !== dispTier;
+  var tip = adjusted
+    ? "전역 " + globalTier + " → 이 챔피언 기준 " + dispTier +
+      (typeof reason === "string" && reason ? " — " + reason : "")
+    : "";
   var aria = labeled
-    ? ' role="img" aria-label="꿀잼 티어 ' + esc(funTier) + '"'
+    ? ' role="img" aria-label="꿀잼 티어 ' + esc(dispTier) +
+      (adjusted ? " (전역 " + esc(globalTier) + ")" : "") + '"'
     : ' aria-hidden="true"';
   return (
-    '<span class="fun-chip fun-chip-' + cls + '"' + aria + ">" +
-    esc(funTier) + "</span>"
+    '<span class="fun-chip fun-chip-' + cls + (adjusted ? " fun-chip-adj" : "") +
+    '"' + (tip ? ' title="' + esc(tip) + '"' : "") + aria + ">" +
+    esc(dispTier) + "</span>"
   );
 }
 
@@ -302,11 +366,11 @@ function newSeed() {
 function startGame(champion, seed) {
   state.champion = champion;
   state.seed = seed;
-  state.goldenUsed = false;
-  state.goldenArmed = false;
+  state.goldenFlashSlot = null;
   state.actions = [];
   state.round = null;
   previewCache.clear(); // 게임 단위 캐시 — 챔피언이 바뀌면 무효
+  /* displayTierCache는 챔피언 id가 키에 포함돼 게임 간 무효화 불필요 */
 
   try {
     state.game = newGame({
@@ -339,6 +403,38 @@ function currentActions() {
   return state.actions[state.actions.length - 1];
 }
 
+/* ---- 황금 리롤 자동 발동 감지 (G-AUTO — research/raw/19) ----
+ * 황금 리롤은 버튼이 아니라 "일반 리롤이 확률적으로 상급 등급으로 나오는"
+ * 자동 메커니즘이다 (실버/골드 화면 한정, 화면당 최대 1회 — 근사).
+ * 발동 판정·RNG 소비는 전부 draft.js(B1 병렬) 몫이고, UI는 결과만 감지해
+ * "✨ 황금 리롤!" 배지를 붙인다. 표기 방식 후보를 전부 방어적으로 수용:
+ *  ① round.golden === i (기존 필드 재사용)   ② round.golden 배열
+ *  ③ round.goldenSlots[i] 불리언 배열
+ *  ④ 구조 신호: 슬롯 등급 > 라운드 등급 (표기 API 전무 시 폴백).
+ * 근사: ④는 풀 고갈 FALLBACK_ORDER 보충으로 등급이 오른 희귀 케이스를
+ * 황금으로 오인할 수 있다 — 4라운드 게임에서 사실상 발생하지 않아 수용. */
+var TIER_RANK = { silver: 0, gold: 1, prismatic: 2 };
+
+function isGoldenSlot(round, i) {
+  if (!round) return false;
+  if (round.golden === i) return true;
+  if (Array.isArray(round.golden) && round.golden.indexOf(i) !== -1) return true;
+  if (Array.isArray(round.goldenSlots) && round.goldenSlots[i]) return true;
+  var slot = round.slots && round.slots[i];
+  var sr = slot && TIER_RANK[slot.tier];
+  var rr = TIER_RANK[round.tier];
+  return typeof sr === "number" && typeof rr === "number" && sr > rr;
+}
+
+/* 이 화면(라운드)에서 황금 리롤이 이미 발동했나 — 근사: 화면당 최대 1회 */
+function goldenFiredThisRound(round) {
+  if (!round || !Array.isArray(round.slots)) return false;
+  for (var i = 0; i < round.slots.length; i++) {
+    if (isGoldenSlot(round, i)) return true;
+  }
+  return false;
+}
+
 function doReroll(i, silent) {
   var r = state.round;
   if (!r) return;
@@ -346,6 +442,7 @@ function doReroll(i, silent) {
     if (!silent) toast("이 슬롯은 이미 리롤했습니다.");
     return;
   }
+  var wasGolden = isGoldenSlot(r, i); // 리롤 전에도 이미 황금 슬롯이었나 (오탐 방지)
   try {
     var ret = rerollSlot(state.game, i);
     state.round = extractRound(ret) || state.round;
@@ -355,27 +452,12 @@ function doReroll(i, silent) {
     if (!silent) toast("리롤할 수 없습니다.");
     return;
   }
-  if (!silent) renderDraft();
-}
-
-function doGolden(i, silent) {
-  if (state.goldenUsed || (state.game && state.game.goldenUsed)) {
-    if (!silent) toast("황금 리롤은 게임당 1회입니다.");
-    return;
-  }
-  try {
-    var ret = goldenReroll(state.game, i);
-    state.round = extractRound(ret) || state.round;
-    state.goldenUsed = true;
-    state.goldenArmed = false;
-    currentActions().push("g" + i);
-  } catch (err) {
-    console.error(err);
-    if (!silent) toast("황금 리롤을 사용할 수 없습니다.");
-    return;
-  }
+  /* 이번 리롤로 새로 황금이 발동했으면 1회성 반짝 연출 예약 */
   if (!silent) {
-    toast("✨ 황금 리롤! 한 단계 높은 등급으로 교체되었습니다.");
+    if (!wasGolden && isGoldenSlot(state.round, i)) {
+      state.goldenFlashSlot = i;
+      toast("✨ 황금 리롤! 상급 등급 증강이 나왔습니다.");
+    }
     renderDraft();
   }
 }
@@ -389,7 +471,7 @@ function doPick(i, silent) {
     if (!silent) toast("선택할 수 없습니다.");
     return;
   }
-  state.goldenArmed = false;
+  state.goldenFlashSlot = null; // 라운드가 넘어가면 반짝 연출 예약 해제
   if (gameFinished()) {
     if (!silent) renderResult();
   } else {
@@ -475,7 +557,13 @@ function replayFromParams(params) {
       var type = acts[ai].charAt(0);
       var slot = Number(acts[ai].charAt(1));
       if (type === "r") doReroll(slot, true);
-      else if (type === "g") doGolden(slot, true);
+      else if (type === "g") {
+        /* 하위 호환 no-op: 구버전 URL의 수동 황금 리롤 액션.
+         * 자동 발동 모델(G-AUTO) 전환으로 수동 황금이 사라졌고, 재해석해
+         * RNG를 소비하면 이후 액션의 재현이 전부 어긋난다 — 무시가 계약
+         * (research/raw/19-golden-reroll.md §9). 결과는 원본과 다를 수
+         * 있으나(메커니즘 자체가 바뀜) 크래시 없이 나머지 액션은 재생된다. */
+      }
       else if (type === "p") {
         doPick(slot, true);
         break;
@@ -744,7 +832,6 @@ function syncL9Toggle() {
 }
 
 function showSelectScreen() {
-  state.goldenArmed = false;
   state.previewChampId = null;
   renderRoleChips();
   renderSortChips();
@@ -900,7 +987,7 @@ function renderDex(champ) {
 
   if (dossier) {
     html += dexDossierCombosHtml(dossier);
-    html += dexDossierAbilityHtml(dossier.abilityTable);
+    html += dexDossierAbilityHtml(dossier.abilityTable, champ);
     html += dexDossierItemsHtml(dossier.exampleItems);
   } else {
     /* 로컬 폴백 — buildDossier 부재/실패 시에도 사전이 뜬다 (동일 섹션 구성) */
@@ -1010,7 +1097,7 @@ function dexDossierCombosHtml(dossier) {
   return html;
 }
 
-function dexDossierAbilityHtml(table) {
+function dexDossierAbilityHtml(table, champ) {
   if (!Array.isArray(table) || !table.length) return "";
   var rows = table
     .map(function (row) {
@@ -1052,6 +1139,14 @@ function dexDossierAbilityHtml(table) {
         '<span class="dex-skill-name">' + esc(row.nameKo) +
         ' <span class="result-detail-tier tier-' + esc(row.tier || "silver") + '">' +
         esc(TIER_LABEL[row.tier] || row.tier || "") + "</span>" +
+        /* 문맥 꿀잼 티어 칩 (#dex 적용 지점) — 증강 원본이 있을 때만 */
+        (a
+          ? " " +
+            augFunChipHtml(
+              displayTierInfo(a, champ).tier, a.funTier, true,
+              displayTierInfo(a, champ).reason
+            )
+          : "") +
         (row.measured ? ' <span class="dex-badge-measured">실측</span>' : "") +
         "</span>" +
         '<span class="dex-skill-target">' + target + (exHtml ? " " + exHtml : "") +
@@ -1332,6 +1427,12 @@ function dexAbilityHtml(champ, pool) {
         '<span class="dex-skill-name">' + esc(a.nameKo) +
         ' <span class="result-detail-tier tier-' + esc(a.tier || "silver") + '">' +
         esc(TIER_LABEL[a.tier] || a.tier || "") + "</span>" +
+        /* 문맥 꿀잼 티어 칩 (#dex 적용 지점) */
+        " " +
+        augFunChipHtml(
+          displayTierInfo(a, champ).tier, a.funTier, true,
+          displayTierInfo(a, champ).reason
+        ) +
         (measured ? ' <span class="dex-badge-measured">실측</span>' : "") +
         "</span>" +
         '<span class="dex-skill-target">' + target + " " + exHtml + "</span>" +
@@ -1433,7 +1534,7 @@ function renderHistoryBar() {
  * - previewAugment 부재(typeof)·호출 실패·형태 불량이면 "" 반환
  *   → 기존 카드 그대로 (방어적)
  * - 카드가 <button>이므로 내부는 phrasing content(span/img)만 사용
- * - 리롤/황금 리롤/라운드 진행 후 재계산: 세 경로 모두 renderDraft()가
+ * - 리롤(황금 자동 발동 포함)/라운드 진행 후 재계산: 두 경로 모두 renderDraft()가
  *   카드 HTML을 통째로 다시 만들므로 여기서 자동으로 재계산된다.
  * - 메모 캐시: 키 = picked 증강 이름들 + 후보 이름. 리롤 시 바뀐 슬롯 1장만
  *   실제 계산되고 나머지 2장은 캐시 히트 (라운드 진행 시 picked가 바뀌어
@@ -1541,9 +1642,11 @@ function previewInfo(candidate) {
 }
 
 /* ---------- 리롤 확률 어드바이저 (SPEC-day2 §3) ----------
- * draft.js의 순수 조회 API(T1: drawDistribution/rerollDistribution/
- * goldenDistribution/hitProbability/remainingByTier)만 사용한다 — 전부
+ * draft.js의 순수 조회 API(drawDistribution/rerollDistribution/
+ * hitProbability/remainingByTier)만 사용한다 — 전부
  * rng 미소비라 확률 표시가 시드 결정론(드로우 바이트)을 절대 바꾸지 않는다.
+ * 자동 황금 리롤(G-AUTO) 반영 후 rerollDistribution은 혼합 분포
+ * P = (1-g)·동급 + g·상급을 돌려준다(B1) — 카드별 줄은 그대로 신뢰한다.
  * API 부재 시(typeof 방어) 스트립·카드 확률 줄을 통째로 생략한다.
  * 정직성: 표시되는 모든 %는 "시뮬레이터 모델 기준"이다 — weightFor 계수
  * (2.0/0.6/1.5)·tierWeights가 전부 근사 상수라서 (draft.js 주석 참조).
@@ -1583,11 +1686,13 @@ function sumHit(dist, pred) {
 
 /* 근사: 증강에는 수치 funScore가 없고 funTier(S~D)만 있어, 밴드 힌트(§3-5)의
  * E[리롤 funScore] 계산용으로 티어를 0~100 스케일 스칼라로 근사한다.
- * 티어 부재/어휘 밖은 중립값 55(B급 상당)로 취급 — 근사 상수. */
+ * 티어 부재/어휘 밖은 중립값 55(B급 상당)로 취급 — 근사 상수.
+ * 티어는 전역 funTier가 아니라 문맥 티어(displayTierOf)를 쓴다 — AP 챔피언에게
+ * 태풍(원딜 S)을 "리롤보다 좋다"고 힌트하는 왜곡 방지. */
 var AUG_FUNTIER_SCORE = { S: 85, A: 70, B: 55, C: 40, D: 25 };
 
 function augFunScore(aug) {
-  var s = aug && AUG_FUNTIER_SCORE[aug.funTier];
+  var s = aug && AUG_FUNTIER_SCORE[displayTierOf(aug, state.champion)];
   return typeof s === "number" ? s : 55;
 }
 
@@ -1606,6 +1711,9 @@ function routeInfoFor(pv, candidate) {
         synergies: state.data.synergies,
         augments: state.data.augments,
         game: state.game,
+        /* 문맥 티어 조정 규칙 — 있으면 S 목표 집합(sTierSet)이 displayTier
+         * 기준으로 판정된다 (없으면 전역 funTier 'S' — 하위 호환) */
+        tierAdjust: state.data.tierAdjust,
       });
       if (rt && rt.routeSet && typeof rt.routeSet.has === "function") {
         return { T: rt.routeSet, inRoute: !!rt.candidateInRoute };
@@ -1751,16 +1859,42 @@ function renderOddsStrip() {
     wrap.innerHTML = "";
     return;
   }
+  /* 통합(C1): 스트립의 꿀잼S%·스킬%도 카드별 줄과 같은 혼합 분포
+   * P = (1-g)·동급 + g·상급 (rerollDistribution, G-AUTO 반영)으로 계산한다 —
+   * 동급 drawDistribution만 쓰면 카드별 줄과 다른 답이 나온다("리롤 확률"
+   * 스트립인데 자동 황금 발동분 누락). 리롤 미소진 슬롯의 혼합 분포는
+   * 라운드 공통이라(같은 등급·같은 used·황금 판정 동일) 첫 미소진 슬롯
+   * 하나로 충분하다. 전 슬롯 소진 시엔 종전대로 동급 drawDistribution
+   * 폴백(가정적 표시 — 실제 리롤은 이미 불가). */
   var dist = null;
-  try {
-    dist = draftApi.drawDistribution(state.game, r.tier);
-  } catch (err) {
-    dist = null;
+  if (typeof draftApi.rerollDistribution === "function") {
+    for (var si = 0; si < r.slots.length; si++) {
+      if (r.rerolled && r.rerolled[si]) continue;
+      try {
+        dist = draftApi.rerollDistribution(state.game, si);
+      } catch (err) {
+        dist = null;
+      }
+      break;
+    }
+  }
+  if (!dist) {
+    try {
+      dist = draftApi.drawDistribution(state.game, r.tier);
+    } catch (err) {
+      dist = null;
+    }
   }
   if (!dist || !Array.isArray(dist.entries) || !dist.entries.length) {
     wrap.innerHTML = "";
     return;
   }
+  /* "N개 중 1개" 개수는 동급(base) 풀 기준 — 혼합 entries는 상급 항목이
+   * 병합돼 있어 개수로 읽으면 풀 크기가 부풀려 보인다 (%는 혼합 기준 유지) */
+  var baseCount =
+    dist.base && Array.isArray(dist.base.entries)
+      ? dist.base.entries.length
+      : dist.entries.length;
   var counts = null;
   try {
     counts = draftApi.remainingByTier(state.game);
@@ -1772,8 +1906,10 @@ function renderOddsStrip() {
     : 0;
 
   var tierLabel = TIER_LABEL[dist.resolvedTier] || dist.resolvedTier || "";
+  /* "꿀잼 S급" 적중률은 문맥 티어(displayTierOf) 기준 — 이 챔피언에게 S인
+   * 증강만 센다 (전역 funTier면 AP 챔피언에게 원딜 S가 섞여 부풀려짐). */
   var pFunS = sumHit(dist, function (a) {
-    return a.funTier === "S";
+    return displayTierOf(a, state.champion) === "S";
   });
   var pAbility = sumHit(dist, function (a) {
     return a.category === "ability";
@@ -1782,11 +1918,11 @@ function renderOddsStrip() {
   /* 접힌 상태에서도 핵심 숫자가 보이는 요약 줄 */
   var mini =
     "꿀잼S " + fmtPct(pFunS) + " · 스킬 " + fmtPct(pAbility) +
-    " · 남은 " + tierLabel + " " + dist.entries.length + "개";
+    " · 남은 " + tierLabel + " " + baseCount + "개";
 
   var body =
     '<p class="odds-line">리롤하면 <strong>' + esc(tierLabel) + "</strong> " +
-    dist.entries.length + "개 중 1개 — 꿀잼 S급 " + esc(fmtPct(pFunS)) +
+    baseCount + "개 중 1개 — 꿀잼 S급 " + esc(fmtPct(pFunS)) +
     " · 스킬 증강 " + esc(fmtPct(pAbility)) + "</p>";
 
   if (counts) {
@@ -1796,39 +1932,29 @@ function renderOddsStrip() {
       " (전체 " + total + "개)</p>";
   }
 
-  /* 황금 리롤 줄 — 사용 전에만 (§1-2 결정: 상위 등급 풀 기준이라 일반 리롤과 답이 다름).
-   * 사용 후에는 줄 제거 (§3-4-4 소진 처리). */
-  var goldenSpent = state.goldenUsed || (state.game && state.game.goldenUsed);
-  if (!goldenSpent && typeof draftApi.goldenDistribution === "function") {
-    var gi = 0;
-    for (var i = 0; i < r.slots.length; i++) {
-      if (r.slots[i] && r.slots[i].tier === r.tier) {
-        gi = i;
-        break;
-      }
-    }
-    var gd = null;
-    try {
-      gd = draftApi.goldenDistribution(state.game, gi);
-    } catch (err) {
-      gd = null;
-    }
-    if (gd && Array.isArray(gd.entries) && gd.entries.length) {
-      var gLabel = TIER_LABEL[gd.resolvedTier] || gd.resolvedTier || "";
-      body +=
-        '<p class="odds-line odds-line-golden">✨ 황금 리롤 시 <strong>' + esc(gLabel) +
-        "</strong> " + gd.entries.length + "개 중 1개 — 꿀잼 S급 " +
-        esc(fmtPct(sumHit(gd, function (a) { return a.funTier === "S"; }))) +
-        " · 스킬 증강 " +
-        esc(fmtPct(sumHit(gd, function (a) { return a.category === "ability"; }))) +
-        "</p>";
-    }
+  /* 황금 리롤 줄 — 자동 발동 모델(G-AUTO)의 안내로 재구성:
+   * "리롤 시 g% 확률로 상급 등급". 실버/골드 화면 + 이 화면 미발동일 때만
+   * (프리즘 화면은 판정 자체가 없고, 화면당 최대 1회 — 근사, research/raw/19).
+   * 통합(C1): g는 위 혼합 분포의 goldenChance를 그대로 쓴다(단일 근원 —
+   * 게임 단위 재정의·판정 불가 시 0을 rerollDistribution이 이미 해소).
+   * 폴백 분포(전 슬롯 소진)엔 goldenChance가 없어 줄이 함께 생략된다 —
+   * 리롤 자체가 불가하니 안내도 무의미. g 값은 근사: 트랙 완주 가정 추정치
+   * (합산 총량 비공개, draft.js GOLDEN_REROLL_CHANCE 주석 참조). */
+  var g = typeof dist.goldenChance === "number" && dist.goldenChance > 0
+    ? dist.goldenChance
+    : null;
+  var GOLDEN_UP_LABEL = { silver: "골드", gold: "프리즘" };
+  if (g !== null && GOLDEN_UP_LABEL[r.tier] && !goldenFiredThisRound(r)) {
+    body +=
+      '<p class="odds-line odds-line-golden">✨ 리롤 시 ' + esc(fmtPct(g)) +
+      " 확률로 <strong>상급 등급(" + GOLDEN_UP_LABEL[r.tier] +
+      ")</strong> 증강이 자동으로 나옵니다 — 화면당 최대 1회 (근사)</p>";
   }
 
   /* 재등장 금지 규칙(시뮬 내 정확) + 정직성 캡션 — "시뮬 기준" 고지는 여기 1회 (§3-6) */
   body +=
     '<p class="odds-caption">한 번 화면에 나온 카드는 이번 판에 다시 안 나와요 · ' +
-    "모든 %는 시뮬 기준 (가중치는 근사 상수)</p>";
+    "모든 %는 시뮬 기준 (가중치는 근사 상수) · 꿀잼 티어는 이 챔피언 기준</p>";
 
   wrap.innerHTML =
     '<details class="odds-strip"' + (state.oddsOpen ? " open" : "") + ">" +
@@ -1860,7 +1986,7 @@ function renderDraft() {
   badge.className = "tier-badge tier-" + tier;
   badge.textContent = TIER_LABEL[tier] || tier;
 
-  /* 라운드 확률 스트립 — 리롤/황금 리롤/라운드 진행 시 renderDraft 전체 재렌더로 자동 갱신 */
+  /* 라운드 확률 스트립 — 리롤(황금 자동 발동 포함)/라운드 진행 시 renderDraft 전체 재렌더로 자동 갱신 */
   renderOddsStrip();
 
   /* 카드 3장 */
@@ -1876,22 +2002,29 @@ function renderDraft() {
         aug.enhancedSkill && aug.enhancedSkill.key ? aug.enhancedSkill : null;
       /* 미리보기 계산 1회 — html(스트립)과 newCombo(티어 승격 시그널) 둘 다 사용 */
       var pv = previewInfo(aug);
-      /* 카드 최종 꿀잼 티어: funTier(F1 병렬 생성 중) 기본, 단 새 조합이
-       * 1개 이상 가동되면 "S" 승격 (조합 발동이 최고 시그널).
-       * funTier 부재/어휘 밖 + 승격 없음 → null → 티어 테두리·칩 없이
-       * 기존 희귀 등급(tier-*) 테두리 그대로 (방어적 폴백). */
-      var funTier = pv.newCombo
-        ? "S"
-        : AUG_FUN_TIER_CLASS[aug.funTier]
-          ? aug.funTier
-          : null;
+      /* 카드 최종 꿀잼 티어: 문맥 티어(displayTierOf — 챔피언 아키타입 기준
+       * 강등/승급, 부재 시 전역 funTier 폴백) 기본, 단 새 조합이 1개 이상
+       * 가동되면 "S" 승격 (조합 발동이 최고 시그널 — 챔피언 특정적이라
+       * 문맥 티어와 모순 없음). 티어 없음 → 기존 희귀 등급 테두리 폴백. */
+      var dInfo = displayTierInfo(aug, state.champion);
+      var funTier = pv.newCombo ? "S" : dInfo.tier;
       var funCls = funTier ? " aug-fun-" + AUG_FUN_TIER_CLASS[funTier] : "";
+      /* 황금 리롤 자동 발동 슬롯: 배지 + (방금 발동했으면) 1회성 반짝 */
+      var golden = isGoldenSlot(r, i);
+      var goldenBadge = golden
+        ? '<span class="aug-badge-golden' +
+          (state.goldenFlashSlot === i ? " flash" : "") +
+          '">✨ 황금 리롤!</span>'
+        : "";
       return (
         '<div class="aug-slot">' +
         '<button type="button" class="aug-card tier-' + esc(augTier) + funCls +
+        (golden ? " aug-golden" : "") +
         '" data-slot="' + i + '" aria-label="' + esc(aug.nameKo) + " 선택" +
-        (funTier ? ", 꿀잼 티어 " + esc(funTier) : "") + '">' +
-        augFunChipHtml(funTier, false) +
+        (funTier ? ", 꿀잼 티어 " + esc(funTier) : "") +
+        (golden ? ", 황금 리롤로 등장한 상급 등급" : "") + '">' +
+        augFunChipHtml(funTier, aug.funTier, false, pv.newCombo ? null : dInfo.reason) +
+        goldenBadge +
         '<img class="aug-icon" src="' + esc(aug.icon) +
         '" alt="" loading="lazy" decoding="async" width="64" height="64">' +
         '<span class="aug-tier-label">' + esc(TIER_LABEL[augTier] || augTier) + "</span>" +
@@ -1914,19 +2047,9 @@ function renderDraft() {
     })
     .join("");
   $("#aug-cards").innerHTML = cardsHtml;
-  $("#aug-cards").classList.toggle("golden-armed", state.goldenArmed);
-
-  /* 황금 리롤 */
-  var goldenSpent = state.goldenUsed || (state.game && state.game.goldenUsed);
-  var btnGolden = $("#btn-golden");
-  btnGolden.disabled = !!goldenSpent;
-  btnGolden.classList.toggle("armed", state.goldenArmed);
-  btnGolden.textContent = goldenSpent
-    ? "✨ 황금 리롤 사용됨"
-    : state.goldenArmed
-      ? "✨ 슬롯 선택 중..."
-      : "✨ 황금 리롤 (게임당 1회)";
-  $("#golden-hint").hidden = !state.goldenArmed;
+  /* 반짝 연출은 발동 직후 렌더 1회만 — 다음 재렌더(다른 슬롯 리롤 등)에서
+   * 애니메이션이 재생되지 않도록 소진한다 (배지 자체는 라운드 내내 유지). */
+  state.goldenFlashSlot = null;
 
   renderHistoryBar();
   showScreen("draft");
@@ -1941,18 +2064,7 @@ function onAugCardsClick(e) {
   }
   var card = target.closest ? target.closest(".aug-card") : null;
   if (!card) return;
-  var slot = Number(card.getAttribute("data-slot"));
-  if (state.goldenArmed) {
-    doGolden(slot, false);
-  } else {
-    doPick(slot, false);
-  }
-}
-
-function toggleGoldenArmed() {
-  if (state.goldenUsed || (state.game && state.game.goldenUsed)) return;
-  state.goldenArmed = !state.goldenArmed;
-  renderDraft();
+  doPick(Number(card.getAttribute("data-slot")), false);
 }
 
 /* ---------------- ③ 결과 화면 ---------------- */
@@ -2018,10 +2130,14 @@ function renderResult() {
     picks
       .map(function (p) {
         var tier = esc(p.tier || "silver");
-        /* 태그 줄 맨 앞에 꿀잼 티어 칩 — funTier 부재/어휘 밖이면 "" (방어적).
+        /* 태그 줄 맨 앞에 꿀잼 티어 칩 — 문맥 티어(displayTierOf: 이 챔피언
+         * 기준 강등/승급, 부재 시 전역 funTier 폴백). 티어 없음이면 "" (방어적).
          * 결과 화면은 드래프트가 끝난 뒤라 newCombos 승격은 적용하지 않는다. */
         var tags =
-          augFunChipHtml(p.funTier, true) +
+          augFunChipHtml(
+            displayTierInfo(p, c).tier, p.funTier, true,
+            displayTierInfo(p, c).reason
+          ) +
           '<span class="result-detail-tier tier-' + tier + '">' +
           esc(TIER_LABEL[p.tier] || p.tier || "") +
           "</span>" +
@@ -2188,11 +2304,7 @@ function bindEvents() {
       state.oddsOpen = !s.parentNode.open;
     });
   }
-  $("#btn-golden").addEventListener("click", toggleGoldenArmed);
-  $("#btn-golden-cancel").addEventListener("click", function () {
-    state.goldenArmed = false;
-    renderDraft();
-  });
+  /* 황금 리롤 버튼·취소 바인딩 제거 — 자동 발동(G-AUTO)이라 UI 액션이 없다 */
 
   $("#btn-share").addEventListener("click", copyShareUrl);
   $("#btn-again").addEventListener("click", function () {

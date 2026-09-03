@@ -4,9 +4,17 @@
 // 반환: { headline, playstyle, matchedCombos, items:[{id,nameKo,icon,reason}](최대 6),
 //         skills, funScore(0~100), styleTags:[...] }
 //
-// export function routeTargets({champion, picked, candidate, synergies, augments, game})
+// export function displayTier(augment, champion, adjust)
+// 전역 funTier를 챔피언 문맥(아키타입)으로 조정한 "표시 티어" — {tier, reason} 반환.
+// adjust = docs/data/tier-adjust.json (없으면 전역 funTier 그대로, reason null — 하위 호환).
+// 근거: research/data/class-tier-adjust.json 전수조사(2026-09-03, empirical) —
+// 예: 태풍(전역 S)은 AP 딜러(아리)에게 C, 애쉬(AD 원딜)에게는 S 유지.
+//
+// export function routeTargets({champion, picked, candidate, synergies, augments, game, tierAdjust})
 // "꿀조합을 진전시키는 증강 집합" T 산출 (SPEC-day2 §3-3) — 리롤 확률 어드바이저의 목표 집합.
-// 콤보 미완성분(진행 중/candidate로 열리는 콤보의 아직 안 나온 구성 증강) ∪ S티어(funTier 'S').
+// 콤보 미완성분(진행 중/candidate로 열리는 콤보의 아직 안 나온 구성 증강) ∪ S티어.
+// S티어 판정은 tierAdjust가 주어지면 displayTier(문맥 티어) 기준 — 태풍이 아리의 목표
+// 집합에 들어가는 오류를 막는다. tierAdjust 없으면 종전대로 전역 funTier 'S' (하위 호환).
 // game(draft.js 상태)이 있으면 pool 교집합·used 제외를 적용한다. rng 미소비 순수 함수.
 // 반환: { targets:Set, routeSet:Set, sTierSet:Set, combos:[{title, missing:[apiName]}],
 //         candidateInRoute:boolean, candidateIsSTier:boolean }
@@ -597,6 +605,122 @@ export function previewAugment(input) {
   }
 }
 
+// ---------------------------------------------------------------- 클래스 문맥 표시 티어
+
+// 티어 눈금 (tier-adjust.json _meta.tierScale과 동일 — 인덱스가 작을수록 좋음)
+const DISPLAY_TIERS = ["S", "A", "B", "C", "D"];
+
+/**
+ * archetypeOf — 챔피언 → 아키타입 6종 결정론 유도.
+ * research/data/class-tier-adjust.json _meta.archetypeDerivation 의사코드 그대로:
+ *   t0=tags[0]; Support→support; Tank→tank; Marksman→(dmg==='ap'?apMage:adMarksman);
+ *   Mage→apMage; Assassin→(dmg==='ap'?apMage:adAssassin); Fighter→(dmg==='ap'?apMage:fighter);
+ *   폴백: dmg==='ap'?apMage:fighter
+ * 근사: dmg는 DDragon info 격차 기반 근사(enrich-champions.cjs) — 알려진 오분류
+ * (Qiyana·Belveth의 dmg='ap')는 조정표 원본 _meta 참조. dmg 누락 시 mixed 취급.
+ */
+function archetypeOf(champ) {
+  const t0 = champ ? toArray(champ.tags).filter(isStr)[0] : "";
+  const ap = !!champ && champ.dmg === "ap";
+  if (t0 === "Support") return "support";
+  if (t0 === "Tank") return "tank";
+  if (t0 === "Marksman") return ap ? "apMage" : "adMarksman";
+  if (t0 === "Mage") return "apMage";
+  if (t0 === "Assassin") return ap ? "apMage" : "adAssassin";
+  if (t0 === "Fighter") return ap ? "apMage" : "fighter";
+  return ap ? "apMage" : "fighter";
+}
+
+/**
+ * displayTier — 전역 funTier를 챔피언 문맥으로 조정한 "표시 티어" (표시·routeTargets 전용,
+ * 풀 적격성(eligibleAugments)은 건드리지 않는다).
+ *
+ * 규칙 적용 순서 (tier-adjust.json _meta.ruleSemantics.combine 그대로):
+ *  ① 시작 t = funTier 인덱스 (funTier가 없거나 어휘 밖이면 조정 불가 → {tier:null}).
+ *  ② 매칭 규칙 전부 수집 — 증강 측 (tags ∩ ifAugmentTags ≠ ∅) AND (tags ∩ unlessAugmentTags = ∅),
+ *     챔피언 측 (forDmg가 null이거나 champion.dmg === forDmg — mixed는 forDmg 지정 규칙에 미적용)
+ *     AND (forClasses가 비었거나 archetypeOf(champion) ∈ forClasses)
+ *     AND (unlessDmg가 없거나 champion.dmg !== unlessDmg — 예: AP 탱커는 ap-core-vs-tank 제외)
+ *     AND (unlessChampionTags가 비었거나 champion.tags와 교집합 없음 — 예: Tank,Mage 말파이트는
+ *          Mage 부태그 하이브리드라 AP 코어 강등 제외. 2026-09-03 V2 클래스 스위프 확장).
+ *  ③ up/down 합산 반영 (up = 인덱스 감소 = 승급), 눈금 범위로 클램프.
+ *  ④ 모든 cap 중 가장 낮은 상한(최대 인덱스) 적용 — cap은 강등만 한다.
+ *  ⑤ perAugment.overrides[archetype]가 있으면 규칙 결과보다 우선 (예외 확정 지정).
+ *
+ * @param {Object} augment 증강 (funTier·tags 사용)
+ * @param {Object} champion 챔피언 (tags·dmg 사용)
+ * @param {Object} [adjust] tier-adjust.json 전체({rules, perAugment}) — 없으면 무조정
+ * @returns {{tier: string|null, reason: string|null}}
+ *   tier: 조정된 표시 티어 (funTier 없으면 null). reason: 조정이 실제로 일어났을 때
+ *   결정적이었던 규칙/예외의 사유 한 줄 (무변경이면 null) — UI 툴팁·사전 각주용.
+ * 순수 함수 — rng 미소비, 어떤 입력에도 throw 없음.
+ */
+export function displayTier(augment, champion, adjust) {
+  const funTier = augment && isStr(augment.funTier) ? augment.funTier : null;
+  const base = funTier === null ? -1 : DISPLAY_TIERS.indexOf(funTier);
+  if (base === -1) return { tier: null, reason: null };
+  try {
+    const rules = adjust ? toArray(adjust.rules) : [];
+    const perAugment = adjust ? toArray(adjust.perAugment) : [];
+    if (!rules.length && !perAugment.length) return { tier: funTier, reason: null };
+
+    const arch = archetypeOf(champion);
+    const dmg = champion && (champion.dmg === "ad" || champion.dmg === "ap") ? champion.dmg : "mixed";
+    const champTags = new Set(champion ? toArray(champion.tags).filter(isStr) : []);
+    const tags = new Set(augment ? toArray(augment.tags).filter(isStr) : []);
+    const apiName = augment && isStr(augment.apiName) ? augment.apiName : "";
+
+    // ⑤ perAugment 예외가 있으면 규칙 계산 없이 그 값이 확정 (규칙 결과보다 우선)
+    for (const p of perAugment) {
+      if (!p || p.apiName !== apiName || !p.overrides) continue;
+      const t = p.overrides[arch];
+      if (isStr(t) && DISPLAY_TIERS.indexOf(t) !== -1) {
+        return { tier: t, reason: t === funTier ? null : (isStr(p.reason) ? p.reason : null) };
+      }
+    }
+
+    // ②~④ 규칙 매칭·합성
+    let delta = 0; // up/down 합산 (음수 = 승급)
+    let capIdx = -1; // 가장 낮은 상한(최대 인덱스)
+    let deltaReason = null;
+    let capReason = null;
+    for (const r of rules) {
+      if (!r || typeof r !== "object" || !isStr(r.adjust)) continue;
+      const ifTags = toArray(r.ifAugmentTags).filter(isStr);
+      if (!ifTags.some((t) => tags.has(t))) continue;
+      if (toArray(r.unlessAugmentTags).filter(isStr).some((t) => tags.has(t))) continue;
+      if (isStr(r.forDmg) && r.forDmg !== dmg) continue;
+      const forClasses = toArray(r.forClasses).filter(isStr);
+      if (forClasses.length && forClasses.indexOf(arch) === -1) continue;
+      // 챔피언 측 제외 가드 (2026-09-03 V2 클래스 스위프 확장 — tier-adjust.json _meta 참조):
+      // unlessDmg = 해당 dmg 챔피언에 미적용 (AP 탱커·아무무류는 AP 코어가 실빌드),
+      // unlessChampionTags = 부태그 하이브리드 제외 (Tank,Mage 말파이트 — AP 원콤 실빌드,
+      // mm 실측 유레카 1482게임 정상 제시).
+      if (isStr(r.unlessDmg) && r.unlessDmg === dmg) continue;
+      const unlessChampTags = toArray(r.unlessChampionTags).filter(isStr);
+      if (unlessChampTags.length && unlessChampTags.some((t) => champTags.has(t))) continue;
+      let m;
+      if ((m = /^cap:([SABCD])$/.exec(r.adjust))) {
+        const idx = DISPLAY_TIERS.indexOf(m[1]);
+        if (idx > capIdx) { capIdx = idx; capReason = isStr(r.reason) ? r.reason : null; }
+      } else if ((m = /^down:(\d+)$/.exec(r.adjust))) {
+        delta += Number(m[1]);
+        if (!deltaReason) deltaReason = isStr(r.reason) ? r.reason : null;
+      } else if ((m = /^up:(\d+)$/.exec(r.adjust))) {
+        delta -= Number(m[1]);
+        if (!deltaReason) deltaReason = isStr(r.reason) ? r.reason : null;
+      }
+    }
+    let idx = clamp(base + delta, 0, DISPLAY_TIERS.length - 1);
+    let reason = idx !== base ? deltaReason : null;
+    if (capIdx > idx) { idx = capIdx; reason = capReason; } // cap이 결정적이면 그 사유가 대표
+    if (idx === base) return { tier: funTier, reason: null };
+    return { tier: DISPLAY_TIERS[idx], reason };
+  } catch (_) {
+    return { tier: funTier, reason: null }; // 조정은 부가 정보 — 실패 시 전역 티어로 폴백
+  }
+}
+
 // ---------------------------------------------------------------- 목표 집합 T (리롤 확률 어드바이저)
 
 /**
@@ -612,11 +736,13 @@ export function previewAugment(input) {
  * 순수 함수: game을 변경하지 않고 rng를 소비하지 않는다. 어떤 입력에도 throw 없이
  * 항상 같은 형태를 반환한다 (previewAugment와 동일 방어 원칙).
  *
- * @param {Object} input { champion, picked, candidate?, synergies, augments, game? }
+ * @param {Object} input { champion, picked, candidate?, synergies, augments, game?, tierAdjust? }
  *   - candidate: 드래프트 카드 1장 (증강 객체 또는 apiName 문자열) — 카드별 T 계산용.
  *     candidate 자신은 T에 넣지 않는다 (이미 화면에 노출된 카드는 리롤 목표가 아님).
  *   - game: draft.js 게임 상태 — pool(챔피언 조건부 풀)·used(노출분 제외)에만 접근.
  *     없으면 eligibleAugments(augments, champion)로 풀을 재산출한다 (드래프트와 동일 판정).
+ *   - tierAdjust: tier-adjust.json — 주어지면 sTierSet·candidateIsSTier를 displayTier
+ *     (챔피언 문맥 티어) 'S' 기준으로 판정한다. 없으면 전역 funTier 'S' (하위 호환).
  * @returns {{ targets: Set<string>, routeSet: Set<string>, sTierSet: Set<string>,
  *   combos: Array<{title: string, missing: Array<string>}>,
  *   candidateInRoute: boolean, candidateIsSTier: boolean }}
@@ -638,6 +764,7 @@ export function routeTargets(input) {
     const synergies = opts.synergies && typeof opts.synergies === "object" ? opts.synergies : {};
     const combos = unwrap(synergies, "combos");
     const game = opts.game && typeof opts.game === "object" ? opts.game : null;
+    const tierAdjust = opts.tierAdjust && typeof opts.tierAdjust === "object" ? opts.tierAdjust : null;
 
     // 확보분: picked(+candidate) apiName — 이들은 목표가 아니다 (이미 손에 있거나 화면에 있음)
     const picked = normalizePicked(opts.picked, augmentList);
@@ -684,10 +811,13 @@ export function routeTargets(input) {
       comboInfos.push({ title: isStr(combo.title) ? combo.title : "시너지", missing });
     }
 
-    // ② sTierSet — funTier 'S' 잔여분 (funTier는 큐레이션 데이터 — 없는 증강은 그냥 제외)
+    // ② sTierSet — "이 챔피언에게 S"인 잔여분. tierAdjust가 있으면 displayTier(문맥 티어)
+    //    기준 — 전역 S(태풍)가 AP 딜러의 목표 집합에 끼는 오류를 막는다. 없으면 종전대로
+    //    전역 funTier 'S' (displayTier가 무조정 폴백하므로 동일 판정 — 하위 호환).
     const sTierSet = new Set();
     for (const a of poolList) {
-      if (a && a.funTier === "S" && isStr(a.apiName) && available(a.apiName)) {
+      if (a && isStr(a.apiName) && available(a.apiName) &&
+        displayTier(a, champ, tierAdjust).tier === "S") {
         sTierSet.add(a.apiName);
       }
     }
@@ -704,7 +834,8 @@ export function routeTargets(input) {
           if (a && a.apiName === candidateName) { cand = a; break; }
         }
       }
-      candidateIsSTier = !!cand && cand.funTier === "S";
+      // sTierSet과 동일 판정(displayTier) — 카드 배지와 목표 집합이 다른 답을 내지 않게 한다
+      candidateIsSTier = !!cand && displayTier(cand, champ, tierAdjust).tier === "S";
     }
 
     return {

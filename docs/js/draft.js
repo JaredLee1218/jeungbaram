@@ -8,14 +8,26 @@
  *  - 제약: 1라운드와 2라운드가 둘 다 실버일 수는 없음
  *    → 2라운드 롤 결과가 실버인데 1라운드가 실버였으면 실버를 제외하고 재롤.
  *  - 슬롯(카드)별 최대 1회 리롤, 같은 등급의 다른 증강으로 교체 (한 화면 최대 6개 노출).
- *  - 황금 리롤: 사용 시 해당 슬롯을 한 단계 높은 등급의 증강으로 교체 (실버→골드, 골드→프리즘).
+ *  - 황금 리롤(자동 발동 — G-AUTO 모델, research/raw/19-golden-reroll.md):
+ *    플레이어가 버튼으로 쓰는 자원이 아니라 "리롤이 한 단계 높은 등급으로 나올 확률"이다
+ *    (사용자 실플레이 증언 + 공식 지원 페이지 "상위 티어 리롤 확률 증가" + 위키).
+ *    슬롯 리롤 순간 시드 RNG로 판정하며, 조건은 ①화면 등급이 실버/골드(프리즘 화면은
+ *    발동 없음) ②이 화면에서 아직 미발동. 발동 시 교체 증강을 화면 등급+1 적격 풀에서
+ *    뽑는다(실버→골드, 골드→프리즘). 게임당 횟수 제한 없음 — 화면마다 독립.
  *  - 한 번이라도 노출(제시/리롤 포함)되었거나 선택된 증강은 같은 게임에서 다시 등장하지 않음.
  *
- * ⚠ 근사: 황금 리롤의 보유·사용 가능 조건은 단순화했다. 실제 게임에서는 진행도 트랙
- *   보상으로 해금한 플레이어가 "실버/골드 등급이 제시되는 화면"에서 일정 확률(비공개)로
- *   받는 소모품이다. 본 엔진은 (1) 게임당 1회 항상 보유, (2) 프리즘 화면에서도 사용 가능
- *   (이때 프리즘 유지)으로 근사한다 — 등장 확률이 비공개라 시뮬레이터에서는 결정적
- *   보유가 재현성에 유리하기 때문.
+ * ⚠ 근사: 황금 리롤 발동 확률 g = GOLDEN_REROLL_CHANCE(0.04)는 추정치다. 공식 수치는
+ *   진행도 트랙 4단계 몫 "+1%"(Riot Phlox)뿐이고 트랙 1·4·13·31단계 누적형의 합산
+ *   총량은 비공개 — 완주 유저 가정 추정. newGame opts.goldenChance로 재정의 가능.
+ * ⚠ 근사: 발동은 화면당 최대 1회로 제한한다 (위키 "a Golden Reroll" 단수 표현 근거,
+ *   반례 미관측). 프리즘 화면 무발동은 위키의 실버/골드 한정 서술 근거.
+ * ⚠ RNG 소비 규칙(결정론 계약): 모든 rerollSlot은 판정 draw 1회를 "무조건" 먼저 소비한다
+ *   — 판정이 불필요한 리롤(프리즘 화면·화면 내 기발동)에서도 동일하게 소비해 소비량을
+ *   결정적으로 고정한다. 순서 고정: ①판정 draw → ②결과 draw(drawAugment) → ③스킬 지정
+ *   draw(presentAugment ③, 해당 시).
+ * (구버전 "게임당 1회 수동 황금 리롤" 모델의 goldenReroll/goldenDistribution export와
+ *  game.goldenUsed 필드는 제거됨. 공유 URL의 구 'g' 액션은 app.js가 no-op으로 무시한다
+ *  — 재해석하면 RNG 소비 순서가 어긋나 이후 재현이 전부 붕괴하기 때문.)
  *
  * ⚠ 근사: 등급 확률(tierWeights)은 라이엇이 공식 공개한 값이 없음.
  *   기본값 { silver: 0.45, gold: 0.35, prismatic: 0.20 } 은 **추정치**이며 패치로 조정되는 값임
@@ -48,8 +60,16 @@ export const TIERS = ['silver', 'gold', 'prismatic'];
 /** 등급 확률 기본값 — 근사: 추정치 (공식 미공개, 패치마다 조정될 수 있음) */
 export const DEFAULT_TIER_WEIGHTS = { silver: 0.45, gold: 0.35, prismatic: 0.20 };
 
-/** 황금 리롤 등급 상승 매핑 (프리즘은 프리즘 유지) */
+/** 황금 리롤 등급 상승 매핑 (프리즘은 프리즘 유지 — 실제로는 프리즘 화면에서 발동 자체가 없음) */
 const TIER_UP = { silver: 'gold', gold: 'prismatic', prismatic: 'prismatic' };
+
+/**
+ * 근사: 황금 리롤 자동 발동 확률 기본값 (G-AUTO 모델 — research/raw/19-golden-reroll.md).
+ * 공식 수치는 트랙 4단계 몫 "+1%"(Riot Phlox X 2019601265681191246)뿐이며 트랙
+ * 1·4·13·31단계 누적 총량은 비공개 → 트랙 완주 유저 가정의 추정 상수.
+ * newGame({ goldenChance }) 옵션으로 게임 단위 재정의 가능 (0~1, 시드 재현에 포함).
+ */
+export const GOLDEN_REROLL_CHANCE = 0.04;
 
 /**
  * 근사: 풀 고갈 시 다른 등급에서 보충하는 순서 (공식 규칙 아님 — 구현 보충 규칙.
@@ -231,6 +251,8 @@ export function eligibleAugments(augments, champion) {
  * @param {boolean} [opts.trackL9] 진행도 트랙 Lv9 보정 (기본 false).
  *   근사: 켜면 스킬 증강(category==='ability') 추출 가중치를 WEIGHT_TRACK_L9_ABILITY(1.5)배 —
  *   실제 증가 폭은 비공개 (research/AUGMENT-POOLS-STUDY.md §3-2)
+ * @param {number} [opts.goldenChance] 황금 리롤 자동 발동 확률 재정의 (0~1).
+ *   기본 GOLDEN_REROLL_CHANCE — 근사: 실제 수치 비공개 (파일 헤더·상수 주석 참조)
  * @returns JSON 직렬화 가능한 plain object 게임 상태
  */
 export function newGame(opts) {
@@ -247,11 +269,16 @@ export function newGame(opts) {
     trackL9: o.trackL9 === true,      // 진행도 트랙 Lv9 보정 (스킬 증강 가중치 ↑, 기본 off)
     champion: champion,               // 전달받은 챔피언 객체 그대로 (plain object)
     pool: eligibleAugments(o.augments, champion), // 이 챔피언이 받을 수 있는 전체 증강 풀
+    // 황금 리롤 자동 발동 확률 — 근사: 기본값은 추정 상수 (GOLDEN_REROLL_CHANCE 주석 참조).
+    // 게임 상태에 저장해 직렬화 왕복·시드 재현에 포함시킨다.
+    goldenChance: (typeof o.goldenChance === 'number' && isFinite(o.goldenChance) && o.goldenChance >= 0)
+      ? Math.min(o.goldenChance, 1)
+      : GOLDEN_REROLL_CHANCE,
     rounds: [],                       // 라운드 이력: {level, tier, slots, rerolled, golden, pickedIndex}
     used: [],                         // 게임 내 노출된 모든 증강 apiName (재등장 금지 판정용)
     picked: [],                       // 선택 확정된 증강 객체들
-    goldenUsed: false,                // 황금 리롤 사용 여부 (게임당 1회)
     finished: false,                  // 4라운드 선택 완료 여부
+    // (구버전 필드 goldenUsed는 G-AUTO 전환으로 제거 — 게임당 횟수 제한 자체가 없어짐)
   };
 }
 
@@ -589,7 +616,7 @@ export function nextRound(game) {
     tier: tier,
     slots: slots,
     rerolled: slots.map(function () { return false; }),
-    golden: null,       // 황금 리롤이 적용된 슬롯 인덱스 (없으면 null)
+    golden: null,       // 황금 리롤이 "자동 발동"한 슬롯 인덱스 (없으면 null — 화면당 최대 1회 판정용 겸 UI 배지용)
     pickedIndex: null,  // 선택 확정된 슬롯 인덱스 (null = 진행 중)
   };
   game.rounds.push(round);
@@ -597,10 +624,28 @@ export function nextRound(game) {
 }
 
 /**
- * 슬롯별 1회 리롤: 슬롯 i를 같은 등급의 다른 증강으로 교체.
- * 근사: 황금 리롤로 등급이 오른 슬롯은 오른 등급 기준으로 리롤한다 — 황금 리롤과
- * 일반 리롤의 상호작용 순서는 공식 문서에 없어(모호) 구현 판단.
- * 같은 등급 고갈 시 FALLBACK_ORDER로 보충. 전체 고갈 시 기존 증강 유지(리롤 횟수는 소모).
+ * 황금 리롤 자동 발동 판정이 "가능한" 상태인지 (G-AUTO 모델 — 파일 헤더 참조).
+ * 조건: ①화면 등급이 실버/골드 (프리즘 화면은 발동 없음 — 위키의 실버/골드 한정 서술)
+ *       ②이 화면에서 아직 미발동 (근사: 화면당 최대 1회 — "a Golden Reroll" 단수 근거)
+ * 순수 조회 — rng 미소비.
+ */
+function goldenEligible(round) {
+  return (round.tier === 'silver' || round.tier === 'gold') && round.golden === null;
+}
+
+/**
+ * 슬롯별 1회 리롤: 슬롯 i를 다른 증강으로 교체.
+ * 황금 리롤 자동 발동(G-AUTO): 판정 가능 상태(goldenEligible)에서 확률 game.goldenChance로
+ * 발동하며, 발동 시 교체 증강을 "화면 등급+1" 적격 풀에서 뽑는다(실버→골드, 골드→프리즘;
+ * 상위 고갈 시 FALLBACK_ORDER_UPGRADE 보충). 미발동 시 종전대로 카드 자신의 등급
+ * (current.tier — 폴백 보충으로 라운드 등급과 다를 수 있음)에서 뽑는다.
+ *
+ * RNG 소비 규칙(결정론 계약 — 파일 헤더 명시): 판정 draw 1회를 "무조건" 먼저 소비한다.
+ * 프리즘 화면·화면 내 기발동 등 판정이 불필요한 리롤에서도 동일하게 소비해, 어떤 경로든
+ * 리롤 1회 = 판정 1 draw + 결과 1 draw(+스킬 지정 draw)로 소비량이 고정된다.
+ *
+ * 같은 등급 고갈 시 FALLBACK_ORDER로 보충. 전체 고갈 시 기존 증강 유지(리롤 횟수는 소모,
+ * 판정 draw도 소모 — 발동했다면 round.golden 기록도 유지).
  * @returns 교체된(또는 유지된) 증강
  */
 export function rerollSlot(game, i) {
@@ -609,35 +654,22 @@ export function rerollSlot(game, i) {
   if (round.rerolled[i]) throw new Error('이 슬롯은 이미 리롤했습니다 (슬롯당 1회).');
   round.rerolled[i] = true;
   const current = round.slots[i];
-  const aug = drawAugment(game, current.tier);
-  if (!aug) return current; // 풀 완전 고갈: 교체 불가, 기존 유지
-  game.used.push(aug.apiName);
-  const presented = presentAugment(game, aug); // 스킬 증강이면 enhancedSkill 부여 (rng 사용)
-  round.slots[i] = presented;
-  return presented;
-}
 
-/**
- * 황금 리롤: 슬롯 i를 한 단계 높은 등급의 증강으로 교체 (실버→골드, 골드→프리즘).
- * 근사: 실제 게임에서는 진행도 트랙 해금 후 실버/골드 화면에서 확률적으로 받는
- * 소모품이지만, 본 엔진은 "게임당 1회 항상 보유 + 프리즘 화면에서도 사용 가능
- * (프리즘 유지)"으로 단순화한다 (파일 상단 헤더 참조).
- * 상위 등급 고갈 시 FALLBACK_ORDER_UPGRADE(위 등급 → 현재 등급 → 하위 등급)로 보충.
- * 슬롯별 일반 리롤 횟수와는 별개로 카운트된다.
- * @returns 교체된(또는 유지된) 증강
- */
-export function goldenReroll(game, i) {
-  const round = mustActiveRound(game);
-  mustSlot(round, i);
-  if (game.goldenUsed) throw new Error('황금 리롤은 게임당 1회만 사용할 수 있습니다.');
-  game.goldenUsed = true;
-  round.golden = i;
-  const current = round.slots[i];
-  const upTier = TIER_UP[current.tier] || current.tier;
-  const aug = drawAugment(game, upTier, FALLBACK_ORDER_UPGRADE[current.tier]);
+  // ① 황금 리롤 자동 발동 판정 (무조건 1 draw — 소비 규칙 위 주석)
+  const judgment = nextFloat(game);
+  const fired = goldenEligible(round) && judgment < game.goldenChance;
+
+  // ② 결과 draw — 발동 시 화면 등급+1, 미발동 시 카드 등급 유지
+  let aug;
+  if (fired) {
+    round.golden = i; // 화면당 최대 1회 잠금 + UI "✨ 황금 리롤!" 배지 앵커
+    aug = drawAugment(game, TIER_UP[round.tier], FALLBACK_ORDER_UPGRADE[round.tier]);
+  } else {
+    aug = drawAugment(game, current.tier);
+  }
   if (!aug) return current; // 풀 완전 고갈: 교체 불가, 기존 유지
   game.used.push(aug.apiName);
-  const presented = presentAugment(game, aug); // 스킬 증강이면 enhancedSkill 부여 (rng 사용)
+  const presented = presentAugment(game, aug); // ③ 스킬 증강이면 enhancedSkill 부여 (rng 사용)
   round.slots[i] = presented;
   return presented;
 }
@@ -662,31 +694,61 @@ export function pickAugment(game, i) {
 /* ------------------------------------------------------------------ */
 
 /**
- * 슬롯 리롤 분포: rerollSlot이 실제로 뽑을 후보·확률을 미리 계산한다.
- * rerollSlot과 동일하게 카드 자신의 tier(round.slots[i].tier — 폴백·황금 리롤로
- * 라운드 등급과 다를 수 있음) + FALLBACK_ORDER로 drawDistribution을 래핑.
- * rerolled[i]/goldenUsed 소진 여부는 검사하지 않는다(순수 조회) — 소진 처리는 app.js 몫.
- * @returns drawDistribution 반환형 { resolvedTier, entries: [{aug, weight, p}], totalWeight }
+ * 슬롯 리롤 분포 (혼합 분포 — G-AUTO): rerollSlot이 실제로 뽑을 후보·확률을 미리 계산한다.
+ *
+ * 판정 가능 상태(goldenEligible — 실버/골드 화면·화면 내 미발동)에서는
+ *   P(a) = (1-g)·P_동급(a) + g·P_상급(a)   (g = game.goldenChance)
+ * 프리즘 화면·화면 내 기발동 상태에서는 g=0으로 동급 분포 그대로다.
+ *  - 동급(base): 카드 자신의 tier(round.slots[i].tier — 폴백 보충으로 라운드 등급과
+ *    다를 수 있음) + FALLBACK_ORDER (rerollSlot 미발동 경로 미러)
+ *  - 상급(golden): TIER_UP[round.tier] + FALLBACK_ORDER_UPGRADE[round.tier]
+ *    (rerollSlot 발동 경로 미러 — 화면 등급 기준임에 주의)
+ * rerolled[i] 소진 여부는 검사하지 않는다(순수 조회) — 소진 처리는 app.js 몫.
+ *
+ * @returns {{
+ *   resolvedTier: string|null,  // 동급(base) 분포의 해소 등급 (종전 호환)
+ *   entries: Array<{aug, weight, p}>, // 혼합 분포 — Σp = 1 (전 고갈 시 []). base 순서
+ *                                     // 우선, 상급 전용 항목은 뒤에 이어붙는다(결정론).
+ *                                     // weight는 weightFor 값(등급 무관 동일) — 참고용.
+ *   totalWeight: number,        // 동급(base) 분포의 가중치 합 (종전 호환)
+ *   goldenChance: number,       // 이 리롤에서 황금 리롤이 자동 발동할 확률 (판정 불가 상태면 0)
+ *   goldenTier: string|null,    // 발동 시 뽑는 등급 (goldenChance 0이면 null)
+ *   base: Object,               // 동급 분포 (drawDistribution 반환형)
+ *   golden: Object|null         // 상급 분포 (goldenChance 0이면 null)
+ * }}
  */
 export function rerollDistribution(game, slotIndex) {
   const round = mustActiveRound(game);
   mustSlot(round, slotIndex);
   const current = round.slots[slotIndex];
-  return drawDistribution(game, current.tier);
-}
-
-/**
- * 황금 리롤 분포: goldenReroll이 실제로 뽑을 후보·확률을 미리 계산한다.
- * goldenReroll과 동일하게 TIER_UP[현재 tier] + FALLBACK_ORDER_UPGRADE로 래핑.
- * goldenUsed 소진 여부는 검사하지 않는다(순수 조회).
- * @returns drawDistribution 반환형 { resolvedTier, entries: [{aug, weight, p}], totalWeight }
- */
-export function goldenDistribution(game, slotIndex) {
-  const round = mustActiveRound(game);
-  mustSlot(round, slotIndex);
-  const current = round.slots[slotIndex];
-  const upTier = TIER_UP[current.tier] || current.tier;
-  return drawDistribution(game, upTier, FALLBACK_ORDER_UPGRADE[current.tier]);
+  const base = drawDistribution(game, current.tier);
+  const g = goldenEligible(round) ? game.goldenChance : 0;
+  if (!(g > 0)) {
+    return {
+      resolvedTier: base.resolvedTier, entries: base.entries, totalWeight: base.totalWeight,
+      goldenChance: 0, goldenTier: null, base: base, golden: null,
+    };
+  }
+  const up = drawDistribution(game, TIER_UP[round.tier], FALLBACK_ORDER_UPGRADE[round.tier]);
+  // 혼합: base 항목을 (1-g) 배로 복사한 뒤, 상급 항목의 g 배를 apiName 기준으로 병합.
+  // (동급·상급 분포가 폴백으로 같은 등급에 해소되면 항목이 겹칠 수 있다 — p 합산)
+  const mixed = [];
+  const idxOf = {};
+  for (let i = 0; i < base.entries.length; i++) {
+    const e = base.entries[i];
+    idxOf[e.aug.apiName] = mixed.length;
+    mixed.push({ aug: e.aug, weight: e.weight, p: (1 - g) * e.p });
+  }
+  for (let i = 0; i < up.entries.length; i++) {
+    const e = up.entries[i];
+    const at = idxOf[e.aug.apiName];
+    if (at !== undefined) mixed[at].p += g * e.p;
+    else mixed.push({ aug: e.aug, weight: e.weight, p: g * e.p });
+  }
+  return {
+    resolvedTier: base.resolvedTier, entries: mixed, totalWeight: base.totalWeight,
+    goldenChance: g, goldenTier: up.resolvedTier, base: base, golden: up,
+  };
 }
 
 /**

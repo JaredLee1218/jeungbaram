@@ -7,8 +7,10 @@ import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 
+/* goldenReroll import 제거 — 황금 리롤 자동 발동(G-AUTO) 리워크로 수동 API 삭제 (raw/19).
+ * 자동 발동 경로는 아래 3.5 섹션에서 goldenChance=1 강제로 검증한다. */
 import {
-  newGame, nextRound, rerollSlot, goldenReroll, pickAugment,
+  newGame, nextRound, rerollSlot, pickAugment,
   eligibleAugments, ROUND_LEVELS,
 } from '../docs/js/draft.js';
 import { recommend, previewAugment } from '../docs/js/recommend.js';
@@ -176,20 +178,17 @@ for (let r = 0; r < 4; r++) {
   ok(round.level === ROUND_LEVELS[r], '라운드 ' + (r + 1) + ': 레벨 ' + ROUND_LEVELS[r]);
   ok(round.slots.length === 3, '라운드 ' + (r + 1) + ': 슬롯 3개');
   ok(round.slots.every((a) => a && augNames.has(a.apiName)), '라운드 ' + (r + 1) + ': 슬롯 전부 실제 증강');
-  // 라운드마다 다른 경로를 태운다: 1R 일반 리롤, 2R 황금 리롤, 3·4R 그대로 선택
+  // 라운드마다 다른 경로를 태운다: 1R·2R 일반 리롤(자동 황금 판정 내재), 3·4R 그대로 선택
+  // (갱신 사유: 수동 goldenReroll 삭제 — G-AUTO 리워크. 자동 발동 자체는 3.5 섹션 검증)
   if (r === 0) {
     const before = round.slots[1].apiName;
     const after = rerollSlot(game, 1);
     ok(after.apiName !== before, '라운드 1: 슬롯 1 리롤로 교체됨');
   }
   if (r === 1) {
-    const beforeTier = round.slots[2].tier;
-    const after = goldenReroll(game, 2);
-    const upOk = beforeTier === 'prismatic'
-      ? after.tier === 'prismatic'
-      : (beforeTier === 'silver' ? after.tier !== 'silver' : true);
-    ok(upOk, '라운드 2: 황금 리롤 등급 상승/유지 (' + beforeTier + ' → ' + after.tier + ')');
-    ok(game.goldenUsed === true, '라운드 2: goldenUsed 플래그');
+    const before = round.slots[2].apiName;
+    const after = rerollSlot(game, 2);
+    ok(after.apiName !== before, '라운드 2: 슬롯 2 리롤로 교체됨');
   }
   pickAugment(game, 0);
 }
@@ -204,11 +203,27 @@ const game2 = newGame({ augments: augData.augments, champion: ekko, seed: SEED }
 for (let r = 0; r < 4; r++) {
   nextRound(game2);
   if (r === 0) rerollSlot(game2, 1);
-  if (r === 1) goldenReroll(game2, 2);
+  if (r === 1) rerollSlot(game2, 2);
   pickAugment(game2, 0);
 }
 ok(JSON.stringify(game2.picked.map((a) => a.apiName)) === JSON.stringify(pickedNames),
   '재현성: 같은 시드 = 같은 4증강');
+
+// ---- 3.5) 자동 황금 리롤 스모크 (G-AUTO — raw/19): goldenChance=1 강제로 실데이터 발동 확인 ----
+{
+  const TIER_UP = { silver: 'gold', gold: 'prismatic' };
+  let fired = false;
+  for (let s = 0; s < 100 && !fired; s++) {
+    const gg = newGame({ augments: augData.augments, champion: ekko, seed: 90000 + s, goldenChance: 1 });
+    const rr = nextRound(gg);
+    if (rr.tier !== 'silver' && rr.tier !== 'gold') continue;
+    const up = rerollSlot(gg, 0);
+    ok(up.tier === TIER_UP[rr.tier], '자동 황금: 실버/골드 화면 리롤이 화면 등급+1 (' + rr.tier + '→' + up.tier + ')');
+    ok(rr.golden === 0, '자동 황금: round.golden 슬롯 기록');
+    fired = true;
+  }
+  ok(fired, '자동 황금: 발동 케이스 확보 (100시드 내)');
+}
 
 // ---- 4) 추천 생성 ----
 const rec = recommend({

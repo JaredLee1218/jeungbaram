@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 /**
- * enrich-augments.cjs — research/data/eligibility-notes.json (1차 스터디) 및
- * research/data/ability-augment-map.json (3차 실매핑, 306건) 의 조사 결과를
- * docs/data/augments.json 에 이식하는 변환 스크립트 (재실행 가능·결정론).
+ * enrich-augments.cjs — research/data/eligibility-notes.json (1차 스터디),
+ * research/data/ability-augment-map.json (3차 실매핑, 306건),
+ * research/data/class-tier-adjust.json (4차 전수조사 — 풀 게이트 confirmed 분, §2.6)
+ * 의 조사 결과를 docs/data/augments.json 에 이식하는 변환 스크립트 (재실행 가능·결정론).
+ * 챔피언 파생 게이트(dmg 기반 championExclude)를 위해 docs/data/champions.json 도 읽는다.
  *
  * 실행: node scripts/enrich-augments.cjs   (Node v14 호환, 의존성 0)
  * 산출: docs/data/augments.json 갱신 + scripts/enrich-augments-log.md 로그
@@ -32,13 +34,17 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
 const AUG_PATH = path.join(ROOT, 'docs', 'data', 'augments.json');
+const CHAMP_PATH = path.join(ROOT, 'docs', 'data', 'champions.json');
 const NOTES_PATH = path.join(ROOT, 'research', 'data', 'eligibility-notes.json');
 const MAP_PATH = path.join(ROOT, 'research', 'data', 'ability-augment-map.json');
+const ADJUST_PATH = path.join(ROOT, 'research', 'data', 'class-tier-adjust.json');
 const LOG_PATH = path.join(__dirname, 'enrich-augments-log.md');
 
 const augData = JSON.parse(fs.readFileSync(AUG_PATH, 'utf8'));
+const champData = JSON.parse(fs.readFileSync(CHAMP_PATH, 'utf8'));
 const notes = JSON.parse(fs.readFileSync(NOTES_PATH, 'utf8'));
 const abilityMap = JSON.parse(fs.readFileSync(MAP_PATH, 'utf8'));
+const adjustData = JSON.parse(fs.readFileSync(ADJUST_PATH, 'utf8'));
 
 /* ------------------------------------------------------------------ */
 /* 1. category                                                         */
@@ -363,6 +369,84 @@ for (const api of Object.keys(MAP_DERIVED)) {
 }
 
 /* ------------------------------------------------------------------ */
+/* 2.6 풀 게이트 — research/data/class-tier-adjust.json                  */
+/*     poolGateCandidates(status=confirmed) 기계 이식 (수작업 금지)       */
+/* ------------------------------------------------------------------ */
+// 4차 전수조사(클래스 문맥 티어 계약, 2026-09-03) 산출물의 풀 게이트 확정분만 이식한다.
+//  - status==='deferred'(크리/평타 스탯 8종)는 표시 강등(displayTier) 전용 — 여기서 미이식.
+//  - 각 후보의 conflictCheck: offered 287건(test-fidelity [12] 221건 포함)과 충돌 0 —
+//    test-e2e 2.7 offered 전수 대조가 회귀 가드로 이중 보증.
+//  - 게이트 표현: 신규 restrictions 키를 만들지 않고 champions.json의 dmg/ranged로
+//    챔피언 id 목록을 파생해 기존 championExclude에 합류시킨다 (스키마·엔진 무변경,
+//    validate-data 어휘 통과, 재실행 결정론 — 목록은 정렬).
+//  - 근사: dmg 자체가 DDragon info 격차 기반 근사다 (enrich-champions.cjs computeDmg).
+//
+// dmg 근사 오류 예외 (산출물 caveats + _meta.archetypeDerivation.notes 명시 — 오폭 방지):
+//  - Qiyana: dmg='ap' 표기이나 실제 물리(AD) 암살자 → dmg=ap 파생 게이트에서 면제
+//  - Belveth: dmg='ap' 표기이나 실제 온힛(mixed) 전사 → 동일 면제
+const AP_GATE_EXEMPT = { Qiyana: true, Belveth: true };
+
+const POOL_GATE = {}; // apiName → { championExclude: [id...], note, gateId }
+{
+  const apIds = [];      // dmg==='ap' (근사 오류 예외 제외)
+  const meleeAdIds = []; // dmg==='ad' && ranged===false
+  for (const c of champData.champions) {
+    if (c.dmg === 'ap' && !AP_GATE_EXEMPT[c.id]) apIds.push(c.id);
+    if (c.dmg === 'ad' && !c.ranged) meleeAdIds.push(c.id);
+  }
+  apIds.sort();
+  meleeAdIds.sort();
+
+  const HARD_EVIDENCE = { official: true, datamined: true, empirical: true };
+  for (const gate of adjustData.poolGateCandidates) {
+    if (gate.status !== 'confirmed') continue; // deferred는 표시 층위 전용
+    if (!HARD_EVIDENCE[gate.evidence]) continue; // 이진 규율: empirical 이상만
+    if (gate.id === 'ad-crit-core-dmg-gate') {
+      // AD/크리 코어 10종: 실게임은 하이브리드 태그(아리=Mage+Assassin)에게도 구조 제외
+      // (mm 2026-09-03 아리 134행 전행 부재 + raw/11 브·말·소 양소스 부재).
+      // ⚠ 태풍·검을 뽑아라·양손잡이·탭 댄서·신비한 주먹은 아리 실제 제시 관측(19~97게임)이라
+      //   게이트 포함 금지 — 산출물 caveats 준수 (표시 강등은 displayTier 몫).
+      for (const api of gate.augments) {
+        POOL_GATE[api] = {
+          championExclude: apIds,
+          gateId: gate.id,
+          note: 'AD/크리 코어 dmg 게이트: dmg=ap 챔피언 ' + apIds.length + '명 이진 제외'
+            + ' (Qiyana·Belveth는 dmg 근사 오류로 면제). 근거: mm 2026-09-03 아리 전행 부재'
+            + ' + raw/11 브·말·소 양소스 부재 — research/data/class-tier-adjust.json'
+            + ' poolGateCandidates[ad-crit-core-dmg-gate]. 근사: dmg는 DDragon info 기반',
+        };
+      }
+    } else if (gate.id === 'mana-core-gate') {
+      // 이미 1차 스터디 MANA_GATE(requiresMana)로 이식돼 있음 — 목록 일치만 검증(드리프트 가드)
+      const want = gate.augments.slice().sort().join(',');
+      const have = MANA_GATE.slice().sort().join(',');
+      if (want !== have) throw new Error('mana-core-gate 목록이 MANA_GATE와 불일치: ' + want + ' vs ' + have);
+    } else if (gate.id === 'phenomenal-evil-melee-ad-gate') {
+      // 극악무도: raw/11 §3-2 패턴 111010(제드·다리우스 부재, 징크스 포함) +
+      // mm 애쉬 708게임 제시(원거리 AD 포함 재확인) → 근접 AD만 이진 제외.
+      for (const api of gate.augments) {
+        POOL_GATE[api] = {
+          championExclude: meleeAdIds,
+          gateId: gate.id,
+          note: '근접 AD 게이트: dmg=ad·근접 챔피언 ' + meleeAdIds.length + '명 이진 제외.'
+            + ' 근거: raw/11 §3-2 111010(제드·다리우스 부재, 징크스 포함) + mm 애쉬 708게임'
+            + ' 제시 — research/data/class-tier-adjust.json'
+            + ' poolGateCandidates[phenomenal-evil-melee-ad-gate]. 근사: 메커니즘 해석은 추정',
+        };
+      }
+    } else {
+      throw new Error('미지의 poolGateCandidates id: ' + gate.id + ' — 이식 규칙을 추가하세요');
+    }
+  }
+  // 무결성: 게이트 대상 apiName 실존 검증
+  const apiSet = {};
+  for (const a of augData.augments) apiSet[a.apiName] = true;
+  for (const api of Object.keys(POOL_GATE)) {
+    if (!apiSet[api]) throw new Error('POOL_GATE: 미실존 apiName ' + api);
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /* 2.7 funTier — 꿀잼 티어 큐레이션 (augment-fun-tier 계약)               */
 /* ------------------------------------------------------------------ */
 // 근거 우선순위(계약): ① research/raw/13 (aramgg 한국판 T1~T5 + 인벤/디시/증바람.com)
@@ -654,7 +738,7 @@ const RESTR_KEY_ORDER = ['rangedOnly', 'meleeOnly', 'requiresMana', 'classRequir
 
 const logRows = []; // { apiName, nameKo, category, fields:[], why }
 const counts = { ability: 0, quest: 0, normal: 0, restrAdded: 0, weightAdded: 0,
-  mapSpellPin: 0, mapSpellExclude: 0, mapChampionExclude: 0 };
+  mapSpellPin: 0, mapSpellExclude: 0, mapChampionExclude: 0, poolGate: 0 };
 const funDist = { S: 0, A: 0, B: 0, C: 0, D: 0 };
 let funInferredCount = 0;
 
@@ -767,6 +851,20 @@ for (const aug of augData.augments) {
     }
   }
 
+  // (5c) 풀 게이트 (2.6 파생 — class-tier-adjust.json poolGateCandidates confirmed).
+  // championExclude 합집합(기존 항목 보존, 파생 목록은 정렬돼 있어 재실행 결정론).
+  // note는 게이트 근거로 교체 — 대상 11종은 다른 note 공급원(OPS·map)이 없음(무결성은
+  // POOL_GATE 실존 검증 + validate-data가 담보).
+  const pg = POOL_GATE[api];
+  if (pg) {
+    const gateList = (r.championExclude || []).slice();
+    for (const c of pg.championExclude) if (gateList.indexOf(c) === -1) gateList.push(c);
+    r.championExclude = gateList;
+    r.note = pg.note;
+    changedFields.add('championExclude(풀게이트 ' + pg.gateId + ' ' + pg.championExclude.length + '명)');
+    counts.poolGate++;
+  }
+
   // (6) 재조립 — 키 순서: …tier 뒤 category, tags 뒤 favored/disfavored, restrictions는 마지막
   const rebuilt = {};
   for (const k of Object.keys(aug)) {
@@ -832,6 +930,7 @@ lines.push('| map 이식: spellExclude 항목(챔피언×스킬) | ' + counts.ma
 lines.push('| map 이식: championExclude 신규 | ' + counts.mapChampionExclude + ' |');
 lines.push('| map 이식 보류(사유 있음) | ' + mapLog.skip.length + ' |');
 lines.push('| map pin 확정 불가(다중 스킬 적격) | ' + mapLog.conflict.length + ' |');
+lines.push('| 풀 게이트(class-tier-adjust confirmed) 적용 증강 | ' + counts.poolGate + ' |');
 lines.push('');
 lines.push('## ability-augment-map 이식 상세 (3차 실매핑, 306건 중)');
 lines.push('');
@@ -873,6 +972,16 @@ lines.push('- **TitansPulse meleeOnly 제거**: 원거리 아리·리산드라·
 lines.push('- **ARAM_SkilledSniper rangedOnly 제거**: 근접 Locke Q offered(official, 26.15) 반증 → favoredClasses(Mage/Marksman) 강등.');
 lines.push('- **Spin To Win 화이트리스트**: raw/15 §2-1 검증 수정본(22챔피언·28스킬)에서 스크립트 파생 — 챔피언 집합은 종전과 동일, 근거 등급을 community(위키 편집자 실측)로 정정하고 단일 QWER 스킬 확정 챔피언에는 spellPin 부여.');
 lines.push('');
+lines.push('## 풀 게이트 (4차 전수조사 — research/data/class-tier-adjust.json poolGateCandidates)');
+lines.push('');
+lines.push('- **ad-crit-core-dmg-gate (confirmed)**: AD/크리 코어 10종에 dmg=ap 챔피언 championExclude'
+  + ' (Qiyana·Belveth는 dmg 근사 오류 면제). 근거: mm 2026-09-03 아리 전행 부재 + raw/11 양소스 부재.');
+lines.push('- **mana-core-gate (confirmed)**: 기존 MANA_GATE(requiresMana)와 동일 — 목록 일치 검증만 수행.');
+lines.push('- **phenomenal-evil-melee-ad-gate (confirmed)**: 극악무도에 dmg=ad·근접 챔피언 championExclude.'
+  + ' 근거: raw/11 111010 + mm 애쉬 708게임 제시.');
+lines.push('- **crit-stat-family-ap-gate (deferred)**: 미이식 — 표시 강등(displayTier)만, 26.18 재실측 후 판단.');
+lines.push('- 태풍·검을 뽑아라·양손잡이·탭 댄서·신비한 주먹은 아리 실제 제시 관측(19~97게임)이라 게이트 금지 — 산출물 caveats 준수.');
+lines.push('');
 lines.push('## 판단 기록 (근사·보류)');
 lines.push('');
 lines.push('- **OceanSoul 미이식**: 마나 태그 계열이나 실측 6명 전원 등재 — STUDY §3-1 "보류" 지시대로 requiresMana 미부여.');
@@ -910,4 +1019,5 @@ console.log('[enrich-augments] funTier: S=' + funDist.S + ' A=' + funDist.A + ' 
 console.log('[enrich-augments] 이진 restrictions 부여/갱신: ' + counts.restrAdded + '건, 가중치 필드: ' + counts.weightAdded + '건');
 console.log('[enrich-augments] map 이식: spellPin=' + counts.mapSpellPin + ' spellExclude=' + counts.mapSpellExclude
   + ' championExclude(신규)=' + counts.mapChampionExclude + ' 보류=' + mapLog.skip.length + ' pin충돌=' + mapLog.conflict.length);
+console.log('[enrich-augments] 풀 게이트(class-tier-adjust confirmed): ' + counts.poolGate + '종 championExclude 부여');
 console.log('[enrich-augments] 로그: scripts/enrich-augments-log.md (' + logRows.length + '행)');

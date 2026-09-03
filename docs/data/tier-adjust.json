@@ -1,0 +1,306 @@
+{
+  "_meta": {
+    "doc": "클래스 문맥 티어 조정표 — recommend.js displayTier(augment, champion, adjust)가 읽는 런타임 데이터",
+    "generatedBy": "scripts/enrich-tier-adjust.cjs (수작업 편집 금지 — research/data/class-tier-adjust.json을 고치고 재생성)",
+    "source": "research/data/class-tier-adjust.json",
+    "sourceCollectedAt": "2026-09-03",
+    "sourcePatch": "26.17",
+    "tierScale": [
+      "S",
+      "A",
+      "B",
+      "C",
+      "D"
+    ],
+    "archetypes": [
+      "apMage",
+      "adMarksman",
+      "tank",
+      "adAssassin",
+      "support",
+      "fighter"
+    ],
+    "archetypeDerivation": "champions.json의 tags[0](주 태그)와 dmg로 결정론 유도. 의사코드: t0=tags[0]; t0==='Support'→'support'; t0==='Tank'→'tank'; t0==='Marksman'→(dmg==='ap'?'apMage':'adMarksman'); t0==='Mage'→'apMage'; t0==='Assassin'→(dmg==='ap'?'apMage':'adAssassin'); t0==='Fighter'→(dmg==='ap'?'apMage':'fighter'); 폴백: dmg==='ap'?'apMage':'fighter'",
+    "ruleSemantics": {
+      "match": "규칙은 (증강.tags ∩ ifAugmentTags ≠ ∅) AND (증강.tags ∩ unlessAugmentTags = ∅)일 때 그 증강에 적용. 챔피언 측은 (forDmg가 null이거나 champion.dmg===forDmg) AND (forClasses가 비었거나 archetype ∈ forClasses). 확장(2026-09-03 V2 스위프): 규칙에 unlessDmg가 있으면 champion.dmg===unlessDmg 챔피언에 미적용, unlessChampionTags가 있으면 champion.tags와 교집합이 있는 챔피언에 미적용 (하이브리드 예외 — Tank,Mage 말파이트류).",
+      "adjustGrammar": "cap:<T> = 표시 티어 상한을 T로(강등만, 승급 없음) / down:<n> = n단계 강등 / up:<n> = n단계 승급(up:0은 무변경 자리표시)",
+      "combine": "매칭된 모든 규칙 적용: 시작 t=funTier 인덱스 → up/down 합산 반영 → 모든 cap의 min(가장 낮은 상한) 적용. perAugment.overrides가 있으면 규칙 결과보다 우선.",
+      "displayOnly": "이 표는 표시(displayTier)와 routeTargets의 S 판정 문맥화 전용. 풀(eligibility) 변경은 poolGateCandidates만 근거로 구현팀이 별도 판단."
+    }
+  },
+  "rules": [
+    {
+      "id": "aa-core-vs-apmage",
+      "ifAugmentTags": [
+        "onhit",
+        "as"
+      ],
+      "unlessAugmentTags": [
+        "ap"
+      ],
+      "forDmg": "ap",
+      "forClasses": [
+        "apMage"
+      ],
+      "adjust": "cap:C",
+      "reason": "평타(온힛/공속) 코어는 AP 딜러 빌드와 무관 — 태풍·양손잡이·탭 댄서·신비한 주먹·능수능란이 아리에게 S/A로 표시되던 문제의 직접 원인. ap 태그 동반(광신자·마법 명사수 등 AP 스케일 평타)은 유지."
+    },
+    {
+      "id": "crit-core-vs-apmage",
+      "ifAugmentTags": [
+        "crit"
+      ],
+      "unlessAugmentTags": [
+        "ap"
+      ],
+      "forDmg": "ap",
+      "forClasses": [
+        "apMage"
+      ],
+      "adjust": "cap:C",
+      "reason": "치명타 스탯 코어(치명적인 공격·영혼 흡수·취약·한 발에 두 놈·치명적 가속)는 AP 딜러에게 무의미. AP 스케일 크리(보석 건틀릿·광신자·쌍둥이 불꽃)는 ap 태그로 보존."
+    },
+    {
+      "id": "ad-core-vs-apmage",
+      "ifAugmentTags": [
+        "ad"
+      ],
+      "unlessAugmentTags": [
+        "ap",
+        "tank",
+        "heal"
+      ],
+      "forDmg": "ap",
+      "forClasses": [
+        "apMage"
+      ],
+      "adjust": "cap:D",
+      "reason": "순수 AD 코어(육중한 힘·마법사(물리)·전장의 교향곡·검을 뽑아라)는 AP 딜러에게 사실상 무효 — 실측상 대부분 구조 제외 대상이라 최하 표시. 적응형(ad+ap 동반)은 보존."
+    },
+    {
+      "id": "aa-crit-ad-vs-support",
+      "ifAugmentTags": [
+        "onhit",
+        "as",
+        "crit",
+        "ad"
+      ],
+      "unlessAugmentTags": [
+        "ap",
+        "support",
+        "tank"
+      ],
+      "forDmg": "ap",
+      "forClasses": [
+        "support"
+      ],
+      "adjust": "cap:D",
+      "reason": "인챈터에게 평타/크리/AD 계열은 최하 표시. 자기 증강(자비의 일격 등 support 태그)과 방어 겸용(tank 태그)은 보존."
+    },
+    {
+      "id": "support-core-vs-ad-carries",
+      "ifAugmentTags": [
+        "support"
+      ],
+      "unlessAugmentTags": [
+        "ad",
+        "ap"
+      ],
+      "forDmg": "ad",
+      "forClasses": [
+        "adMarksman",
+        "adAssassin"
+      ],
+      "adjust": "cap:C",
+      "reason": "아군 치유/보호막 연계(바람전달자의 축복 등)는 힐/실드 없는 AD 캐리에게 무의미. 적응형 동반(남작의 손길)은 보존."
+    },
+    {
+      "id": "ap-core-vs-marksman",
+      "ifAugmentTags": [
+        "ap"
+      ],
+      "unlessAugmentTags": [
+        "ad",
+        "crit",
+        "onhit",
+        "tank"
+      ],
+      "forDmg": "ad",
+      "forClasses": [
+        "adMarksman"
+      ],
+      "adjust": "cap:C",
+      "reason": "순수 AP 코어(유레카·극악무도·지옥의 전도체·마도사의 주스 상자·사악한 정신)는 AD 원딜에게 저효율. 크리/온힛 동반(보석 건틀릿·마법 명사수)은 별도 판단."
+    },
+    {
+      "id": "ap-core-vs-adassassin",
+      "ifAugmentTags": [
+        "ap"
+      ],
+      "unlessAugmentTags": [
+        "ad",
+        "crit",
+        "onhit",
+        "tank"
+      ],
+      "forDmg": "ad",
+      "forClasses": [
+        "adAssassin"
+      ],
+      "adjust": "cap:C",
+      "reason": "AD 암살자(제드류)에게 순수 AP 코어 강등. 평타/크리 계열은 강등하지 않음(마스터 이·야스오류 온힛/크리 암살자 실존)."
+    },
+    {
+      "id": "ap-core-vs-fighter",
+      "ifAugmentTags": [
+        "ap"
+      ],
+      "unlessAugmentTags": [
+        "ad",
+        "crit",
+        "onhit",
+        "tank"
+      ],
+      "forDmg": "ad",
+      "forClasses": [
+        "fighter"
+      ],
+      "adjust": "cap:C",
+      "reason": "AD 전사에게 순수 AP 코어 강등. dmg==='ap'인 전사(모데카이저·릴리아·럼블)는 아키타입 유도에서 apMage로 빠지므로 오폭 없음."
+    },
+    {
+      "id": "aa-crit-core-vs-tank",
+      "ifAugmentTags": [
+        "onhit",
+        "as",
+        "crit"
+      ],
+      "unlessAugmentTags": [
+        "tank",
+        "ap"
+      ],
+      "forDmg": null,
+      "forClasses": [
+        "tank"
+      ],
+      "adjust": "cap:C",
+      "reason": "탱커에게 평타/크리 코어 강등. 탱크 겸용(강타자·확률적 방어)과 AP 스케일(광신자 — 말파이트류 AP 탱커 실존)은 보존. forDmg 없음: mixed 탱커(말파이트)도 적용."
+    },
+    {
+      "id": "ad-core-vs-tank",
+      "ifAugmentTags": [
+        "ad"
+      ],
+      "unlessAugmentTags": [
+        "tank",
+        "ap",
+        "heal"
+      ],
+      "forDmg": null,
+      "forClasses": [
+        "tank"
+      ],
+      "adjust": "cap:C",
+      "reason": "탱커에게 순수 AD 코어 강등(육중한 힘·전장의 교향곡 등). 죽음의 무도 업글(tank 태그)류는 보존."
+    },
+    {
+      "id": "tank-core-vs-ad-carries",
+      "ifAugmentTags": [
+        "tank"
+      ],
+      "unlessAugmentTags": [
+        "ad",
+        "ap",
+        "crit",
+        "onhit",
+        "as"
+      ],
+      "forDmg": null,
+      "forClasses": [
+        "adMarksman",
+        "adAssassin"
+      ],
+      "adjust": "cap:C",
+      "reason": "탱 전용 코어(강철 같은 심장·탱크 엔진·거인·확고한 의지로·압력솥·이케시아의 몰락·정신 변환)는 AD 캐리(원딜·AD 암살자)의 꿀잼 축이 아님 — 공격 태그 동반 하이브리드(나 이제 폭주해 등 tank+ad/ap)는 보존."
+    },
+    {
+      "id": "support-core-boost",
+      "ifAugmentTags": [
+        "support"
+      ],
+      "unlessAugmentTags": [],
+      "forDmg": null,
+      "forClasses": [
+        "support"
+      ],
+      "adjust": "up:1",
+      "reason": "서포터 전용 계열은 서포터에게 대표 픽 — 전역 funTier(범용 기준 C/B)보다 한 단계 올려 '서포터의 S/A'를 보이게 한다."
+    },
+    {
+      "id": "ap-core-vs-tank",
+      "ifAugmentTags": [
+        "ap"
+      ],
+      "unlessAugmentTags": [
+        "tank",
+        "heal",
+        "shield"
+      ],
+      "forDmg": null,
+      "forClasses": [
+        "tank"
+      ],
+      "adjust": "cap:C",
+      "reason": "순수 AP 코어(유레카·지옥의 전도체·보석 건틀릿·우글렛·극악무도·마법 미사일)는 AP 스케일 없는 정통 탱커(오른·람머스·세주아니·뽀삐)에게 무의미 — 단 AP 탱커(dmg=ap 아무무·초가스·자크)와 Mage 부태그 하이브리드(말파이트 — mm 실측 유레카 1482게임 정상 제시)는 AP 원콤이 실빌드라 unlessDmg/unlessChampionTags로 제외.",
+      "unlessDmg": "ap",
+      "unlessChampionTags": [
+        "Mage"
+      ]
+    }
+  ],
+  "perAugment": [
+    {
+      "apiName": "ARAM_EtherealWeapon",
+      "overrides": {
+        "apMage": "A"
+      },
+      "reason": "환영 무기(스킬이 적중 효과 적용)는 onhit 태그지만 스킬 기반이라 AP 딜러에게 실사용됨 — aa-core-vs-apmage 규칙(cap:C)의 예외."
+    },
+    {
+      "apiName": "ARAM_JeweledGauntlet",
+      "overrides": {
+        "adMarksman": "B"
+      },
+      "reason": "보석 건틀릿(스킬 치명타)은 crit 태그 가드로 규칙을 통과하지만 AD 원딜 실측 승률이 낮아 S→B로 완화 강등(루시안류 스킬 원딜 예외 여지 감안해 C까지는 내리지 않음)."
+    },
+    {
+      "apiName": "ARAM_ProteinShake",
+      "overrides": {
+        "adMarksman": "C",
+        "adAssassin": "C"
+      },
+      "reason": "프로틴 음료(치유·보호막 효과 증폭)는 힐/실드 없는 AD 캐리에게 무의미 — 태그(heal+shield+tank)가 규칙망에 안 걸려 개별 지정."
+    },
+    {
+      "apiName": "ARAM_MindtoMatter",
+      "overrides": {
+        "adMarksman": "C"
+      },
+      "reason": "정신 변환(마나→체력)은 A티어지만 원딜 실측에서 제시 자체가 안 잡힘 — 태그(mana+tank)가 규칙망 밖이라 개별 지정."
+    },
+    {
+      "apiName": "ARAM_Overflow",
+      "overrides": {
+        "adMarksman": "C"
+      },
+      "reason": "범람(마나 2배 소모·효과 증폭)도 동일 — 원딜 실측 부재, 태그(mana+heal+shield) 규칙망 밖."
+    },
+    {
+      "apiName": "ARAM_Upgrade_Sheen",
+      "overrides": {
+        "apMage": "B"
+      },
+      "reason": "광휘의 검 업그레이드는 onhit 태그지만 주문검 계열에 리치베인(AP 아이템)이 포함되어 AP 딜러에게 실사용 — aa-core-vs-apmage 규칙(cap:C)의 예외로 전역 funTier(B) 유지."
+    }
+  ]
+}

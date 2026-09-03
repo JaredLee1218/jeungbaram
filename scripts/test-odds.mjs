@@ -3,22 +3,27 @@
  * 실행: node scripts/test-odds.mjs   (실패 시 exit 1)
  *
  * 실데이터(docs/data/*.json)로 draft.js의 순수 조회 API
- * (drawDistribution / rerollDistribution / goldenDistribution / hitProbability /
- *  skillOdds / remainingByTier)를 검증한다:
+ * (drawDistribution / rerollDistribution(혼합) / hitProbability /
+ *  skillOdds / remainingByTier)를 검증한다.
+ * G-AUTO 갱신(사유: 황금 리롤이 수동 액션에서 자동 발동으로 리워크 — raw/19):
+ * goldenDistribution 케이스는 rerollDistribution의 혼합 분포
+ * P(a) = (1-g)·P_동급(a) + g·P_상급(a) 검증으로 대체됐다.
  *
  *  [1] 분포 불변식 — 12챔피언 × 전 등급 × (신규 게임 / 2라운드 진행 후):
  *      Σp = 1 ± 1e-9, 음수 p·weight 0건, entries = {pool − used, tier 일치} 정확 집합 일치,
  *      entries 순서 = pool 순서, weight = weightFor 재호출값, totalWeight = 순서 합,
- *      used(노출·선택분) 제외 확인
+ *      used(노출·선택분) 제외 확인 + rerollDistribution 혼합 정합(base/golden/goldenChance)
  *  [2] 순수성 — 조회 API 호출 전후 game JSON(rngState 포함) 불변
  *  [3] skillOdds 불변식 — 12챔피언 × 풀 내 스킬 증강 전부 (Σ=1±1e-9, 음수 0,
  *      spellPin은 해당 키 정확히 1.0, 비스킬 증강은 전부 0)
  *  [4] 엣지: 풀 고갈·타 등급 보충 — used 주입으로 FALLBACK_ORDER /
- *      FALLBACK_ORDER_UPGRADE 각 분기 강제, 전 등급 고갈 시 entries=[]
+ *      FALLBACK_ORDER_UPGRADE 각 분기 강제, 전 등급 고갈 시 entries=[],
+ *      프리즘 화면·화면 내 기발동이면 goldenChance=0 (판정 불가 상태)
  *  [5] hitProbability — Σ(개별 p)와 일치(±1e-12), Set/술어 함수 동등
- *  [6] 몬테카를로 대조 — 시나리오 8개(일반 리롤 / trackL9 / 황금 리롤 / 폴백 /
+ *  [6] 몬테카를로 대조 — 시나리오 8개(일반 리롤 / trackL9 / 자동 황금 혼합 / 폴백 /
  *      skillOdds ③균등·exclude / ①pin), 시드 고정 재현 가능, 시나리오당 N=100,000:
  *      각 증강(또는 스킬 키)의 |실측 빈도 − 해석 확률| < 4·√(p(1−p)/N)  (4σ 판정)
+ *      — rerollSlot의 판정 draw + 결과 draw가 혼합 분포와 일치하는지의 직접 실증
  *  [7] 결정론 가드 — 같은 시드 100게임 전체 이력을 이중 실행 diff + FNV-1a 해시 고정
  *      (SPEC §5-1의 스냅샷 diff — 엔진 리팩터가 드로우 바이트를 바꾸면 여기서 잡힌다)
  *
@@ -31,17 +36,16 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+/* goldenReroll/goldenDistribution import 제거 — G-AUTO 리워크로 export 삭제됨(위 헤더 사유) */
 import {
   createRng,
   newGame,
   nextRound,
   rerollSlot,
-  goldenReroll,
   pickAugment,
   weightFor,
   drawDistribution,
   rerollDistribution,
-  goldenDistribution,
   hitProbability,
   skillOdds,
   remainingByTier,
@@ -113,9 +117,10 @@ function depleteAllExcept(game, keepApiName) {
   }
 }
 
-/** k개 라운드를 진행·선택(결정적 픽)하고, 마지막에 nextRound 1회로 진행 중 라운드를 연다. */
-function setupActiveRound(champion, seed, trackL9, roundsBefore) {
-  const game = newGame({ augments: AUGMENTS, champion: champion, seed: seed, trackL9: trackL9 });
+/** k개 라운드를 진행·선택(결정적 픽)하고, 마지막에 nextRound 1회로 진행 중 라운드를 연다.
+ *  goldenChance 미지정 시 draft.js 기본값(GOLDEN_REROLL_CHANCE) — 혼합 분포 경로가 기본 커버됨. */
+function setupActiveRound(champion, seed, trackL9, roundsBefore, goldenChance) {
+  const game = newGame({ augments: AUGMENTS, champion: champion, seed: seed, trackL9: trackL9, goldenChance: goldenChance });
   for (let r = 0; r < roundsBefore; r++) {
     nextRound(game);
     const cur = game.rounds[game.rounds.length - 1];
@@ -178,6 +183,50 @@ function checkDistInvariants(label, game, dist, startTier) {
   check(leaked.length === 0, label + ': used 증강이 분포에 포함 ' + leaked.join(','));
 }
 
+/**
+ * rerollDistribution(혼합 — G-AUTO)의 불변식 검증:
+ *  - base(동급)/golden(상급) 하위 분포 각각 checkDistInvariants
+ *  - goldenChance = 판정 가능 상태(실버/골드 화면·화면 내 미발동)면 game.goldenChance, 아니면 0
+ *  - 혼합 정합: p(a) = (1-g)·p_base(a) + g·p_golden(a), Σp = 1, 중복 병합·후보 누락 없음
+ */
+function checkMixedInvariants(label, game, dist, slotIndex) {
+  const round = game.rounds[game.rounds.length - 1];
+  const slotTier = round.slots[slotIndex].tier;
+  checkDistInvariants(label + '/base', game, dist.base, slotTier);
+  const eligible = (round.tier === 'silver' || round.tier === 'gold') && round.golden === null;
+  const expectG = eligible ? game.goldenChance : 0;
+  check(dist.goldenChance === expectG,
+    label + ': goldenChance=' + dist.goldenChance + ' (기대 ' + expectG + ')');
+  check(dist.resolvedTier === dist.base.resolvedTier && dist.totalWeight === dist.base.totalWeight,
+    label + ': 최상위 resolvedTier/totalWeight ≠ base');
+  if (!(expectG > 0)) {
+    check(dist.golden === null && dist.goldenTier === null, label + ': g=0인데 golden 분포 존재');
+    check(dist.entries === dist.base.entries, label + ': g=0이면 entries === base.entries');
+    return;
+  }
+  checkDistInvariants(label + '/golden', game, dist.golden, TIER_UP[round.tier]);
+  check(dist.goldenTier === dist.golden.resolvedTier, label + ': goldenTier ≠ golden.resolvedTier');
+  const g = expectG;
+  const pBase = {};
+  const pUp = {};
+  dist.base.entries.forEach(function (e) { pBase[e.aug.apiName] = e.p; });
+  dist.golden.entries.forEach(function (e) { pUp[e.aug.apiName] = e.p; });
+  let sum = 0;
+  let mixOk = true;
+  const seen = {};
+  for (const e of dist.entries) {
+    if (seen[e.aug.apiName]) mixOk = false; // apiName 중복 = 병합 실패
+    seen[e.aug.apiName] = true;
+    const want = (1 - g) * (pBase[e.aug.apiName] || 0) + g * (pUp[e.aug.apiName] || 0);
+    if (Math.abs(e.p - want) > 1e-12) mixOk = false;
+    sum += e.p;
+  }
+  for (const n in pBase) if (!seen[n]) mixOk = false;
+  for (const n in pUp) if (!seen[n]) mixOk = false;
+  check(mixOk, label + ': 혼합 p ≠ (1-g)·base + g·golden (또는 후보 누락/중복)');
+  check(Math.abs(sum - 1) <= 1e-9, label + ': 혼합 Σp=' + sum);
+}
+
 for (let ci = 0; ci < CHAMP_IDS.length; ci++) {
   const champ = byId(CHAMP_IDS[ci]);
   const trackL9 = ci % 2 === 1; // 절반은 trackL9 on — 가중 경로 커버
@@ -194,17 +243,16 @@ for (let ci = 0; ci < CHAMP_IDS.length; ci++) {
   for (const tier of TIERS) {
     checkDistInvariants(champ.id + '/진행/' + tier, game, drawDistribution(game, tier), tier);
   }
-  // 리롤/황금 리롤 래퍼도 동일 불변식 (시작 등급은 래퍼 규칙으로 산출)
-  const slotTier = game.rounds[game.rounds.length - 1].slots[0].tier;
-  checkDistInvariants(champ.id + '/rerollDist', game, rerollDistribution(game, 0), slotTier);
-  checkDistInvariants(champ.id + '/goldenDist', game, goldenDistribution(game, 0), TIER_UP[slotTier]);
+  // 리롤 래퍼(혼합 분포)도 불변식 검증 — G-AUTO 갱신: goldenDistribution 별도 케이스는
+  // 혼합 분포의 base/golden 하위 분포 검증으로 대체 (checkMixedInvariants 주석 참조)
+  checkMixedInvariants(champ.id + '/rerollDist', game, rerollDistribution(game, 0), 0);
 
   // [2] 순수성: 조회 API 6종 호출 전후 game 불변 (rngState 포함 — rng 미소비 증명)
   const abilityAug = game.pool.find(function (a) { return a.category === 'ability'; });
   const before = JSON.stringify(game);
   for (const tier of TIERS) drawDistribution(game, tier);
   rerollDistribution(game, 0);
-  goldenDistribution(game, 0);
+  rerollDistribution(game, 1); // (goldenDistribution 삭제 — 혼합 분포가 golden 하위 분포 포함)
   remainingByTier(game);
   if (abilityAug) skillOdds(game, abilityAug);
   hitProbability(rerollDistribution(game, 0), new Set());
@@ -265,52 +313,61 @@ section('4. 엣지 — 폴백·전 고갈 (used 주입 강제)');
   check(d.resolvedTier === FALLBACK_ORDER.gold[0],
     '엣지b: gold 고갈 시 resolvedTier=' + d.resolvedTier + ' (기대 ' + FALLBACK_ORDER.gold[0] + ')');
 
-  // (c) 황금 리롤 폴백 — silver 슬롯, 상위(gold)·prismatic 고갈 → silver 유지
+  // (G-AUTO 갱신: goldenDistribution 삭제 — 황금 경로 폴백은 rerollDistribution(...)
+  //  .golden(상급 하위 분포)으로 검증한다. 상급 분포의 기준 등급은 화면 등급(round.tier)+1.)
+
+  // (c) 황금 경로 폴백 — silver 화면, 상위(gold)·prismatic 고갈 → silver 유지
   //     (FALLBACK_ORDER_UPGRADE.silver = ['prismatic','silver'] 전 분기)
   const g3 = newGame({ augments: AUGMENTS, champion: champ, seed: 73 });
   depleteTier(g3, 'gold');
   depleteTier(g3, 'prismatic');
   nextRound(g3); // 등급 롤 후보가 silver뿐 → silver 라운드
   check(g3.rounds[0].tier === 'silver', '엣지c: 강제 silver 라운드 실패(' + g3.rounds[0].tier + ')');
-  d = goldenDistribution(g3, 0);
-  check(d.resolvedTier === 'silver',
-    '엣지c: gold·prism 고갈 시 황금 리롤 resolvedTier=' + d.resolvedTier + ' (기대 silver)');
-  checkDistInvariants('엣지c/silver유지', g3, d, null);
+  d = rerollDistribution(g3, 0);
+  check(d.goldenChance === g3.goldenChance && d.golden !== null,
+    '엣지c: silver 화면·미발동인데 goldenChance=' + d.goldenChance);
+  check(d.golden.resolvedTier === 'silver',
+    '엣지c: gold·prism 고갈 시 황금 경로 resolvedTier=' + d.golden.resolvedTier + ' (기대 silver)');
+  checkDistInvariants('엣지c/silver유지', g3, d.golden, null);
+  // (c2) 화면 내 기발동 상태 주입 → 판정 불가(goldenChance=0)
+  g3.rounds[0].golden = 1;
+  d = rerollDistribution(g3, 0);
+  check(d.goldenChance === 0 && d.golden === null, '엣지c2: 화면 내 기발동 후 황금 판정 없음');
+  g3.rounds[0].golden = null; // 원복
 
-  // (d) 황금 리롤 폴백 — silver 슬롯, gold만 고갈 → prismatic (UPGRADE[silver][0])
+  // (d) 황금 경로 폴백 — silver 화면, gold만 고갈 → prismatic (UPGRADE[silver][0])
   const g4 = newGame({ augments: AUGMENTS, champion: champ, seed: 74 });
   const injGold = depleteTier(g4, 'gold');
   const injPrism = depleteTier(g4, 'prismatic');
   nextRound(g4); // silver 라운드 강제
   removeFromUsed(g4, injPrism); // prismatic 복구 → gold만 고갈 상태
   check(injGold.length > 0 && g4.rounds[0].tier === 'silver', '엣지d: 상태 구성 실패');
-  d = goldenDistribution(g4, 0);
-  check(d.resolvedTier === FALLBACK_ORDER_UPGRADE.silver[0],
-    '엣지d: gold 고갈 시 황금 리롤 resolvedTier=' + d.resolvedTier + ' (기대 prismatic)');
+  d = rerollDistribution(g4, 0).golden;
+  check(d !== null && d.resolvedTier === FALLBACK_ORDER_UPGRADE.silver[0],
+    '엣지d: gold 고갈 시 황금 경로 resolvedTier=' + (d && d.resolvedTier) + ' (기대 prismatic)');
   checkDistInvariants('엣지d/prism상승', g4, d, null);
 
-  // (e) 황금 리롤 폴백 — gold 슬롯, prismatic 고갈 → gold 유지 (UPGRADE[gold][0])
+  // (e) 황금 경로 폴백 — gold 화면, prismatic 고갈 → gold 유지 (UPGRADE[gold][0])
   const g5 = newGame({ augments: AUGMENTS, champion: champ, seed: 75 });
   depleteTier(g5, 'silver');
   depleteTier(g5, 'prismatic');
   nextRound(g5); // gold 라운드 강제
   check(g5.rounds[0].tier === 'gold', '엣지e: 강제 gold 라운드 실패(' + g5.rounds[0].tier + ')');
-  d = goldenDistribution(g5, 0);
-  check(d.resolvedTier === FALLBACK_ORDER_UPGRADE.gold[0],
-    '엣지e: prism 고갈 시 황금 리롤 resolvedTier=' + d.resolvedTier + ' (기대 gold)');
+  d = rerollDistribution(g5, 0).golden;
+  check(d !== null && d.resolvedTier === FALLBACK_ORDER_UPGRADE.gold[0],
+    '엣지e: prism 고갈 시 황금 경로 resolvedTier=' + (d && d.resolvedTier) + ' (기대 gold)');
 
-  // (f) prismatic 슬롯 황금 리롤(동급 유지) + 이후 전 고갈 → 빈 분포
+  // (f) prismatic 화면 — G-AUTO에서는 황금 판정 자체가 없음(goldenChance=0) + 전 고갈 → 빈 분포
   const g6 = newGame({ augments: AUGMENTS, champion: champ, seed: 76 });
   depleteTier(g6, 'silver');
   depleteTier(g6, 'gold');
   nextRound(g6); // prismatic 라운드 강제
   check(g6.rounds[0].tier === 'prismatic', '엣지f: 강제 prismatic 라운드 실패');
-  d = goldenDistribution(g6, 0);
-  check(d.resolvedTier === 'prismatic', '엣지f: prismatic 슬롯 황금 리롤은 prismatic 유지');
+  d = rerollDistribution(g6, 0);
+  check(d.goldenChance === 0 && d.golden === null,
+    '엣지f: prismatic 화면은 황금 판정 없음 (goldenChance=0)');
+  check(d.resolvedTier === 'prismatic', '엣지f: prismatic 화면 리롤은 prismatic 동급');
   depleteTier(g6, 'prismatic');
-  d = goldenDistribution(g6, 0);
-  check(d.resolvedTier === null && d.entries.length === 0,
-    '엣지f: 전 고갈 시 황금 리롤 분포가 비어야 함');
   d = rerollDistribution(g6, 0);
   check(d.resolvedTier === null && d.entries.length === 0,
     '엣지f: 전 고갈 시 리롤 분포가 비어야 함');
@@ -355,36 +412,40 @@ const N_MC = 100000;
 const mcRows = []; // 결과 표 (시나리오·resolvedTier·후보 수·maxσ)
 
 /**
- * 몬테카를로 공용 루프: 상태 고정 → 매 시행 rngState 교체 → action 1회 → O(1) 되감기.
+ * 몬테카를로 공용 루프: 상태 고정 → 매 시행 rngState 교체 → rerollSlot 1회 → O(1) 되감기.
+ * (G-AUTO 갱신: 황금 리롤이 rerollSlot에 내재된 자동 발동이라 별도 action 분기가 없다 —
+ *  판정 draw + 결과 draw의 실측 분포가 혼합 분포와 일치하는지가 검증 대상.)
  * 되감기 무결성은 종료 시 원본 JSON과의 완전 일치로 증명한다.
- * @returns {{ counts: Object, skillCounts: Object }} apiName·스킬 키별 실측 횟수
+ * @returns {{ counts: Object, skillCounts: Object, goldenFired: number }}
  */
-function runTrials(name, game, slot, action, n) {
+function runTrials(name, game, slot, n) {
   const round = game.rounds[game.rounds.length - 1];
   const savedSlot = round.slots[slot];
   const savedUsedLen = game.used.length;
   const savedRng = game.rngState;
+  const savedGolden = round.golden; // 진행 중 라운드의 발동 상태 (시나리오 전제상 null)
   const pristine = JSON.stringify(game);
   const master = createRng('mc-' + name); // 시행별 rngState 공급 (시드 고정 → 재현 가능)
   const counts = {};
   const skillCounts = { Q: 0, W: 0, E: 0, R: 0 };
+  let goldenFired = 0;
   for (let t = 0; t < n; t++) {
     game.rngState = Math.floor(master() * 4294967296) >>> 0;
-    const got = (action === 'golden') ? goldenReroll(game, slot) : rerollSlot(game, slot);
+    const got = rerollSlot(game, slot);
     counts[got.apiName] = (counts[got.apiName] || 0) + 1;
+    if (round.golden === slot) goldenFired++;
     if (got.enhancedSkill && skillCounts[got.enhancedSkill.key] !== undefined) {
       skillCounts[got.enhancedSkill.key]++;
     }
-    // O(1) 되감기 (rerollSlot/goldenReroll의 변이 전부: used·슬롯·플래그)
+    // O(1) 되감기 (rerollSlot의 변이 전부: used·슬롯·플래그·자동 발동 기록)
     game.used.length = savedUsedLen;
     round.slots[slot] = savedSlot;
     round.rerolled[slot] = false;
-    round.golden = null;
-    game.goldenUsed = false;
+    round.golden = savedGolden;
   }
   game.rngState = savedRng;
   check(JSON.stringify(game) === pristine, name + ': 되감기 후 상태가 원본과 다름 (MC 무결성 위반)');
-  return { counts: counts, skillCounts: skillCounts };
+  return { counts: counts, skillCounts: skillCounts, goldenFired: goldenFired };
 }
 
 /** 실측 빈도 vs 해석 확률 4σ 대조. pairs = [{ key, p, count }]. 최대 편차(σ) 반환. */
@@ -411,14 +472,23 @@ function compareFreq(name, pairs, n) {
   return maxSigma;
 }
 
-/** 증강 분포 시나리오 1건 실행 (일반/황금 리롤) */
+/** 증강 분포 시나리오 1건 실행 — rerollSlot 실측 vs rerollDistribution(혼합) 해석 확률.
+ *  cfg.goldenChance: newGame 재정의 (미지정 시 기본값 0.04 — 혼합이 기본 경로).
+ *  cfg.requireGolden: 활성 라운드가 실버/골드(판정 가능)일 때까지 시드를 결정적으로 탐색. */
 function mcAugScenario(cfg) {
   const champ = byId(cfg.champ);
-  const game = setupActiveRound(champ, cfg.seed, cfg.trackL9, cfg.roundsBefore);
+  let game = setupActiveRound(champ, cfg.seed, cfg.trackL9, cfg.roundsBefore, cfg.goldenChance);
+  if (cfg.requireGolden) {
+    for (let t = 1; t <= 50; t++) {
+      const rt = game.rounds[game.rounds.length - 1].tier;
+      if (rt === 'silver' || rt === 'gold') break;
+      game = setupActiveRound(champ, cfg.seed + t, cfg.trackL9, cfg.roundsBefore, cfg.goldenChance);
+    }
+    check(rerollDistribution(game, cfg.slot).goldenChance > 0,
+      cfg.name + ': 판정 가능(실버/골드) 라운드 확보 실패');
+  }
   if (cfg.prep) cfg.prep(game);
-  const dist = (cfg.action === 'golden')
-    ? goldenDistribution(game, cfg.slot)
-    : rerollDistribution(game, cfg.slot);
+  const dist = rerollDistribution(game, cfg.slot);
   check(dist.entries.length >= 2 && dist.totalWeight > 0,
     cfg.name + ': 시나리오 전제 실패 (후보 ' + dist.entries.length + ')');
   if (cfg.expectTier) {
@@ -429,7 +499,11 @@ function mcAugScenario(cfg) {
     check(dist.entries.some(function (e) { return e.aug.category === 'ability'; }),
       cfg.name + ': trackL9 검증에 필요한 스킬 증강 후보가 없음');
   }
-  const res = runTrials(cfg.name, game, cfg.slot, cfg.action, N_MC);
+  const res = runTrials(cfg.name, game, cfg.slot, N_MC);
+  // 자동 발동 빈도 자체도 이항 대조 (판정 draw의 실증 — goldenChance 0이면 0회여야 함)
+  compareFreq(cfg.name + '/goldenFire',
+    [{ key: '발동', p: dist.goldenChance, count: res.goldenFired },
+     { key: '미발동', p: 1 - dist.goldenChance, count: N_MC - res.goldenFired }], N_MC);
   const known = {};
   const pairs = dist.entries.map(function (e) {
     known[e.aug.apiName] = true;
@@ -455,7 +529,7 @@ function mcAugScenario(cfg) {
 
   mcRows.push({
     name: cfg.name, champ: cfg.champ,
-    action: cfg.action + (cfg.trackL9 ? '+trackL9' : ''),
+    action: 'reroll(g=' + dist.goldenChance + ')' + (cfg.trackL9 ? '+trackL9' : ''),
     tier: dist.resolvedTier, cand: dist.entries.length, maxSigma: maxSigma,
   });
   return maxSigma;
@@ -478,7 +552,7 @@ function mcSkillScenario(cfg) {
     check(Math.abs(odds[k] - cfg.expectOdds[k]) <= 1e-12,
       cfg.name + ': skillOdds.' + k + '=' + odds[k] + ' (기대 ' + cfg.expectOdds[k] + ')');
   }
-  const res = runTrials(cfg.name, game, 0, 'reroll', N_MC);
+  const res = runTrials(cfg.name, game, 0, N_MC);
   const pairs = ['Q', 'W', 'E', 'R'].map(function (k) {
     return { key: k, p: odds[k], count: res.skillCounts[k] };
   });
@@ -493,35 +567,39 @@ function mcSkillScenario(cfg) {
 let mcMaxSigma = 0;
 const t0 = Date.now();
 
+// (G-AUTO 갱신: 종전 S3/S5 "황금 리롤 액션" 시나리오는 메커니즘 삭제로 "goldenChance를
+//  크게 강제한 자동 발동 혼합 분포" 시나리오로 대체 — 판정 draw+상급 추출 경로의 4σ 실증.
+//  S1/S2/S4/S6은 기본 goldenChance(0.04)로 돌아 혼합의 저확률 꼬리도 함께 검증된다.)
 // S1 일반 리롤 기본 (Lux, 1라운드) + hitProbability 집합 대조
 mcMaxSigma = Math.max(mcMaxSigma, mcAugScenario({
   name: 'S1-reroll-basic', champ: 'Lux', seed: 20260903, trackL9: false,
-  roundsBefore: 0, slot: 0, action: 'reroll', hitProbe: true,
+  roundsBefore: 0, slot: 0, hitProbe: true,
 }));
 // S2 일반 리롤 + trackL9 (MasterYi, 2라운드째 — 스킬 증강 1.5배 가중 경로)
 mcMaxSigma = Math.max(mcMaxSigma, mcAugScenario({
   name: 'S2-reroll-trackL9', champ: 'MasterYi', seed: 777, trackL9: true,
-  roundsBefore: 1, slot: 1, action: 'reroll', needsAbility: true,
+  roundsBefore: 1, slot: 1, needsAbility: true,
 }));
-// S3 황금 리롤 기본 (Garen, 1라운드) + hitProbability 집합 대조
+// S3 자동 황금 발동 혼합 (Garen, 실버/골드 화면 강제, g=0.3) + hitProbability 집합 대조
 mcMaxSigma = Math.max(mcMaxSigma, mcAugScenario({
-  name: 'S3-golden-basic', champ: 'Garen', seed: 424242, trackL9: false,
-  roundsBefore: 0, slot: 0, action: 'golden', hitProbe: true,
+  name: 'S3-goldenmix', champ: 'Garen', seed: 424242, trackL9: false,
+  roundsBefore: 0, slot: 0, goldenChance: 0.3, requireGolden: true, hitProbe: true,
 }));
 // S4 일반 리롤 후반 라운드 (Ahri, 3라운드째 — used 누적 상태)
 mcMaxSigma = Math.max(mcMaxSigma, mcAugScenario({
   name: 'S4-reroll-late', champ: 'Ahri', seed: 31337, trackL9: false,
-  roundsBefore: 2, slot: 2, action: 'reroll',
+  roundsBefore: 2, slot: 2,
 }));
-// S5 황금 리롤 + trackL9 (Ashe, 2라운드째)
+// S5 자동 황금 발동 + trackL9 (Ashe, 2라운드째, g=0.3)
 mcMaxSigma = Math.max(mcMaxSigma, mcAugScenario({
-  name: 'S5-golden-trackL9', champ: 'Ashe', seed: 9001, trackL9: true,
-  roundsBefore: 1, slot: 1, action: 'golden',
+  name: 'S5-goldenmix-trackL9', champ: 'Ashe', seed: 9001, trackL9: true,
+  roundsBefore: 1, slot: 1, goldenChance: 0.3, requireGolden: true,
 }));
 // S6 일반 리롤 폴백 — 슬롯 등급을 고갈시켜 타 등급 보충 경로의 확률 정합 검증
+// (goldenChance=0: 폴백 base 경로를 순수하게 격리 — 혼합은 S1~S5가 담당)
 mcMaxSigma = Math.max(mcMaxSigma, mcAugScenario({
   name: 'S6-reroll-fallback', champ: 'Amumu', seed: 555, trackL9: false,
-  roundsBefore: 0, slot: 0, action: 'reroll',
+  roundsBefore: 0, slot: 0, goldenChance: 0,
   prep: function (game) {
     const round = game.rounds[game.rounds.length - 1];
     const t = round.slots[0].tier;
@@ -561,8 +639,15 @@ section('7. 결정론 가드 (100게임 이력 스냅샷)');
  * 엔진(draft.js)만 수정했는데 이 값이 바뀌면 시드 결정론 회귀다 — 수정 금지, 엔진을 고칠 것.
  * docs/data/augments.json·champions.json 갱신 시에는 바뀌는 것이 정상 —
  * 실패 메시지의 새 해시로 의도적으로 재고정하고 커밋 메시지에 데이터 갱신을 명기할 것.
+ *
+ * 재고정 이력:
+ *  - 2026-09-03 '5aa8d647' → 재고정. 사유(정당한 이중 변경):
+ *    ① 메커니즘 변경 — 황금 리롤 자동 발동(G-AUTO) 리워크로 rerollSlot이 판정 draw 1회를
+ *       추가 소비 + 수동 goldenReroll 삭제로 이력 스크립트 자체가 바뀜 (raw/19)
+ *    ② 데이터 갱신 — 풀 게이트 이식(enrich-augments 2.6: AD/크리 코어 10종·극악무도
+ *       championExclude — research/data/class-tier-adjust.json confirmed)
  */
-const HISTORY_HASH_PINNED = '5aa8d647';
+const HISTORY_HASH_PINNED = 'a9497399';
 
 function fnv1a(s) {
   let h = 0x811c9dc5;
@@ -577,12 +662,16 @@ function sig(a) {
   return a.apiName + (a.enhancedSkill ? ':' + a.enhancedSkill.key : '');
 }
 
-/** 게임 1판 자동 진행(리롤·황금 리롤 조작은 시드 결정적) → 전체 이력 배열 */
+/** 게임 1판 자동 진행(리롤 조작은 시드 결정적) → 전체 이력 배열.
+ *  G-AUTO 갱신: 수동 goldenReroll 단계 삭제 — 대신 goldenChance를 게임별로 0/0.04/1로
+ *  순환시켜 미발동·기본·항상발동 경로를 모두 이력에 포함하고, 자동 발동 기록(round.golden)도
+ *  해시 대상에 넣는다 (발동 판정 draw의 결정론 회귀 가드). */
 function playHistory(gi) {
   const champ = CHAMPIONS[(gi * 37) % CHAMPIONS.length];
-  const g = newGame({ augments: AUGMENTS, champion: champ, seed: 90000 + gi * 101, trackL9: gi % 2 === 1 });
+  const gc = [0, 0.04, 1][gi % 3];
+  const g = newGame({ augments: AUGMENTS, champion: champ, seed: 90000 + gi * 101, trackL9: gi % 2 === 1, goldenChance: gc });
   const ctrl = createRng('hist-' + gi);
-  const hist = [champ.id];
+  const hist = [champ.id, 'g' + gc];
   for (let r = 0; r < 4; r++) {
     const round = nextRound(g);
     hist.push([round.tier, round.slots.map(sig)]);
@@ -590,11 +679,8 @@ function playHistory(gi) {
       const si = Math.floor(ctrl() * round.slots.length);
       hist.push(['re' + si, sig(rerollSlot(g, si))]);
     }
-    if (!g.goldenUsed && ctrl() < 0.3) {
-      const si = Math.floor(ctrl() * round.slots.length);
-      hist.push(['go' + si, sig(goldenReroll(g, si))]);
-    }
     const cur = g.rounds[g.rounds.length - 1];
+    hist.push(['au', cur.golden]); // 자동 황금 발동 슬롯 기록 (null = 미발동)
     hist.push(['pk', sig(pickAugment(g, Math.floor(ctrl() * cur.slots.length)))]);
   }
   return hist;

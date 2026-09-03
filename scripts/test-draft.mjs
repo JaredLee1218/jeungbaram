@@ -5,8 +5,10 @@
  * 합성 증강 fixture 30개(실버 12 / 골드 10 / 프리즘 8)로 검증:
  *  [1] 4라운드 진행 (레벨 3/7/11/15, 3슬롯, finished 전이)
  *  [2] 등급 규칙 (1·2라운드 둘 다 실버 금지, 화면 3개 동일 등급, 3등급 모두 등장)
- *  [3] 리롤 1회 제한 (슬롯별 1회, 황금 리롤 게임당 1회 + 등급 상승)
- *  [4] 중복 금지 (게임 내 노출/선택 증강 재등장 없음 — 풀 스트레스)
+ *  [3] 리롤 1회 제한 + 황금 리롤 자동 발동 (G-AUTO — research/raw/19-golden-reroll.md:
+ *      실버/골드 화면에서 확률 goldenChance로 리롤이 화면 등급+1로 상승, 화면당 최대 1회,
+ *      프리즘 화면 무발동. 구 "게임당 1회 수동 goldenReroll" 케이스는 메커니즘 변경으로 대체)
+ *  [4] 중복 금지 (게임 내 노출/선택 증강 재등장 없음 — 풀 스트레스, 황금 발동 경로 포함)
  *  [5] 시드 재현성 (같은 seed+같은 조작=같은 결과, 직렬화 복원 후에도 동일, createRng)
  *  [6] eligibleAugments 챔피언 필터 (보너스 체크)
  *
@@ -21,15 +23,17 @@
  * real-mapping 계약 검증 (research/ABILITY-AUGMENT-DATA.md §4):
  *  [14] spellPin 지정 순서 — ①pin(rng 미소비) ②slot ③무작위, exclude 충돌 시 pin 무시→③
  */
+/* goldenReroll import 제거: 황금 리롤이 자동 발동(G-AUTO)으로 바뀌며 수동 API가 삭제됨.
+ * 대신 newGame({ goldenChance }) 재정의(0/1 강제)로 발동/미발동 경로를 결정적으로 검증한다. */
 import {
   createRng,
   eligibleAugments,
   newGame,
   nextRound,
   rerollSlot,
-  goldenReroll,
   pickAugment,
   weightFor,
+  GOLDEN_REROLL_CHANCE,
   WEIGHT_FAVORED,
   WEIGHT_DISFAVORED,
   WEIGHT_TRACK_L9_ABILITY,
@@ -141,55 +145,71 @@ section('2. 등급 규칙');
     JSON.stringify(tierSeen));
 }
 
-/* ---------------- [3] 리롤 제한 ---------------- */
-section('3. 리롤 1회 제한 + 황금 리롤');
+/* ---------------- [3] 리롤 제한 + 황금 리롤 자동 발동 ---------------- */
+section('3. 리롤 1회 제한 + 황금 리롤 자동 발동 (G-AUTO)');
 {
-  const g = newGame({ augments: AUGS, champion: CHAMP, seed: 777 });
+  // 갱신 사유(메커니즘 변경): 황금 리롤이 "게임당 1회 수동 액션"에서 "리롤 시 자동 발동"으로
+  // 바뀜 (raw/19 G-AUTO). goldenChance 0/1 강제로 미발동/발동 경로를 결정적으로 검증한다.
+  const g = newGame({ augments: AUGS, champion: CHAMP, seed: 777, goldenChance: 0 });
   const round = nextRound(g);
   const before1 = round.slots[1].apiName;
   const re1 = rerollSlot(g, 1);
   check('리롤 시 다른 증강으로 교체', re1.apiName !== before1);
-  check('리롤은 같은 등급 유지', re1.tier === round.tier, re1.tier + ' vs ' + round.tier);
+  check('goldenChance=0이면 리롤은 같은 등급 유지', re1.tier === round.tier, re1.tier + ' vs ' + round.tier);
   check('rerolled[1]=true', round.rerolled[1] === true);
+  check('goldenChance=0이면 round.golden=null 유지', round.golden === null);
   checkThrows('같은 슬롯 2번째 리롤은 예외', () => rerollSlot(g, 1));
   const re0 = rerollSlot(g, 0);
   check('다른 슬롯은 리롤 가능', re0 && typeof re0.apiName === 'string');
   checkThrows('잘못된 슬롯 인덱스는 예외', () => rerollSlot(g, 9));
 
-  // 황금 리롤: 한 단계 상위 등급 (프리즘이면 프리즘 유지)
-  const beforeGold = round.slots[2];
-  const ga = goldenReroll(g, 2);
-  check('황금 리롤 등급 상승', ga.tier === TIER_UP[beforeGold.tier],
-    beforeGold.tier + ' → ' + ga.tier);
-  check('goldenUsed=true', g.goldenUsed === true);
-  check('round.golden=2', round.golden === 2);
-  checkThrows('같은 라운드 2번째 황금 리롤은 예외', () => goldenReroll(g, 0));
-  pickAugment(g, 2);
-  nextRound(g);
-  checkThrows('다음 라운드에서도 황금 리롤 불가 (게임당 1회)', () => goldenReroll(g, 0));
+  // 기본값·직렬화: goldenChance 미지정 시 GOLDEN_REROLL_CHANCE, 상태에 저장(직렬화 왕복)
+  const gDef = newGame({ augments: AUGS, seed: 1 });
+  check('goldenChance 기본값 = GOLDEN_REROLL_CHANCE', gDef.goldenChance === GOLDEN_REROLL_CHANCE);
+  check('goldenChance 직렬화 왕복 보존', JSON.parse(JSON.stringify(gDef)).goldenChance === GOLDEN_REROLL_CHANCE);
 
-  // 황금 리롤로 등급이 오른 슬롯도 일반 리롤은 별개 (새 게임에서 확인)
-  const g2 = newGame({ augments: AUGS, champion: CHAMP, seed: 778 });
-  const r2 = nextRound(g2);
-  const upped = goldenReroll(g2, 0);
-  const reAfterGolden = rerollSlot(g2, 0);
-  check('황금 리롤 후 일반 리롤 가능(별개 카운트)', reAfterGolden.apiName !== upped.apiName);
-  check('황금 리롤 후 일반 리롤은 오른 등급 기준', reAfterGolden.tier === upped.tier,
-    reAfterGolden.tier + ' vs ' + upped.tier);
-  check('r2 참조 유지 확인', r2.slots[0].apiName === reAfterGolden.apiName);
-
-  // 프리즘 슬롯 황금 리롤 → 프리즘 유지 (프리즘 라운드가 나올 때까지 시드 탐색)
+  // 자동 발동: goldenChance=1 + 실버/골드 화면 → 첫 리롤이 화면 등급+1로 상승
+  let upChecked = false;
   let prismChecked = false;
-  for (let s = 0; s < 400 && !prismChecked; s++) {
-    const gp = newGame({ augments: AUGS, champion: CHAMP, seed: 5000 + s });
-    const rp = nextRound(gp);
-    if (rp.tier === 'prismatic') {
-      const gaP = goldenReroll(gp, 0);
-      check('프리즘 슬롯 황금 리롤은 프리즘 유지', gaP.tier === 'prismatic', gaP.tier);
+  for (let s = 0; s < 400 && !(upChecked && prismChecked); s++) {
+    const gu = newGame({ augments: AUGS, champion: CHAMP, seed: 5000 + s, goldenChance: 1 });
+    const ru = nextRound(gu);
+    if (!upChecked && (ru.tier === 'silver' || ru.tier === 'gold')) {
+      const up = rerollSlot(gu, 0);
+      check('발동: 실버/골드 화면 리롤이 화면 등급+1 (' + ru.tier + '→' + up.tier + ')',
+        up.tier === TIER_UP[ru.tier]);
+      check('발동: round.golden에 슬롯 기록', ru.golden === 0);
+      // 화면당 최대 1회 (근사: 위키 단수 표현): 같은 화면의 두 번째 리롤은 동급 유지
+      const re2 = rerollSlot(gu, 1);
+      check('화면당 1회: 두 번째 리롤은 동급 유지', re2.tier === ru.tier, re2.tier);
+      check('화면당 1회: round.golden 그대로', ru.golden === 0);
+      upChecked = true;
+    } else if (!prismChecked && ru.tier === 'prismatic') {
+      const keep = rerollSlot(gu, 0);
+      check('프리즘 화면: goldenChance=1이어도 무발동(동급 유지·golden=null)',
+        keep.tier === 'prismatic' && ru.golden === null, keep.tier);
       prismChecked = true;
     }
   }
-  check('프리즘 라운드 케이스 확보', prismChecked);
+  check('실버/골드 발동 케이스 확보', upChecked);
+  check('프리즘 무발동 케이스 확보', prismChecked);
+
+  // 게임당 횟수 제한 없음 — 화면마다 독립 발동 (실측: 한 게임 3회 사례, raw/19 §5)
+  let multiChecked = false;
+  for (let s = 0; s < 400 && !multiChecked; s++) {
+    const gm = newGame({ augments: AUGS, champion: CHAMP, seed: 15000 + s, goldenChance: 1 });
+    const r1 = nextRound(gm);
+    if (r1.tier === 'prismatic') continue;
+    rerollSlot(gm, 0); // 화면 1 발동
+    pickAugment(gm, 0);
+    const r2 = nextRound(gm);
+    if (r2.tier === 'prismatic') continue;
+    const up2 = rerollSlot(gm, 0);
+    check('게임당 제한 없음: 다음 화면에서도 발동 (화면 등급+1)',
+      up2.tier === TIER_UP[r2.tier] && r2.golden === 0, r2.tier + '→' + up2.tier);
+    multiChecked = true;
+  }
+  check('다음 화면 재발동 케이스 확보', multiChecked);
 }
 
 /* ---------------- [4] 중복 금지 (스트레스: 슬롯 3개 전부 리롤 + 황금) ---------------- */
@@ -197,11 +217,12 @@ section('4. 중복 금지');
 {
   let dupGames = 0;
   for (let s = 0; s < 100; s++) {
-    const g = newGame({ augments: AUGS, champion: CHAMP, seed: 1000 + s });
+    // 갱신 사유(메커니즘 변경): 수동 goldenReroll 삭제 — 절반은 goldenChance=1로
+    // 자동 발동(상급 풀 추출) 경로까지 스트레스에 포함시킨다.
+    const g = newGame({ augments: AUGS, champion: CHAMP, seed: 1000 + s, goldenChance: s % 2 ? 1 : 0 });
     for (let r = 0; r < 4; r++) {
       const round = nextRound(g);
       for (let i = 0; i < round.slots.length; i++) rerollSlot(g, i);
-      if (!g.goldenUsed) goldenReroll(g, r % 3);
       pickAugment(g, (r * 2) % 3);
     }
     // used = 게임 내 노출된 모든 apiName. 중복이 있으면 재등장 금지 위반.
@@ -246,10 +267,8 @@ section('5. 시드 재현성');
       for (const aug of round.slots) trace.push(aug.apiName);
       rerollSlot(g, r % 3);
       trace.push(round.slots[r % 3].apiName);
-      if (r === 1) {
-        goldenReroll(g, 0);
-        trace.push(round.slots[0].apiName);
-      }
+      // (수동 goldenReroll 단계 삭제 — G-AUTO 전환. 자동 발동은 rerollSlot에 내재되어
+      //  판정 draw까지 시드 결정적이므로 재현성 검증 범위에 이미 포함된다.)
       const p = pickAugment(g, (r + 1) % 3);
       trace.push(p.apiName);
     }
@@ -325,17 +344,20 @@ section('6. eligibleAugments 챔피언 필터');
 /* ---------------- [7] 황금 리롤 고갈 보충: 하위 등급으로 떨어지지 않음 ---------------- */
 section('7. 황금 리롤 고갈 보충 (프리즘 고갈 시 골드 유지)');
 {
-  // 프리즘이 아예 없는 풀: 골드 슬롯 황금 리롤은 실버로 강등되지 않고 골드를 유지해야 함
+  // 갱신 사유(메커니즘 변경): 수동 goldenReroll → goldenChance=1 강제 자동 발동으로 재구성.
+  // 프리즘이 아예 없는 풀: 골드 화면 황금 발동은 실버로 강등되지 않고 골드를 유지해야 함
+  // (FALLBACK_ORDER_UPGRADE[gold] = 프리즘→골드→실버 보충 순서).
   const noPrism = [];
   for (let i = 1; i <= 8; i++) noPrism.push({ apiName: 'NP_silver_' + i, tier: 'silver', enabled: true });
   for (let i = 1; i <= 8; i++) noPrism.push({ apiName: 'NP_gold_' + i, tier: 'gold', enabled: true });
   let goldChecked = false;
   for (let s = 0; s < 400 && !goldChecked; s++) {
-    const g = newGame({ augments: noPrism, champion: CHAMP, seed: 9000 + s });
+    const g = newGame({ augments: noPrism, champion: CHAMP, seed: 9000 + s, goldenChance: 1 });
     const r = nextRound(g);
     if (r.tier === 'gold') {
-      const ga = goldenReroll(g, 0);
-      check('프리즘 고갈 시 골드 슬롯 황금 리롤은 골드 유지(실버 강등 금지)',
+      const ga = rerollSlot(g, 0); // goldenChance=1 → 반드시 발동
+      check('발동 기록(round.golden=0)', r.golden === 0);
+      check('프리즘 고갈 시 골드 화면 황금 발동은 골드 유지(실버 강등 금지)',
         ga.tier === 'gold', ga.tier);
       goldChecked = true;
     }
@@ -441,11 +463,12 @@ section('8. 신규 restrictions 판정 (계약 검증 기준 1~5)');
   // 풀 스트레스: 전 라운드·전 리롤을 돌려도 슬롯에 마나 증강이 한 번도 노출되지 않아야 함
   let manaExposed = 0;
   for (let s = 0; s < 80; s++) {
-    const g = newGame({ augments: GATED, champion: ZED, seed: 20000 + s });
+    // 갱신 사유(메커니즘 변경): 수동 goldenReroll 삭제 — 절반은 goldenChance=1로 상급 풀
+    // 추출(자동 발동) 경로까지 노출 스트레스에 포함.
+    const g = newGame({ augments: GATED, champion: ZED, seed: 20000 + s, goldenChance: s % 2 ? 1 : 0 });
     for (let r = 0; r < 4; r++) {
       const round = nextRound(g);
       for (let i = 0; i < round.slots.length; i++) rerollSlot(g, i);
-      if (!g.goldenUsed) goldenReroll(g, 0);
       pickAugment(g, 0);
     }
     for (const n of ['ARAM_Overflow', 'ARAM_Juiced', 'ARAM_MindtoMatter']) {
@@ -717,7 +740,7 @@ section('13. 신규 기능 포함 시드 재현성');
       rerollSlot(g, r % 3);
       const s2 = round.slots[r % 3];
       trace.push(s2.apiName + (s2.enhancedSkill ? ':' + s2.enhancedSkill.key : ''));
-      if (r === 1) goldenReroll(g, 0);
+      // (수동 goldenReroll 단계 삭제 — G-AUTO 전환. 발동 판정 draw는 rerollSlot에 내재)
       trace.push(pickAugment(g, (r + 1) % 3).apiName);
     }
     return trace.join('|');
@@ -809,7 +832,8 @@ section('14. spellPin 지정 순서 (①pin ②slot ③무작위)');
       for (const a of round.slots) note(a);
       rerollSlot(g, r % 3);
       note(round.slots[r % 3]);
-      if (r === 1) { goldenReroll(g, 0); note(round.slots[0]); }
+      // (수동 goldenReroll 단계 삭제 — G-AUTO 전환. 판정 draw 소비는 양쪽 풀에서 동일하므로
+      //  rng 미소비(a)/(b)의 "동일 소비량" 전제는 그대로 성립한다.)
       pickAugment(g, (r + 1) % 3);
     }
     return { seq: seq.join('|'), keys: keys, rngState: g.rngState };

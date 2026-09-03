@@ -35,12 +35,13 @@
 import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+/* goldenReroll import 제거 — 황금 리롤 자동 발동(G-AUTO) 리워크로 수동 API 삭제 (raw/19).
+ * 풀 스트레스는 goldenChance=1 강제로 상급 추출(자동 발동) 경로를 그대로 유지한다. */
 import {
   eligibleAugments,
   newGame,
   nextRound,
   rerollSlot,
-  goldenReroll,
   pickAugment,
 } from '../docs/js/draft.js';
 
@@ -83,14 +84,15 @@ function patternOf(api) {
   return SIX.map((id) => (inPool(id, api) ? '1' : '0')).join('');
 }
 
-/** 풀 스트레스 게임 1판: 전 라운드·전 슬롯 리롤 + 황금 리롤 → 노출 최대화. 노출 apiName 목록 반환 */
+/** 풀 스트레스 게임 1판: 전 라운드·전 슬롯 리롤 → 노출 최대화. 노출 apiName 목록 반환.
+ *  갱신 사유(메커니즘 변경): 수동 goldenReroll 삭제 — goldenChance=1 강제로 실버/골드
+ *  화면의 첫 리롤이 항상 자동 발동해 상급 풀 추출 경로 노출이 종전과 동등하게 유지된다. */
 function stressGame(c, seed, opts) {
-  const g = newGame(Object.assign({ augments: AUGMENTS, champion: c, seed }, opts || {}));
+  const g = newGame(Object.assign({ augments: AUGMENTS, champion: c, seed, goldenChance: 1 }, opts || {}));
   const exposedSlots = [];
   for (let r = 0; r < 4; r++) {
     const round = nextRound(g);
     for (let i = 0; i < round.slots.length; i++) rerollSlot(g, i);
-    if (!g.goldenUsed && round.slots.length > 0) goldenReroll(g, 0);
     for (let i = 0; i < round.slots.length; i++) exposedSlots.push(round.slots[i]);
     if (round.slots.length > 0) pickAugment(g, 0);
   }
@@ -173,8 +175,11 @@ section('6. [기준6] 챔피언별 풀 비대칭 + 가중 추출 분포 (11 §4-
   check('말파이트 풀 최대 (실측: op.gg 193종 최대 — 전원 이상)',
     SIX.every((id) => sizes.Malphite >= sizes[id]), sizeStr);
   check('말파이트 풀 > 징크스 풀 (실측 방향성 재현)', sizes.Malphite > sizes.Jinx, sizeStr);
-  check('징크스 풀 < 소라카·다리우스 풀 (AP·힐 제외 > 크리 제외 방향성)',
-    sizes.Jinx < sizes.Soraka && sizes.Jinx < sizes.Darius, sizeStr);
+  // 갱신 사유(2026-09-03, 풀 게이트 이식): 극악무도 근접 AD 게이트로 다리우스가 1종을 더 잃어
+  // (raw/11 111010의 다리우스 부재를 이제 시뮬이 재현) 징크스와 동수가 될 수 있다 —
+  // 방향성 주장을 "징크스 ≤ 다리우스"로 완화 (소라카 비교는 유지).
+  check('징크스 풀 < 소라카 풀, ≤ 다리우스 풀 (AP·힐 제외 > 크리 제외 방향성)',
+    sizes.Jinx < sizes.Soraka && sizes.Jinx <= sizes.Darius, sizeStr);
   // ⚠ 알려진 근사 한계(실패 아님): 실측 최소는 징크스(op.gg 169)지만, 징크스를 최소로 만드는
   // 큐레이션 게이트(Echo Cast·Quickstep·힐스탯류 등 — 11 §4-6)는 confidence 부족(중간/추정)으로
   // 이진 미이식이라 시뮬에서는 제드·브랜드가 더 작을 수 있다. AMNET 실측도 제드 107 < 징크스 108.
@@ -388,9 +393,19 @@ section('11. [추가] confidence 규율 — 이진 필터의 eligibility-notes �
   if (allowed.ARAM_Quickstep) delete allowed.ARAM_Quickstep.meleeOnly;
   if (allowed.TitansPulse) delete allowed.TitansPulse.meleeOnly;
   if (allowed.ARAM_SkilledSniper) delete allowed.ARAM_SkilledSniper.rangedOnly;
-  // 예외 규정: Phenomenal Evil은 개별 게이트가 계열과 다름(징크스 포함) → 이진 금지
+  // 예외 규정: Phenomenal Evil은 개별 게이트가 계열과 다름(징크스 포함) → classRequired 이진 금지
   if (allowed.ARAM_PhenomenalEvil) delete allowed.ARAM_PhenomenalEvil.classRequired;
   // 예외 규정: Draw Your Sword는 adCrit 계열이지만 rangedOnly+클래스 좁힘으로 별도 처리(위 augmentApiName 항목)
+  // 추가 근거원(2026-09-03, research/data/class-tier-adjust.json — 4차 전수조사 풀 게이트):
+  // poolGateCandidates(status='confirmed', evidence empirical 이상)의 championExclude 게이트
+  // (AD/크리 코어 10종 dmg=ap 제외 + 극악무도 근접 AD 제외 — enrich-augments.cjs 2.6이 이식).
+  // mana-core-gate는 기존 eligibility-notes classBias(mana)의 requiresMana와 동일 근거라 통과.
+  const ADJUST = loadJson('../research/data/class-tier-adjust.json');
+  for (const gate of ADJUST.poolGateCandidates) {
+    if (gate.status !== 'confirmed' || OK_CONF.indexOf(gate.evidence) === -1) continue;
+    if (gate.id === 'mana-core-gate') continue; // requiresMana — notes 근거로 이미 허용됨
+    for (const api of gate.augments) allow(api, 'championExclude');
+  }
 
   // (c) championSpecific: confidence empirical 이상 + rule exclude/excludeSpell만 이진 허용
   for (const cs of NOTES.championSpecific) {
@@ -735,6 +750,30 @@ section('18. [추가 감사] community 근거의 하드 필터 유입 0 (map 61�
     mapExcl[e.augment + '|' + e.champion + '|' + (e.skill || '')] = e.confidence;
   }
   const HARD_OK = ['official', 'datamined'];
+  // 추가 근거원(2026-09-03): 풀 게이트 championExclude는 map이 아니라
+  // research/data/class-tier-adjust.json poolGateCandidates(confirmed, empirical)에서 파생됨
+  // (enrich-augments.cjs 2.6 — dmg=ap 제외 + 근접 AD 제외, Qiyana·Belveth는 dmg 근사 오류 면제).
+  // 게이트 파생 목록을 여기서 동일 규칙으로 재계산해 역추적한다 (드리프트 시 실패 → 감사 유지).
+  const ADJUST18 = loadJson('../research/data/class-tier-adjust.json');
+  const AP_EXEMPT18 = { Qiyana: true, Belveth: true };
+  const gateAllowed = {}; // 'aug|champ' → true
+  {
+    const apSet = {};
+    const meleeAdSet = {};
+    for (const c of CHAMPIONS) {
+      if (c.dmg === 'ap' && !AP_EXEMPT18[c.id]) apSet[c.id] = true;
+      if (c.dmg === 'ad' && !c.ranged) meleeAdSet[c.id] = true;
+    }
+    for (const gate of ADJUST18.poolGateCandidates) {
+      if (gate.status !== 'confirmed' || ['official', 'datamined', 'empirical'].indexOf(gate.evidence) === -1) continue;
+      const idSet = gate.id === 'ad-crit-core-dmg-gate' ? apSet
+        : (gate.id === 'phenomenal-evil-melee-ad-gate' ? meleeAdSet : null);
+      if (!idSet) continue; // mana-core-gate 등 championExclude 미사용 게이트
+      for (const api of gate.augments) {
+        for (const cid of Object.keys(idSet)) gateAllowed[api + '|' + cid] = true;
+      }
+    }
+  }
   const rev = [];
   for (const a of AUGMENTS) {
     const r = a.restrictions;
@@ -749,6 +788,7 @@ section('18. [추가 감사] community 근거의 하드 필터 유입 0 (map 61�
     }
     if (Array.isArray(r.championExclude)) {
       for (const cid of r.championExclude) {
+        if (gateAllowed[a.apiName + '|' + cid]) continue; // 풀 게이트 파생분 (class-tier-adjust 근거)
         // 챔피언 단위: map의 champion-level excluded (skill 무관 — Jinx는 Q 명시라 skill 키로도 조회)
         const conf = mapExcl[a.apiName + '|' + cid + '|']
           || mapExcl[a.apiName + '|' + cid + '|Q'] || mapExcl[a.apiName + '|' + cid + '|W']
@@ -761,6 +801,37 @@ section('18. [추가 감사] community 근거의 하드 필터 유입 0 (map 61�
   }
   check('역방향: 이진 spellExclude·championExclude 전 항목이 empirical 이상 근거로 역추적',
     rev.length === 0, rev.join(' | '));
+
+  // [V1 확장 감사 2026-09-03] 풀 게이트 정확 집합 대조 — 위 역추적은 "목록 ⊆ 근거"만
+  // 보장하므로(초과분 검출), 여기서 "목록 = 파생 집합" 등식을 추가로 강제한다
+  // (누락분 검출 — 게이트가 근거보다 느슨해지는 드리프트 방지).
+  // 파생 규칙은 enrich-augments.cjs 2.6과 동일: ad-crit-core → dmg=ap(면제 2명 제외),
+  // phenomenal-evil → dmg=ad·근접. 대상 증강 목록은 class-tier-adjust.json 게이트가 정의.
+  {
+    const apExact = Object.keys(
+      CHAMPIONS.reduce((m, c) => { if (c.dmg === 'ap' && !AP_EXEMPT18[c.id]) m[c.id] = 1; return m; }, {})
+    ).sort().join(',');
+    const meleeAdExact = CHAMPIONS.filter((c) => c.dmg === 'ad' && !c.ranged)
+      .map((c) => c.id).sort().join(',');
+    const augByName = {};
+    for (const a of AUGMENTS) augByName[a.apiName] = a;
+    const mismatch = [];
+    for (const gate of ADJUST18.poolGateCandidates) {
+      if (gate.status !== 'confirmed' || ['official', 'datamined', 'empirical'].indexOf(gate.evidence) === -1) continue;
+      const want = gate.id === 'ad-crit-core-dmg-gate' ? apExact
+        : (gate.id === 'phenomenal-evil-melee-ad-gate' ? meleeAdExact : null);
+      if (!want) continue; // championExclude 미사용 게이트
+      for (const api of gate.augments) {
+        const a = augByName[api];
+        const got = (a && a.restrictions && Array.isArray(a.restrictions.championExclude))
+          ? a.restrictions.championExclude.slice().sort().join(',')
+          : '(없음)';
+        if (got !== want) mismatch.push(api + ' — championExclude ≠ 파생 집합 (' + gate.id + ')');
+      }
+    }
+    check('풀 게이트 championExclude = 파생 집합 정확 일치 (부분집합 아님 — 누락 0)',
+      mismatch.length === 0, mismatch.join(' | '));
+  }
 }
 
 /* ---------------- 요약 ---------------- */

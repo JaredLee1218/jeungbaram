@@ -3,6 +3,7 @@
 // 케이스: ① combo 정확 매칭 ② tagRules 태그 규칙 ③ 매칭 0건 폴백 (+방어적 입력)
 //         ④ class-fit(fitScore) ⑤ previewAugment ⑥ routeTargets(목표 집합 T)
 //         ⑦ buildDossier(챔피언 꿀잼 사전 셰이퍼) — SPEC-day2 §2·§3-3
+//         ⑧ displayTier(클래스 문맥 티어) — 실데이터(docs/data) 기반 전수조사 계약 검증
 //
 // 참고: 저장소에 package.json("type":"module")이 없어도 돌아가도록,
 // docs/js/recommend.js 를 임시 디렉터리에 복사한 뒤 동적 import 한다.
@@ -748,6 +749,108 @@ async function main() {
   checkDossierShape(buildDossier({}), "case7e-빈입력");
   checkDossierShape(buildDossier(), "case7e-무인자");
   checkDossierShape(buildDossier({ champion: CHAMP_ASHE, synergies: null, items: null, augments: null, funrank: null }), "case7e-널데이터");
+
+  // --- 케이스 8: displayTier 클래스 문맥 티어 (실데이터 — 전수조사 계약) ---
+  // 근거: research/data/class-tier-adjust.json (2026-09-03 전수조사, empirical) →
+  //       scripts/enrich-tier-adjust.cjs → docs/data/tier-adjust.json.
+  // 사용자 증언 계약: "아리는 AP 챔피언인데 왜 S,A 증강이 공속이나 태풍 이런거야?" —
+  // 전역 funTier(태풍 S)가 아리(AP 딜러)에게는 강등 표시되고, 애쉬(AD 원딜)에게는 유지돼야 한다.
+  console.log("\n[케이스 8] displayTier 클래스 문맥 티어");
+  ok(typeof mod.displayTier === "function", "displayTier export 존재");
+  const { displayTier } = mod;
+
+  const dataDir = path.join(here, "..", "docs", "data");
+  const readJson = async (f) => JSON.parse(await fs.readFile(path.join(dataDir, f), "utf8"));
+  const realAugs = (await readJson("augments.json")).augments;
+  const realChamps = (await readJson("champions.json")).champions;
+  const ADJUST = await readJson("tier-adjust.json");
+  const champOf = (id) => realChamps.find((c) => c.id === id);
+  const augOf = (n) => realAugs.find((a) => a.apiName === n);
+  const AHRI = champOf("Ahri");       // tags [Mage,Assassin], dmg ap → apMage (하이브리드 태그여도 AP 문맥)
+  const ASHE = champOf("Ashe");       // tags [Marksman,Support], dmg ad → adMarksman
+  const MALPHITE = champOf("Malphite"); // tags [Tank,Mage], dmg mixed → tank
+  const SORAKA = champOf("Soraka");   // tags [Support,Mage] → support
+  ok(!!AHRI && !!ASHE && !!MALPHITE && !!SORAKA, "case8: 실데이터 챔피언 4명 로드");
+
+  // 8a. 아리(apMage): 평타/크리/AD 코어 강등 — 문제 제기의 직접 케이스
+  const d8Typhoon = displayTier(augOf("ARAM_Typhoon"), AHRI, ADJUST);
+  ok(augOf("ARAM_Typhoon").funTier === "S" && d8Typhoon.tier === "C",
+    "case8a: 태풍(전역 S) → 아리에게 C 강등", d8Typhoon);
+  ok(typeof d8Typhoon.reason === "string" && d8Typhoon.reason.length > 0,
+    "case8a: 강등 시 reason(조정 사유) 반환", d8Typhoon.reason);
+  ok(displayTier(augOf("ARAM_SoulSiphon"), AHRI, ADJUST).tier === "C",
+    "case8a: 영혼 흡수(crit, 전역 A) → 아리에게 C");
+  ok(displayTier(augOf("ARAM_BluntForce"), AHRI, ADJUST).tier === "D",
+    "case8a: 육중한 힘(ad, 전역 A) → 아리에게 D (cap:D)");
+  // AP 스케일 가드: ap 태그 동반 증강은 강등하지 않는다
+  ok(displayTier(augOf("ARAM_JeweledGauntlet"), AHRI, ADJUST).tier === "S",
+    "case8a: 보석 건틀릿(crit+ap) → 아리에게 S 유지 (ap 가드)");
+  ok(displayTier(augOf("ARAM_Eureka"), AHRI, ADJUST).tier === "S",
+    "case8a: 유레카(ap) → 아리에게 S 유지");
+  // perAugment 예외: 환영 무기(onhit)는 스킬 기반이라 규칙(cap:C)의 예외 — A로만 완화 강등
+  const d8Ether = displayTier(augOf("ARAM_EtherealWeapon"), AHRI, ADJUST);
+  ok(d8Ether.tier === "A" && typeof d8Ether.reason === "string" && d8Ether.reason.length > 0,
+    "case8a: 환영 무기(전역 S) → 아리에게 A (perAugment 예외가 규칙 cap:C보다 우선)", d8Ether);
+
+  // 8b. 애쉬(adMarksman): 평타 코어는 유지, AP 코어는 강등 ("제시되지만 나쁨" 실측)
+  const d8AsheTyphoon = displayTier(augOf("ARAM_Typhoon"), ASHE, ADJUST);
+  ok(d8AsheTyphoon.tier === "S" && d8AsheTyphoon.reason === null,
+    "case8b: 태풍 → 애쉬에게 S 유지 (무변경이면 reason null)", d8AsheTyphoon);
+  ok(displayTier(augOf("ARAM_Eureka"), ASHE, ADJUST).tier === "C",
+    "case8b: 유레카(ap, 전역 S) → 애쉬에게 C (mm 실측 wr 44.92)");
+  ok(displayTier(augOf("ARAM_JeweledGauntlet"), ASHE, ADJUST).tier === "B",
+    "case8b: 보석 건틀릿 → 애쉬에게 B (perAugment 완화 강등, mm wr 39.82)");
+
+  // 8c. 말파이트(tank, dmg mixed): 평타/크리·AD 코어 강등 — forDmg 없는 탱커 규칙이
+  //     mixed에도 적용. AP 코어는 유지 (mm 실측: 유레카 1482게임 정상 제시 — AP 탱커 실존).
+  //     ※ 과제 지시문의 "말파이트(AP 코어 강등)"는 조정표 원본과 상충 — 실측(keyEvidence
+  //       malphite)은 AP 정상 제시라 강등 규칙이 없다. 실제 강등 대상(평타/AD 코어)로 검증.
+  ok(displayTier(augOf("ARAM_Typhoon"), MALPHITE, ADJUST).tier === "C",
+    "case8c: 태풍 → 말파이트(탱커)에게 C 강등");
+  ok(displayTier(augOf("ARAM_BluntForce"), MALPHITE, ADJUST).tier === "C",
+    "case8c: 육중한 힘(ad) → 말파이트에게 C (ad-core-vs-tank)");
+  ok(displayTier(augOf("ARAM_Eureka"), MALPHITE, ADJUST).tier === "S",
+    "case8c: 유레카(ap) → 말파이트에게 S 유지 (AP 탱커 실측 정상 제시)");
+
+  // 8d. 서포터 승급(up:1): 서포터 전용 계열은 소라카에게 한 단계 위로
+  const d8AllForYou = displayTier(augOf("ARAM_AllForYou"), SORAKA, ADJUST);
+  ok(augOf("ARAM_AllForYou").funTier === "C" && d8AllForYou.tier === "B",
+    "case8d: 너만을 위해(support, 전역 C) → 소라카에게 B 승급", d8AllForYou);
+
+  // 8e. 하위 호환·방어: adjust 없으면 전역 funTier 그대로, 어떤 입력에도 throw 없음
+  const d8NoAdj = displayTier(augOf("ARAM_Typhoon"), AHRI);
+  ok(d8NoAdj.tier === "S" && d8NoAdj.reason === null, "case8e: adjust 없으면 전역 funTier 유지", d8NoAdj);
+  ok(displayTier(null, null, null).tier === null, "case8e: null 증강 → {tier:null} (throw 없음)");
+  ok(displayTier({ apiName: "X", tags: ["onhit"] }, AHRI, ADJUST).tier === null,
+    "case8e: funTier 없는 증강 → {tier:null}");
+  ok(displayTier(augOf("ARAM_Typhoon"), null, ADJUST).tier !== undefined,
+    "case8e: 챔피언 null이어도 throw 없음");
+
+  // 8f. routeTargets S 판정의 문맥 전환: tierAdjust를 주면 sTierSet·candidateIsSTier가
+  //     displayTier 기준이 된다 — 태풍이 아리의 리롤 목표 집합에서 빠진다.
+  const AUGS_8F = { augments: [augOf("ARAM_Typhoon"), augOf("ARAM_Eureka")] };
+  const t8fOld = routeTargets({
+    champion: AHRI, picked: [], synergies: { combos: [] }, augments: AUGS_8F,
+  });
+  ok(t8fOld.sTierSet.has("ARAM_Typhoon") && t8fOld.sTierSet.has("ARAM_Eureka"),
+    "case8f: tierAdjust 없으면 종전대로 전역 S 전부 (하위 호환)", [...t8fOld.sTierSet]);
+  const t8fNew = routeTargets({
+    champion: AHRI, picked: [], synergies: { combos: [] }, augments: AUGS_8F, tierAdjust: ADJUST,
+  });
+  ok(!t8fNew.sTierSet.has("ARAM_Typhoon") && t8fNew.sTierSet.has("ARAM_Eureka"),
+    "case8f: tierAdjust 적용 시 아리 목표 집합에서 태풍 제외·유레카 유지", [...t8fNew.sTierSet]);
+  const t8fCand = routeTargets({
+    champion: AHRI, picked: [], candidate: augOf("ARAM_Typhoon"),
+    synergies: { combos: [] }, augments: AUGS_8F, tierAdjust: ADJUST,
+  });
+  ok(t8fCand.candidateIsSTier === false,
+    "case8f: 태풍 카드는 아리에게 candidateIsSTier false (문맥 티어 C)");
+  const t8fAshe = routeTargets({
+    champion: ASHE, picked: [], candidate: augOf("ARAM_Typhoon"),
+    synergies: { combos: [] }, augments: AUGS_8F, tierAdjust: ADJUST,
+  });
+  ok(t8fAshe.candidateIsSTier === true,
+    "case8f: 같은 태풍 카드가 애쉬에게는 candidateIsSTier true (S 유지)");
 
   // --- 결과 ---
   console.log(`\n${pass} passed, ${fail} failed`);
