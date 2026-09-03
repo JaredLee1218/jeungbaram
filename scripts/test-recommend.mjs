@@ -4,6 +4,8 @@
 //         ④ class-fit(fitScore) ⑤ previewAugment ⑥ routeTargets(목표 집합 T)
 //         ⑦ buildDossier(챔피언 꿀잼 사전 셰이퍼) — SPEC-day2 §2·§3-3
 //         ⑧ displayTier(클래스 문맥 티어) — 실데이터(docs/data) 기반 전수조사 계약 검증
+//         ⑨ buildDossier.recommended(추천 증강) — dex-recommended 계약 (시그니처 ∩ 풀
+//           우선 + 문맥 S/A 보충, 풀 위반 시그니처 제외, 실데이터 173명 전수 회귀)
 //
 // 참고: 저장소에 package.json("type":"module")이 없어도 돌아가도록,
 // docs/js/recommend.js 를 임시 디렉터리에 복사한 뒤 동적 import 한다.
@@ -851,6 +853,108 @@ async function main() {
   });
   ok(t8fAshe.candidateIsSTier === true,
     "case8f: 같은 태풍 카드가 애쉬에게는 candidateIsSTier true (S 유지)");
+
+  // --- 케이스 9: buildDossier.recommended 추천 증강 (dex-recommended 계약) ---
+  // 미리보기 패널(시그니처)과 꿀잼 사전(#dex)이 같은 데이터를 보게 하는 신규 필드:
+  // ① 시그니처 ∩ 풀(source:"signature") ② 문맥 S → A 보충(source:"stier"), 합계 최대 10.
+  // 풀 밖 시그니처는 제외 + _ineligibleSignatures 보고. 정렬: signature → displayTier → funTier → 이름.
+  console.log("\n[케이스 9] buildDossier.recommended 추천 증강");
+
+  // 9a. 합성: 시그니처 우선 정렬 + 풀 위반 시그니처 제외 + 문맥 S→A 보충
+  //     (tierAdjust 미전달 → displayTier가 전역 funTier로 폴백하는 계약도 겸사 검증)
+  const REC_SIG_OK = { apiName: "REC_SigOk", nameKo: "시그 증강", tier: "prismatic", enabled: true, funTier: "B", tags: [], descKo: "시그 설명" };
+  const REC_SIG_BAD = { apiName: "REC_SigBad", nameKo: "근접 전용 시그", tier: "gold", enabled: true, funTier: "S", tags: [], restrictions: { meleeOnly: true } };
+  const REC_S_G = { apiName: "REC_S_G", nameKo: "가나다 증강", tier: "gold", enabled: true, funTier: "S", tags: [] };
+  const REC_S_N = { apiName: "REC_S_N", nameKo: "나다라 증강", tier: "silver", enabled: true, funTier: "S", tags: [] };
+  const REC_A1 = { apiName: "REC_A1", nameKo: "보충 증강", tier: "gold", enabled: true, funTier: "A", tags: [] };
+  const REC_B1 = { apiName: "REC_B1", nameKo: "낮은 증강", tier: "gold", enabled: true, funTier: "B", tags: [] };
+  const AUGMENTS_REC = { augments: [REC_B1, REC_A1, REC_S_N, REC_S_G, REC_SIG_BAD, REC_SIG_OK] };
+  const FUNRANK_REC = { ranks: [{ id: "Ashe", tier: "S", funScore: 60, oneLiner: "-", signatureAugments: ["REC_SigOk", "REC_SigBad"] }] };
+  const d9a = buildDossier({
+    champion: CHAMP_ASHE, synergies: { combos: [], tagRules: [] }, items: ITEMS,
+    augments: AUGMENTS_REC, funrank: FUNRANK_REC,
+  });
+  ok(Array.isArray(d9a.recommended) && Array.isArray(d9a._ineligibleSignatures),
+    "case9a: recommended·_ineligibleSignatures 배열 반환");
+  ok(JSON.stringify(d9a.recommended.map((r) => r.apiName)) === JSON.stringify(["REC_SigOk", "REC_S_G", "REC_S_N", "REC_A1"]),
+    "case9a: 정렬 = 시그니처 먼저(문맥 B여도) → S(funTier→이름 순) → A 보충, B 미포함",
+    d9a.recommended.map((r) => r.apiName));
+  const r9sig = d9a.recommended[0];
+  ok(r9sig.source === "signature" && r9sig.displayTier === "B" && r9sig.tier === "prismatic" &&
+    r9sig.nameKo === "시그 증강" && r9sig.descKo === "시그 설명",
+    "case9a: 항목 필드 계약(apiName/nameKo/tier/displayTier/descKo/source)", r9sig);
+  ok(d9a.recommended.slice(1).every((r) => r.source === "stier"), "case9a: 2순위 항목은 전부 source stier");
+  ok(JSON.stringify(d9a._ineligibleSignatures) === JSON.stringify(["REC_SigBad"]) &&
+    !d9a.recommended.some((r) => r.apiName === "REC_SigBad"),
+    "case9a: 풀 위반 시그니처(근접 전용 vs 원거리)는 recommended 제외 + _ineligibleSignatures 보고",
+    d9a._ineligibleSignatures);
+
+  // 9b. funrank 부재 → stier만 (방어적 계약)
+  const d9b = buildDossier({
+    champion: CHAMP_ASHE, synergies: { combos: [], tagRules: [] }, items: ITEMS, augments: AUGMENTS_REC,
+  });
+  ok(d9b.recommended.length === 3 && d9b.recommended.every((r) => r.source === "stier"),
+    "case9b: funrank 없으면 시그니처 없이 문맥 S/A만", d9b.recommended.map((r) => r.apiName));
+  ok(d9b._ineligibleSignatures.length === 0, "case9b: 시그니처 자체가 없으면 _ineligibleSignatures 빈 배열");
+
+  // 9c. 합계 최대 10개 — 시그니처는 절단으로 밀려나지 않는다
+  const many9 = [];
+  for (let i = 0; i < 12; i++) {
+    many9.push({ apiName: "REC_M" + i, nameKo: "많은 증강 " + ("0" + i).slice(-2), tier: "gold", enabled: true, funTier: "S", tags: [] });
+  }
+  const d9c = buildDossier({
+    champion: CHAMP_ASHE, synergies: { combos: [], tagRules: [] }, items: ITEMS,
+    augments: { augments: many9.concat([REC_SIG_OK]) }, funrank: FUNRANK_REC,
+  });
+  ok(d9c.recommended.length === 10, "case9c: 합계 최대 10개", d9c.recommended.length);
+  ok(d9c.recommended[0].apiName === "REC_SigOk" && d9c.recommended[0].source === "signature",
+    "case9c: 문맥 B 시그니처도 절단 대신 맨 앞 유지");
+
+  // 9d. 실데이터: 럭스 시그니처(보석 건틀릿) — 두 화면 불일치 문제의 원 사례
+  const realFunrank = await readJson("funrank.json");
+  const LUX = champOf("Lux");
+  ok(!!LUX, "case9d: 럭스 실데이터 로드");
+  const d9d = buildDossier({
+    champion: LUX, synergies: { combos: [], tagRules: [] }, items: [],
+    augments: { augments: realAugs }, funrank: realFunrank, tierAdjust: ADJUST,
+  });
+  ok(d9d.recommended.length > 0 && d9d.recommended[0].apiName === "ARAM_JeweledGauntlet" &&
+    d9d.recommended[0].source === "signature",
+    "case9d: 럭스 recommended 맨 앞 = 보석 건틀릿(시그니처) — 미리보기와 사전 일치",
+    d9d.recommended[0] && d9d.recommended[0].apiName);
+  ok(d9d.recommended[0].displayTier === "S", "case9d: 보석 건틀릿 문맥 티어 S (apMage 럭스)");
+  ok(d9d._ineligibleSignatures.length === 0, "case9d: 럭스 시그니처 풀 위반 0건");
+  ok(d9d.recommended.filter((r) => r.source === "stier").every((r) => r.displayTier === "S" || r.displayTier === "A"),
+    "case9d: 2순위 항목은 전부 문맥 S/A");
+  ok(d9d.recommended.length <= 10, "case9d: 상한 10 준수", d9d.recommended.length);
+  // 문맥 강등 반영: 태풍(전역 S)은 아리(apMage) recommended에 못 들어온다
+  const d9Ahri = buildDossier({
+    champion: AHRI, synergies: { combos: [], tagRules: [] }, items: [],
+    augments: { augments: realAugs }, funrank: realFunrank, tierAdjust: ADJUST,
+  });
+  ok(!d9Ahri.recommended.some((r) => r.apiName === "ARAM_Typhoon"),
+    "case9d: 태풍(전역 S → 아리 문맥 C)은 아리 recommended에 없음");
+
+  // 9e. 실데이터 전수(173명): (b) 풀 내 시그니처 ⊆ recommended, (c) 전원 1개 이상,
+  //     풀 위반 시그니처 0건 (scripts/funrank-fixlog.md 수정 반영 회귀 가드)
+  let bad9Empty = 0, bad9Inel = 0, bad9Sig = 0;
+  for (const c9 of realChamps) {
+    const d9 = buildDossier({
+      champion: c9, synergies: { combos: [], tagRules: [] }, items: [],
+      augments: { augments: realAugs }, funrank: realFunrank, tierAdjust: ADJUST,
+    });
+    if (!d9.recommended.length) bad9Empty++;
+    if (d9._ineligibleSignatures.length) bad9Inel++;
+    const names9 = new Set(d9.recommended.map((r) => r.apiName));
+    const entry9 = realFunrank.ranks.find((r) => r.id === c9.id);
+    const pool9 = new Set(draftMod.eligibleAugments(realAugs, c9).map((a) => a.apiName));
+    for (const s of (entry9 && entry9.signatureAugments) || []) {
+      if (pool9.has(s) && !names9.has(s)) bad9Sig++;
+    }
+  }
+  ok(bad9Empty === 0, "case9e: 173명 전원 recommended 1개 이상", bad9Empty);
+  ok(bad9Inel === 0, "case9e: 풀 위반 시그니처 0건 (funrank-fixlog 수정 반영)", bad9Inel);
+  ok(bad9Sig === 0, "case9e: 풀 내 시그니처 전부 recommended 포함 (미리보기 ⊆ 사전)", bad9Sig);
 
   // --- 결과 ---
   console.log(`\n${pass} passed, ${fail} failed`);

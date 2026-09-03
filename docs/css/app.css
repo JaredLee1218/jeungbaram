@@ -576,6 +576,21 @@ button {
   background: var(--gold);
 }
 
+/* ⭐ 추천 증강 (#dex — 미리보기 패널 시그니처와 같은 데이터 근원, 꿀잼 조합 위).
+ * 칩은 sig-aug/dex-aug-chip(희귀 등급 테두리) 재사용 — 안에 문맥 티어 fun-chip과
+ * 시그니처 배지가 들어가므로 칩 크기만 살짝 보정한다. 칩은 비인터랙티브 span
+ * (44px 터치 규칙 비대상). */
+.dex-rec-augs { margin-bottom: 2px; }
+.dex-rec-chip { padding-right: 7px; }
+.dex-rec-chip .fun-chip {
+  min-width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  font-size: 0.72rem;
+  flex-shrink: 0;
+}
+.dex-rec-chip .dex-badge-sig { flex-shrink: 0; }
+
 .dex-empty-note {
   margin: 0 0 10px;
   font-size: 0.85rem;

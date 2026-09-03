@@ -20,9 +20,15 @@
 //         candidateInRoute:boolean, candidateIsSTier:boolean }
 // targets/routeSet/sTierSet은 apiName Set — draft.js hitProbability(dist, set)에 바로 넣는다.
 //
-// export function buildDossier({champion, synergies, items, augments, funrank})
+// export function buildDossier({champion, synergies, items, augments, funrank, tierAdjust})
 // 챔피언 꿀잼 사전(#dex 화면) 데이터 셰이퍼 (SPEC-day2 §2) — DOM 금지, 표시용 데이터만.
-// 반환: { header, combos, fallbackRoutes, abilityTable, exampleItems }
+// 반환: { header, recommended, _ineligibleSignatures, combos, fallbackRoutes, abilityTable, exampleItems }
+//  - recommended (dex-recommended 계약): 미리보기 패널의 시그니처와 사전이 같은 데이터를
+//    보게 하는 추천 증강 목록 — ① funrank signatureAugments 중 이 챔피언 풀에 실존하는 것
+//    (source:"signature") ② 풀에서 문맥 티어(displayTier) S인 증강 + A 보충(source:"stier"),
+//    합계 최대 10개. 정렬: signature 먼저 → displayTier(S>A) → funTier → 이름.
+//    풀에 없는 시그니처는 recommended에서 제외하고 _ineligibleSignatures로 보고(감사용).
+//    tierAdjust 없으면 displayTier가 전역 funTier로 폴백, funrank 없으면 stier만 (방어적).
 //  - combos: 이 챔피언에 적용 가능한(발동 가능한) combo 전부 — 시그니처·챔피언 명시 우선 정렬
 //  - fallbackRoutes: combos 0건일 때만 tagRules 점수화(matchRules 재사용)로 일반 루트 2~3개
 //  - abilityTable: eligibleAugments ∩ category==='ability' — 확정 스킬(fixed/fixedBy),
@@ -868,10 +874,14 @@ function spellNameOf(champ, key) {
  * buildDossier — 챔피언 꿀잼 사전(#dex/{챔피언id} 화면) 데이터 셰이퍼 (SPEC-day2 §2).
  * DOM 접근 금지 — 표시용 plain 데이터만 조립한다. rng 미소비, 어떤 입력에도 throw 없음.
  *
- * @param {Object} input { champion, synergies, items, augments, funrank? }
+ * @param {Object} input { champion, synergies, items, augments, funrank?, tierAdjust? }
  *   funrank는 funrank.json 전체({ranks:[...]}) 또는 ranks 배열 — 없어도 동작(헤더만 빈약해짐).
+ *   tierAdjust는 tier-adjust.json 전체 — 없으면 recommended의 문맥 티어가 전역 funTier로 폴백.
  * @returns {{
  *   header: { id, nameKo, title, icon, tags, funTier, funScore, oneLiner, signatureAugments },
+ *   recommended: Array<{apiName, nameKo, tier, displayTier, icon, descKo,
+ *     source: 'signature'|'stier'}>,
+ *   _ineligibleSignatures: Array<string>,
  *   combos: Array<{ title, whyFun, matchType, skills, styleTags, source, signature,
  *     augments: Array<{apiName, nameKo, tier, funTier, category, eligible}>,
  *     items: Array<{id, nameKo, icon}> }>,
@@ -882,6 +892,10 @@ function spellNameOf(champ, key) {
  *     measured: boolean }>,
  *   exampleItems: Array<{id, nameKo, icon, reason}>
  * }}
+ *  - recommended (dex-recommended 계약): 시그니처(풀 내, source:'signature') →
+ *    문맥 S(source:'stier') → 문맥 A 보충, 합계 최대 10개. 정렬은 signature 먼저 →
+ *    displayTier(S>A) → funTier → 이름(ko). 풀 밖 시그니처는 _ineligibleSignatures로
+ *    보고만 한다 — 미리보기 시그니처 ⊆ 사전 recommended 불변식의 셰이퍼 측 절반.
  *  - combos: comboAppliesTo(champion 필터) 통과 + 이 챔피언 풀로 발동 가능한 것만
  *    (all이면 요구 증강 전부, any면 1개 이상이 풀에 있어야 함). 정렬: funrank
  *    signatureAugments 포함 콤보 → 챔피언 명시 콤보 → 원래 순서 (§2-1 "시그니처 우선").
@@ -902,7 +916,10 @@ export function buildDossier(input) {
     id: "", nameKo: "챔피언", title: "", icon: "", tags: [],
     funTier: null, funScore: null, oneLiner: "", signatureAugments: [],
   };
-  const empty = { header: emptyHeader, combos: [], fallbackRoutes: [], abilityTable: [], exampleItems: [] };
+  const empty = {
+    header: emptyHeader, recommended: [], _ineligibleSignatures: [],
+    combos: [], fallbackRoutes: [], abilityTable: [], exampleItems: [],
+  };
   try {
     const opts = input && typeof input === "object" ? input : {};
     const champ = opts.champion && typeof opts.champion === "object" ? opts.champion : null;
@@ -953,6 +970,50 @@ export function buildDossier(input) {
       signatureAugments,
     };
     const sigSet = new Set(signatureAugments);
+
+    // ── 1.5) 추천 증강 (dex-recommended 계약) — 미리보기 시그니처와 사전을 한 데이터로.
+    // ① 시그니처 ∩ 풀 (source:"signature") — 풀 밖 시그니처는 recommended에서 제외하되
+    //    _ineligibleSignatures로 보고 (감사용: validate-data 6-5 게이트가 0건을 강제).
+    // ② 풀에서 문맥 티어(displayTier) S인 증강, A로 보충 (source:"stier") — 중복 제외.
+    // 정렬: signature 먼저 → displayTier(S>A) → funTier → 이름(ko). 합계 최대 10개 —
+    // signature(최대 3)가 정렬상 항상 앞이라 절단으로 밀려나지 않는다. 표시 전용·rng 미소비.
+    const tierAdjust = opts.tierAdjust && typeof opts.tierAdjust === "object" ? opts.tierAdjust : null;
+    const recTierIdx = (t) => {
+      const i = DISPLAY_TIERS.indexOf(t);
+      return i === -1 ? DISPLAY_TIERS.length : i; // 어휘 밖/null은 맨 뒤
+    };
+    const recEntry = (a, disp, source) => ({
+      apiName: a.apiName,
+      nameKo: isStr(a.nameKo) ? a.nameKo : a.apiName,
+      tier: isStr(a.tier) ? a.tier : "",
+      displayTier: disp,
+      icon: isStr(a.icon) ? a.icon : "",
+      descKo: isStr(a.descKo) ? a.descKo : "",
+      source,
+    });
+    const recAll = []; // { e: 표시 항목, f: 전역 funTier(정렬 3키) }
+    const recSeen = new Set();
+    const _ineligibleSignatures = [];
+    for (const n of signatureAugments) {
+      if (!poolNames.has(n)) { _ineligibleSignatures.push(n); continue; }
+      const a = augByName.get(n);
+      if (!a || recSeen.has(n)) continue;
+      recSeen.add(n);
+      recAll.push({ e: recEntry(a, displayTier(a, champ, tierAdjust).tier, "signature"), f: a.funTier });
+    }
+    for (const a of pool) {
+      if (!a || !isStr(a.apiName) || recSeen.has(a.apiName)) continue;
+      const disp = displayTier(a, champ, tierAdjust).tier;
+      if (disp !== "S" && disp !== "A") continue;
+      recSeen.add(a.apiName);
+      recAll.push({ e: recEntry(a, disp, "stier"), f: a.funTier });
+    }
+    recAll.sort((x, y) =>
+      ((y.e.source === "signature" ? 1 : 0) - (x.e.source === "signature" ? 1 : 0)) ||
+      (recTierIdx(x.e.displayTier) - recTierIdx(y.e.displayTier)) ||
+      (recTierIdx(x.f) - recTierIdx(y.f)) ||
+      String(x.e.nameKo).localeCompare(String(y.e.nameKo), "ko"));
+    const recommended = recAll.slice(0, 10).map((r) => r.e);
 
     // ── 2) 꿀잼 조합 카드 목록 — 적용 가능 + 발동 가능한 combo 전부
     const comboEntries = [];
@@ -1132,7 +1193,7 @@ export function buildDossier(input) {
         : "클래스 불문 두루 어울리는 범용 추천",
     }));
 
-    return { header, combos: comboOut, fallbackRoutes, abilityTable, exampleItems };
+    return { header, recommended, _ineligibleSignatures, combos: comboOut, fallbackRoutes, abilityTable, exampleItems };
   } catch (_) {
     return empty; // 사전 화면은 참고서 — 어떤 오류도 UI를 깨뜨리지 않는다
   }

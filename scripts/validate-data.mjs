@@ -1,6 +1,7 @@
 // D2 데이터 무결성 검사 스크립트 (Node v14)
-import { readFileSync } from 'fs';
-import { fileURLToPath } from 'url';
+import { readFileSync, mkdtempSync, writeFileSync, copyFileSync } from 'fs';
+import { tmpdir } from 'os';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { dirname, join } from 'path';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -436,6 +437,37 @@ for (const r of ranks) {
   const top = (dist['S+'] || 0) + (dist['S'] || 0);
   if (top > ranks.length / 2) issues.push(`funrank: S+·S 합계 ${top}명 > 절반 (티어 인플레)`);
   for (const t of TIER_VOCAB) if (!dist[t]) issues.push(`funrank: 티어 ${t} 사용 0건 (분포 붕괴)`);
+}
+
+// ===== 6-5. funrank signatureAugments 풀 적격성 (dex-recommended 계약 — 영구 게이트) =====
+// 시그니처는 그 챔피언의 조건부 풀(draft.js eligibleAugments — 드래프트·사전과 단일 판정)에
+// 실존해야 한다: "미리보기 시그니처 ⊆ 사전 recommended" 불변식의 데이터 측 절반.
+// 수정 내역·근거: scripts/funrank-fixlog.md. draft.js는 루트 package.json type 변화에도
+// 안전하게 임시 디렉터리 사본으로 import한다 (test-recommend.mjs와 동일 패턴, Node 14.8+ TLA).
+{
+  log('\n=== funrank signatureAugments 풀 적격성 (dex-recommended 게이트) ===');
+  const tmp = mkdtempSync(join(tmpdir(), 'jb-validate-'));
+  writeFileSync(join(tmp, 'package.json'), '{"type":"module"}\n');
+  copyFileSync(join(__dirname, '..', 'docs', 'js', 'draft.js'), join(tmp, 'draft.js'));
+  const { eligibleAugments } = await import(pathToFileURL(join(tmp, 'draft.js')).href);
+  const champById = new Map(champions.map(c => [c.id, c]));
+  let sigChecked = 0;
+  let sigBad = 0;
+  for (const r of ranks) {
+    const sigs = Array.isArray(r.signatureAugments) ? r.signatureAugments : [];
+    if (!sigs.length) continue;
+    const champ = champById.get(r.id);
+    if (!champ) continue; // 미실존 id는 6-1이 이미 잡는다
+    const pool = new Set(eligibleAugments(augments, champ).map(a => a.apiName));
+    for (const s of sigs) {
+      sigChecked++;
+      if (!pool.has(s)) {
+        sigBad++;
+        issues.push(`funrank ${r.id}: signatureAugments "${s}"가 이 챔피언 풀(eligibleAugments)에 없음 — 미리보기·사전 불일치 (scripts/funrank-fixlog.md 원칙대로 근거 있는 대체 또는 제거)`);
+      }
+    }
+  }
+  log(`시그니처 검사 ${sigChecked}건 / 풀 위반 ${sigBad}건`);
 }
 
 log('신규 스키마 위반: ' + issues.length + '건');

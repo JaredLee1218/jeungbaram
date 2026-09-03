@@ -715,18 +715,43 @@ function champById(id) {
   })[0];
 }
 
-/* 시그니처 증강 칩들 — augments.json에 실존하는 apiName만 그린다 (방어적) */
-function sigAugsHtml(entry) {
+/* 이 챔피언 조건부 풀(eligibleAugments)의 apiName 맵.
+ * 부재/실패 시 null = "판정 불가" — 호출부는 필터를 생략한다 (방어적).
+ * 미리보기 시그니처·사전 추천이 같은 기준(풀 소속)을 보게 하는 공용 헬퍼. */
+function eligiblePoolNames(champ) {
+  if (!champ || !state.data) return null;
+  if (typeof draftApi.eligibleAugments !== "function") return null;
+  var pool = null;
+  try {
+    pool = draftApi.eligibleAugments(state.data.augments, champ);
+  } catch (err) {
+    return null;
+  }
+  if (!Array.isArray(pool)) return null;
+  var names = {};
+  pool.forEach(function (a) {
+    if (a && a.apiName) names[a.apiName] = true;
+  });
+  return names;
+}
+
+/* 시그니처 증강 칩들 — augments.json에 실존 + 이 챔피언 풀(eligibleAugments)에
+ * 실재하는 apiName만 그린다 (#dex 추천 증강과 동일 기준 — 두 화면 불일치 방지).
+ * 풀 판정 불가(eligibleAugments 부재/실패) 시엔 실존 필터만 적용 (기존 동작 폴백). */
+function sigAugsHtml(entry, champion) {
   var list =
     entry && Array.isArray(entry.signatureAugments) ? entry.signatureAugments : [];
   if (!list.length) return "";
   var augments = state.data.augments;
+  var poolNames = eligiblePoolNames(champion);
   var rows = [];
-  list.slice(0, 3).forEach(function (apiName) {
+  list.forEach(function (apiName) {
+    if (rows.length >= 3) return;
     var a = augments.filter(function (x) {
       return x.apiName === apiName;
     })[0];
     if (!a) return;
+    if (poolNames && !poolNames[apiName]) return; // 풀에 없는 시그니처는 미표시 (통일 기준)
     rows.push(
       '<span class="sig-aug">' +
         '<img src="' + esc(a.icon) +
@@ -763,7 +788,7 @@ function renderChampPreview() {
     (entry.oneLiner
       ? '<p class="champ-oneliner">' + esc(entry.oneLiner) + "</p>"
       : "") +
-    sigAugsHtml(entry) +
+    sigAugsHtml(entry, champion) +
     '<div class="champ-preview-actions">' +
     '<button type="button" class="btn btn-primary" data-action="start">' +
     "이 챔피언으로 드래프트 시작</button>" +
@@ -978,6 +1003,9 @@ function renderDex(champ) {
         items: state.data.items,
         augments: state.data.augments,
         funrank: { ranks: entry ? [entry] : [] },
+        /* 문맥 티어 조정 규칙 — recommended의 displayTier·정렬이 이 챔피언
+         * 문맥 기준이 된다 (없으면 전역 funTier 폴백 — 방어적) */
+        tierAdjust: state.data.tierAdjust,
       });
       if (!dossier || !dossier.header || dossier.header.id !== champ.id) dossier = null;
     } catch (err) {
@@ -986,6 +1014,12 @@ function renderDex(champ) {
   }
 
   if (dossier) {
+    /* ⭐ 추천 증강 — recommended는 F1 병렬 구현 중인 신규 필드:
+     * 배열이 아니거나 비어 있으면 섹션을 그리지 않는다 (필드 방어). */
+    html += dexRecommendedHtml(
+      Array.isArray(dossier.recommended) ? dossier.recommended : null,
+      champ
+    );
     html += dexDossierCombosHtml(dossier);
     html += dexDossierAbilityHtml(dossier.abilityTable, champ);
     html += dexDossierItemsHtml(dossier.exampleItems);
@@ -1000,6 +1034,7 @@ function renderDex(champ) {
     } catch (err) {
       pool = [];
     }
+    html += dexRecommendedHtml(localRecommended(champ, pool), champ);
     html += dexCombosHtml(champ, pool);
     html += dexAbilityHtml(champ, pool);
     html += dexItemsHtml(champ);
@@ -1032,6 +1067,121 @@ function dexAugDescListHtml(augs) {
     '<details class="dex-aug-descs"><summary>증강 설명 더보기</summary><ul>' +
     rows + "</ul></details>"
   );
+}
+
+/* ---- ⭐ 추천 증강 섹션 (dex-recommended 계약) ----
+ * 미리보기 패널의 시그니처와 사전이 같은 데이터를 보게 하는 섹션 —
+ * 꿀잼 조합 위에 놓인다. list 항목 계약(buildDossier.recommended):
+ * { apiName, nameKo, tier(희귀 등급), displayTier(문맥 티어), icon, descKo,
+ *   source: "signature"|"stier" }. 항목이 없거나 형태 불량이면 "" (섹션 미표시).
+ * 표시는 기존 스타일 재사용: sig-aug/dex-aug-chip(희귀 등급 테두리) +
+ * augFunChipHtml(문맥 티어 칩) + dex-badge-sig(시그니처 배지) +
+ * dexAugDescListHtml(설명 "더보기" 접기). 표시 전용 — 결정론 무영향. */
+function dexRecommendedHtml(list, champ) {
+  if (!Array.isArray(list) || !list.length) return "";
+  var descAugs = [];
+  var chips = list
+    .map(function (r) {
+      if (!r || typeof r !== "object" || !r.apiName) return "";
+      var a = augByName(r.apiName);
+      var tier = r.tier || (a && a.tier) || "silver";
+      var icon = r.icon || (a && a.icon) || "";
+      var nameKo = r.nameKo || (a && a.nameKo) || r.apiName;
+      descAugs.push(a || (r.descKo ? { nameKo: nameKo, tier: tier, descKo: r.descKo } : null));
+      /* 문맥 티어 칩: dossier의 displayTier(어휘 검증)를 우선 신뢰, 부재 시
+       * 로컬 displayTierInfo 폴백. 조정 사유(reason)는 로컬 계산과 티어가
+       * 일치할 때만 툴팁에 싣는다 (다르면 근거 불명 — 생략이 정직). */
+      var chip = "";
+      if (a) {
+        var info = displayTierInfo(a, champ);
+        var disp = AUG_FUN_TIER_CLASS[r.displayTier] ? r.displayTier : info.tier;
+        chip = augFunChipHtml(disp, a.funTier, true, disp === info.tier ? info.reason : null);
+      } else if (AUG_FUN_TIER_CLASS[r.displayTier]) {
+        chip = augFunChipHtml(r.displayTier, r.displayTier, true, null);
+      }
+      var sig =
+        r.source === "signature"
+          ? '<span class="dex-badge-sig">시그니처</span>'
+          : "";
+      return (
+        '<span class="sig-aug dex-aug-chip dex-rec-chip tier-' + esc(tier) + '">' +
+        (icon
+          ? '<img src="' + esc(icon) +
+            '" alt="" loading="lazy" decoding="async" width="24" height="24">'
+          : "") +
+        "<span>" + esc(nameKo) + "</span>" + chip + sig + "</span>"
+      );
+    })
+    .join("");
+  if (!chips) return "";
+  return (
+    '<div class="rec-card dex-section dex-rec-section"><h3>⭐ 추천 증강</h3>' +
+    '<div class="sig-augs dex-rec-augs">' + chips + "</div>" +
+    dexAugDescListHtml(descAugs) +
+    "</div>"
+  );
+}
+
+/* buildDossier.recommended의 로컬 미러 — 폴백 경로(buildDossier 부재/실패) 전용.
+ * 계약과 동일 규칙: ① funrank signatureAugments 중 이 챔피언 풀에 실존하는 것
+ * (source:"signature") ② 풀에서 문맥 티어(displayTier) S인 증강, A로 보충
+ * (source:"stier") — 합계 최대 10개. 정렬: signature 먼저 → displayTier(S>A)
+ * → funTier → 이름. funrank/티어 데이터 부재 시 자연히 빈 배열 (섹션 미표시). */
+var REC_TIER_RANK = { S: 0, A: 1, B: 2, C: 3, D: 4 };
+
+function recTierRank(t) {
+  var r = REC_TIER_RANK[t];
+  return typeof r === "number" ? r : 5;
+}
+
+function localRecommended(champ, pool) {
+  var out = [];
+  var seen = {};
+  var poolByName = {};
+  (pool || []).forEach(function (a) {
+    if (a && a.apiName) poolByName[a.apiName] = true;
+  });
+  /* ① 시그니처 ∩ 풀 — 풀에 없는 시그니처는 제외 (미리보기와 동일 기준) */
+  var entry = funEntry(champ.id);
+  var sigList =
+    entry && Array.isArray(entry.signatureAugments) ? entry.signatureAugments : [];
+  sigList.forEach(function (n) {
+    if (!poolByName[n] || seen[n]) return;
+    var a = augByName(n);
+    if (!a) return;
+    seen[n] = true;
+    out.push({ aug: a, disp: displayTierOf(a, champ), source: "signature" });
+  });
+  /* ② 풀에서 문맥 S → A 보충 (전부 모은 뒤 정렬·상한 절단 —
+   * signature가 정렬상 항상 앞이라 절단으로 밀려나지 않는다) */
+  (pool || []).forEach(function (a) {
+    if (!a || !a.apiName || seen[a.apiName]) return;
+    var disp = displayTierOf(a, champ);
+    if (disp !== "S" && disp !== "A") return;
+    seen[a.apiName] = true;
+    out.push({ aug: a, disp: disp, source: "stier" });
+  });
+  out.sort(function (x, y) {
+    var s =
+      (y.source === "signature" ? 1 : 0) - (x.source === "signature" ? 1 : 0);
+    if (s !== 0) return s;
+    var d = recTierRank(x.disp) - recTierRank(y.disp);
+    if (d !== 0) return d;
+    var f = recTierRank(x.aug.funTier) - recTierRank(y.aug.funTier);
+    if (f !== 0) return f;
+    return String(x.aug.nameKo || "").localeCompare(String(y.aug.nameKo || ""), "ko");
+  });
+  return out.slice(0, 10).map(function (e) {
+    return {
+      apiName: e.aug.apiName,
+      nameKo: e.aug.nameKo || e.aug.apiName,
+      tier: e.aug.tier || "silver",
+      displayTier: e.disp,
+      icon: e.aug.icon || "",
+      descKo: e.aug.descKo || "",
+      source: e.source,
+    };
+  });
 }
 
 function dexDossierComboCardHtml(c) {

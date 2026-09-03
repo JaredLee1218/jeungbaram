@@ -1,7 +1,7 @@
 {
   "_meta": {
     "generated": "2026-09-02",
-    "method": "funScore = 15 + KR통계(증바람.com OP=2/T1=1)*9 + EN통계(arammayhem.com 26.17 S+=4/S=3/A=2/B=1)*4.5 + KR커뮤니티 꿀잼 언급(0~4, 밈 주인공=4; 펨코·칼갤·인벤·나무위키 = research/raw/06·13)*11 + EN 콤보·가이드 언급(0~2, arammayhem combo 666·EloFactory 등 = research/raw/07)*5.5 + synergies.json combos 보유 수(최대 3)*3, 상한 99. 한국 커뮤니티 가중을 최상위로 두어 승률만 높은 무난 챔프보다 증강으로 변신하는 챔프(제이스·갱플·코그모류)가 위로 오게 설계. 티어 구간: S+>=72, S>=52, A>=38, B>=22, C<22. signatureAugments는 연구 파일에 챔피언x증강 근거가 있고 augments.json에 enabled로 실존하는 것만 수록 — 천천히 꾸준히(천꾸)·광대 대학·양자 연산·깊은 상처·미카엘·처형자 등 26.12 삭제/비활성 증강은 oneLiner의 밈 서술로만 남김(synergies.json _unresolved 참조).",
+    "method": "funScore = 15 + KR통계(증바람.com OP=2/T1=1)*9 + EN통계(arammayhem.com 26.17 S+=4/S=3/A=2/B=1)*4.5 + KR커뮤니티 꿀잼 언급(0~4, 밈 주인공=4; 펨코·칼갤·인벤·나무위키 = research/raw/06·13)*11 + EN 콤보·가이드 언급(0~2, arammayhem combo 666·EloFactory 등 = research/raw/07)*5.5 + synergies.json combos 보유 수(최대 3)*3, 상한 99. 한국 커뮤니티 가중을 최상위로 두어 승률만 높은 무난 챔프보다 증강으로 변신하는 챔프(제이스·갱플·코그모류)가 위로 오게 설계. 티어 구간: S+>=72, S>=52, A>=38, B>=22, C<22. signatureAugments는 연구 파일에 챔피언x증강 근거가 있고 augments.json에 enabled로 실존하는 것만 수록 — 천천히 꾸준히(천꾸)·광대 대학·양자 연산·깊은 상처·미카엘·처형자 등 26.12 삭제/비활성 증강은 oneLiner의 밈 서술로만 남김(synergies.json _unresolved 참조). 2026-09-03 강화(dex-recommended 계약): signatureAugments는 그 챔피언의 조건부 풀(draft.js eligibleAugments) 적격까지 요구 — 풀 밖 시그니처 4건 수정, 내역·근거는 scripts/funrank-fixlog.md, 영구 게이트는 scripts/validate-data.mjs 6-5.",
     "tierVocab": [
       "S+",
       "S",
@@ -311,7 +311,6 @@
       "oneLiner": "결대+양잡, 평타가 소나기",
       "signatureAugments": [
         "ARAM_TapDancer",
-        "ARAM_MasterofDuality",
         "ARAM_DualWield"
       ],
       "evidence": "both"
@@ -436,9 +435,9 @@
       "funScore": 49,
       "oneLiner": "피돼지 물리 마법사, 걸어다니는 재난",
       "signatureAugments": [
-        "ARAM_escAPADe",
         "ARAM_ProteinShake",
-        "ARAM_HeavyHitter"
+        "ARAM_HeavyHitter",
+        "ARAM_Quest_SteelYourHeart"
       ],
       "evidence": "community"
     },
@@ -843,7 +842,7 @@
       "funScore": 34,
       "oneLiner": "죽순 나무, 회복할 때마다 쿵",
       "signatureAugments": [
-        "ARAM_CircleofDeath"
+        "ARAM_InfernalConduit"
       ],
       "evidence": "both"
     },
@@ -1303,9 +1302,7 @@
       "tier": "B",
       "funScore": 26,
       "oneLiner": "잔혹행위 우울 폭발",
-      "signatureAugments": [
-        "ARAM_Cruelty"
-      ],
+      "signatureAugments": [],
       "evidence": "community"
     },
     {
