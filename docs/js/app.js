@@ -1007,6 +1007,42 @@ function renderResult() {
         );
       })
       .join("") +
+    "</div>" +
+    /* 선택 증강 상세 — 픽마다 카드 1장. descKo가 없으면(리플레이 폴백 객체) 설명 문단만 생략 */
+    '<div class="result-aug-details">' +
+    picks
+      .map(function (p) {
+        var tier = esc(p.tier || "silver");
+        var tags =
+          '<span class="result-detail-tier tier-' + tier + '">' +
+          esc(TIER_LABEL[p.tier] || p.tier || "") +
+          "</span>" +
+          (p.category === "ability"
+            ? '<span class="result-detail-badge">스킬 증강</span>'
+            : "") +
+          (p.enhancedSkill && p.enhancedSkill.key
+            ? '<span class="result-detail-skill">' +
+              esc(p.enhancedSkill.key) +
+              " 강화" +
+              (p.enhancedSkill.nameKo ? " · " + esc(p.enhancedSkill.nameKo) : "") +
+              "</span>"
+            : "");
+        return (
+          '<div class="result-aug-detail tier-' + tier + '">' +
+          '<div class="result-detail-head">' +
+          '<div class="history-item tier-' + tier + '">' +
+          '<img src="' + esc(p.icon) + '" alt="" loading="lazy" decoding="async"></div>' +
+          '<div class="result-detail-meta">' +
+          '<span class="result-detail-name">' + esc(p.nameKo) + "</span>" +
+          '<span class="result-detail-tags">' + tags + "</span>" +
+          "</div></div>" +
+          (p.descKo
+            ? '<p class="result-detail-desc">' + esc(p.descKo) + "</p>"
+            : "") +
+          "</div>"
+        );
+      })
+      .join("") +
     "</div>";
 
   /* 추천 엔진 호출 (실패해도 요약은 보여준다) */

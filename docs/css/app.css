@@ -826,6 +826,64 @@ button {
 .result-aug-name { font-size: 0.7rem; color: var(--muted); text-align: center; line-height: 1.25; }
 .result-aug-skill { font-size: 0.66rem; font-weight: 700; color: var(--gold); }
 
+/* 선택 증강 상세 카드 (결과 화면) */
+.result-aug-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+  text-align: left;
+}
+.result-aug-detail {
+  border: 1px solid var(--line);
+  border-left-width: 3px;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.result-aug-detail.tier-silver { border-left-color: var(--silver); }
+.result-aug-detail.tier-gold { border-left-color: var(--gold); }
+.result-aug-detail.tier-prismatic {
+  border-left-color: #a06bff;
+  background:
+    linear-gradient(rgba(15, 28, 51, 0.96), rgba(15, 28, 51, 0.96)) padding-box,
+    var(--prism-grad) border-box;
+  border-color: transparent;
+}
+.result-detail-head { display: flex; align-items: center; gap: 10px; }
+.result-aug-detail .history-item { width: 44px; height: 44px; flex-shrink: 0; }
+.result-aug-detail .history-item img { width: 34px; height: 34px; }
+.result-detail-meta { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.result-detail-name { font-weight: 700; color: var(--gold-bright); font-size: 0.92rem; }
+.result-detail-tags { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.result-detail-tier {
+  font-size: 0.66rem;
+  font-weight: 700;
+  border: 1px solid;
+  border-radius: 999px;
+  padding: 0 8px;
+  line-height: 1.6;
+}
+.result-detail-tier.tier-silver { color: #cdd6de; border-color: var(--silver); }
+.result-detail-tier.tier-gold { color: var(--gold); border-color: var(--gold); }
+.result-detail-tier.tier-prismatic { color: #d9b8ff; border-color: #a06bff; }
+.result-detail-badge {
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--bg-bottom);
+  background: var(--gold);
+  border-radius: 999px;
+  padding: 0 8px;
+  line-height: 1.6;
+}
+.result-detail-skill { font-size: 0.7rem; font-weight: 700; color: var(--gold); }
+.result-detail-desc {
+  margin: 8px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+
 .result-body { display: flex; flex-direction: column; gap: 14px; }
 
 .rec-card {
