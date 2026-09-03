@@ -1014,6 +1014,26 @@ function renderDex(champ) {
 
 /* ---- buildDossier 결과 렌더러 (T2 데이터 셰이퍼 경로) ---- */
 
+/* 조합 카드 공용: 증강 설명 "더보기" 접기 — 칩(이름만) 아래에 descKo 목록 */
+function dexAugDescListHtml(augs) {
+  var rows = (augs || [])
+    .filter(function (a) {
+      return a && a.descKo;
+    })
+    .map(function (a) {
+      return (
+        '<li><span class="dex-desc-name tier-' + esc(a.tier || "silver") + '">' +
+        esc(a.nameKo || "") + "</span> " + esc(a.descKo) + "</li>"
+      );
+    })
+    .join("");
+  if (!rows) return "";
+  return (
+    '<details class="dex-aug-descs"><summary>증강 설명 더보기</summary><ul>' +
+    rows + "</ul></details>"
+  );
+}
+
 function dexDossierComboCardHtml(c) {
   var chips = (c.augments || [])
     .map(function (info) {
@@ -1047,6 +1067,11 @@ function dexDossierComboCardHtml(c) {
     (c.signature ? ' <span class="dex-badge-sig">시그니처</span>' : "") + "</p>" +
     (c.whyFun ? '<p class="combo-why">' + esc(c.whyFun) + "</p>" : "") +
     (chips ? '<div class="sig-augs dex-combo-augs">' + chips + "</div>" : "") +
+    dexAugDescListHtml(
+      (c.augments || []).map(function (info) {
+        return augByName(info.apiName);
+      })
+    ) +
     (icons
       ? '<div class="dex-combo-items"><span class="dex-items-label">핵심템</span>' +
         icons + "</div>"
@@ -1284,6 +1309,7 @@ function dexComboCardHtml(m, poolNames) {
     (m.specific ? ' <span class="dex-badge-sig">시그니처</span>' : "") + "</p>" +
     (combo.whyFun ? '<p class="combo-why">' + esc(combo.whyFun) + "</p>" : "") +
     (chips ? '<div class="sig-augs dex-combo-augs">' + chips + "</div>" : "") +
+    dexAugDescListHtml(combo.augments.map(augByName)) +
     dexItemIconsHtml(combo.items, "핵심템", 4) +
     "</div>"
   );

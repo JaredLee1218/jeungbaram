@@ -527,6 +527,37 @@ button {
   object-fit: contain;
 }
 
+/* 조합 카드 — 증강 설명 "더보기" 접기 */
+.dex-aug-descs { margin: 6px 0 0; }
+.dex-aug-descs summary {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--muted);
+  -webkit-tap-highlight-color: rgba(200, 170, 110, 0.2);
+}
+.dex-aug-descs summary:hover { color: var(--gold); }
+.dex-aug-descs[open] summary { color: var(--gold); }
+.dex-aug-descs ul {
+  margin: 2px 0 4px;
+  padding-left: 16px;
+  display: grid;
+  gap: 7px;
+}
+.dex-aug-descs li {
+  font-size: 0.78rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+.dex-aug-descs li::marker { color: var(--gold-dim); }
+.dex-desc-name { font-weight: 700; }
+.dex-desc-name.tier-silver { color: #cdd6de; }
+.dex-desc-name.tier-gold { color: var(--gold); }
+.dex-desc-name.tier-prismatic { color: #d9b8ff; }
+
 .dex-combo-skills {
   margin: 10px 0 0;
   font-size: 0.8rem;
