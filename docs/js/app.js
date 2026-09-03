@@ -35,8 +35,14 @@ import {
 import { recommend } from "./recommend.js";
 /* previewAugment는 F1이 병렬 구현 중인 신규 export — named import는
  * export 부재 시 모듈 로드 자체가 깨지므로(SyntaxError) 네임스페이스로
- * 받아 typeof 체크한다. 부재 시 미리보기 스트립만 조용히 생략된다. */
+ * 받아 typeof 체크한다. 부재 시 미리보기 스트립만 조용히 생략된다.
+ * routeTargets(T2 병렬 작업 중)도 같은 이유로 네임스페이스 + typeof 방어. */
 import * as recommendApi from "./recommend.js";
+/* 확률 조회 API(drawDistribution/rerollDistribution/goldenDistribution/
+ * hitProbability/skillOdds/remainingByTier — T1 완료분)도 네임스페이스로 받아
+ * typeof 방어한다. 전부 순수 조회(rng 미소비)라 호출이 드래프트 결정론을
+ * 건드리지 않는다 — 시드 재현 불변. */
+import * as draftApi from "./draft.js";
 
 /* ---------------- 상수 ---------------- */
 
@@ -86,6 +92,17 @@ var state = {
   sortMode: "name", // "name"(기존 순서) | "fun"(funScore 내림차순) — 새로고침 시 초기화돼도 무방
   previewChampId: null, // 선택 화면 미리보기 중인 챔피언 id (funrank 있을 때만 사용)
   trackL9: false, // 진행도 트랙 Lv9 보정 (기본 off — 근사: research/AUGMENT-POOLS-STUDY.md §3-2)
+  /* 라운드 확률 스트립 펼침 상태 (렌더 간 유지). 모바일(640px 미만)은 기본 접힘 —
+   * 카드 위 과밀 방지 (§3-4-1). 접혀도 요약 줄(mini)로 핵심 숫자는 보인다. */
+  oddsOpen: (function () {
+    try {
+      return !window.matchMedia("(max-width: 639.98px)").matches;
+    } catch (err) {
+      return true; // matchMedia 미지원 환경 방어 — 펼침 기본
+    }
+  })(),
+  dexChampId: null, // 꿀잼 사전(#dex/{id})에 떠 있는 챔피언 id (null = 사전 화면 아님)
+  dexOpenedByApp: false, // 사전을 앱 내 버튼으로 열었나 (true면 뒤로가기 = history.back)
 };
 
 /* ---------------- DOM 헬퍼 ---------------- */
@@ -106,7 +123,7 @@ function esc(s) {
   });
 }
 
-var SCREENS = ["loading", "error", "select", "draft", "result"];
+var SCREENS = ["loading", "error", "select", "dex", "draft", "result"];
 
 function showScreen(name) {
   SCREENS.forEach(function (s) {
@@ -661,7 +678,9 @@ function renderChampPreview() {
     sigAugsHtml(entry) +
     '<div class="champ-preview-actions">' +
     '<button type="button" class="btn btn-primary" data-action="start">' +
-    "이 챔피언으로 드래프트 시작</button></div>";
+    "이 챔피언으로 드래프트 시작</button>" +
+    '<button type="button" class="btn btn-dex" data-action="dex">' +
+    "📖 꿀잼 사전 보기</button></div>";
   panel.hidden = false;
 }
 
@@ -711,6 +730,11 @@ function onChampPreviewClick(e) {
       clearUrl();
       renderDraft();
     }
+    return;
+  }
+  if (action === "dex") {
+    var dexChamp = state.previewChampId ? champById(state.previewChampId) : null;
+    if (dexChamp) openDex(dexChamp.id);
   }
 }
 
@@ -728,6 +752,638 @@ function showSelectScreen() {
   renderChampPreview();
   syncL9Toggle();
   showScreen("select");
+}
+
+/* ---------------- ①-b 챔피언 꿀잼 사전 (#dex/{챔피언id}) ----------------
+ * SPEC-day2 §2 + 결정2: 별도 화면 + 해시 라우팅. 진입은 미리보기 패널의
+ * "꿀잼 사전 보기" 버튼(v1 단일 진입점), 뒤로가기는 브라우저 히스토리.
+ * 데이터는 전부 기존 로드분에서 파생 (신규 파일 없음 — §2-2). */
+
+/* DDragon tags → 한국어 (ROLE_CHIPS 라벨 재사용) */
+function roleLabel(tag) {
+  for (var i = 0; i < ROLE_CHIPS.length; i++) {
+    if (ROLE_CHIPS[i].key === tag) return ROLE_CHIPS[i].label;
+  }
+  return tag;
+}
+
+/* 콤보 0건 폴백 루트 제목용 태그 한국어 표기
+ * (recommend.js TAG_STYLE은 미수출 — UI 문구용 로컬 사본) */
+var DEX_TAG_KO = {
+  onhit: "온힛", as: "공속", ad: "공격력", ap: "주문력", crit: "치명타",
+  tank: "탱킹", heal: "흡혈·회복", shield: "보호막", move: "질주", cc: "CC 연계",
+  dash: "돌진", ult: "궁극기", summoner: "스펠", gold: "골드", onkill: "스노볼",
+  aoe: "광역딜", dot: "도트딜", execute: "처형", poke: "포킹", support: "지원",
+  mana: "마나", quest: "퀘스트",
+};
+
+function augByName(apiName) {
+  return state.data.augments.filter(function (a) {
+    return a.apiName === apiName;
+  })[0];
+}
+
+function openDex(champId) {
+  state.dexOpenedByApp = true;
+  var target = "#dex/" + encodeURIComponent(champId);
+  if (location.hash === target) {
+    showDexById(champId);
+    return;
+  }
+  /* 해시 변경 → hashchange 핸들러가 렌더. 히스토리에 쌓여 브라우저 뒤로가기가 곧 닫기. */
+  location.hash = target;
+}
+
+function parseDexHash() {
+  var m = (location.hash || "").match(/^#dex\/(.+)$/);
+  if (!m) return null;
+  try {
+    return decodeURIComponent(m[1]);
+  } catch (err) {
+    return m[1];
+  }
+}
+
+function showDexById(champId) {
+  var champ = champById(champId);
+  if (!champ) {
+    toast("사전에서 챔피언을 찾을 수 없습니다.");
+    try {
+      history.replaceState(null, "", location.pathname + location.search);
+    } catch (err) {
+      /* 무시 */
+    }
+    return false;
+  }
+  state.dexChampId = champ.id;
+  renderDex(champ);
+  return true;
+}
+
+function onHashChange() {
+  if (!state.data) return; // 데이터 로드 전 해시 변경은 init이 처리
+  var id = parseDexHash();
+  if (id) {
+    showDexById(id);
+    return;
+  }
+  /* dex 해시가 사라짐(뒤로가기/닫기) → 이전 화면 복귀 */
+  if (state.dexChampId) {
+    var backId = state.dexChampId;
+    state.dexChampId = null;
+    state.dexOpenedByApp = false;
+    restoreAfterDex(backId);
+  }
+}
+
+/* 사전을 닫은 뒤 어디로 돌아가나: 진행 중 드래프트 > 결과 > 선택 화면.
+ * 선택 화면 복귀 시 사전에서 보던 챔피언을 미리보기 패널로 유지한다
+ * (showSelectScreen은 previewChampId를 지우므로 직접 렌더). */
+function restoreAfterDex(champId) {
+  if (state.game && state.round && !gameFinished()) {
+    renderDraft();
+    return;
+  }
+  if (state.game && gameFinished()) {
+    renderResult();
+    return;
+  }
+  if (champId && funEntry(champId)) state.previewChampId = champId;
+  renderRoleChips();
+  renderSortChips();
+  renderChampGrid();
+  renderChampPreview();
+  syncL9Toggle();
+  showScreen("select");
+}
+
+function onDexBackClick() {
+  if (state.dexOpenedByApp) {
+    /* 앱 안에서 연 경우: 히스토리 엔트리까지 청소 — hashchange가 복귀 처리 */
+    history.back();
+    return;
+  }
+  /* 직접 링크(#dex/{id})로 들어온 경우: 해시만 지우고 선택 화면으로 */
+  var backId = state.dexChampId;
+  state.dexChampId = null;
+  try {
+    history.replaceState(null, "", location.pathname + location.search);
+  } catch (err) {
+    /* 무시 */
+  }
+  restoreAfterDex(backId);
+}
+
+function renderDex(champ) {
+  var body = $("#dex-body");
+  if (!body) return;
+  var html = dexHeadHtml(champ);
+
+  /* T2 buildDossier(사전 데이터 셰이퍼) 우선 — typeof 방어, 부재/실패 시 로컬 폴백.
+   * funrank는 state.data.funrank가 id→항목 맵이라 이 챔피언 항목만 ranks로 되감아 준다. */
+  var dossier = null;
+  if (typeof recommendApi.buildDossier === "function") {
+    try {
+      var entry = funEntry(champ.id);
+      dossier = recommendApi.buildDossier({
+        champion: champ,
+        synergies: state.data.synergies,
+        items: state.data.items,
+        augments: state.data.augments,
+        funrank: { ranks: entry ? [entry] : [] },
+      });
+      if (!dossier || !dossier.header || dossier.header.id !== champ.id) dossier = null;
+    } catch (err) {
+      dossier = null;
+    }
+  }
+
+  if (dossier) {
+    html += dexDossierCombosHtml(dossier);
+    html += dexDossierAbilityHtml(dossier.abilityTable);
+    html += dexDossierItemsHtml(dossier.exampleItems);
+  } else {
+    /* 로컬 폴백 — buildDossier 부재/실패 시에도 사전이 뜬다 (동일 섹션 구성) */
+    var pool = [];
+    try {
+      pool =
+        typeof draftApi.eligibleAugments === "function"
+          ? draftApi.eligibleAugments(state.data.augments, champ)
+          : [];
+    } catch (err) {
+      pool = [];
+    }
+    html += dexCombosHtml(champ, pool);
+    html += dexAbilityHtml(champ, pool);
+    html += dexItemsHtml(champ);
+  }
+
+  /* 정직성 캡션 1회 (§2-1-5) */
+  html +=
+    '<p class="dex-caption">시뮬레이터 기준 — 실제 풀·가중치는 서버 전용입니다.</p>';
+  body.innerHTML = html;
+  showScreen("dex");
+}
+
+/* ---- buildDossier 결과 렌더러 (T2 데이터 셰이퍼 경로) ---- */
+
+function dexDossierComboCardHtml(c) {
+  var chips = (c.augments || [])
+    .map(function (info) {
+      var a = augByName(info.apiName);
+      var un = info.eligible ? "" : " unavailable";
+      return (
+        '<span class="sig-aug dex-aug-chip tier-' + esc(info.tier || "silver") + un + '"' +
+        (un ? ' title="이 챔피언은 받을 수 없는 증강"' : "") + ">" +
+        (a && a.icon
+          ? '<img src="' + esc(a.icon) +
+            '" alt="" loading="lazy" decoding="async" width="24" height="24">'
+          : "") +
+        "<span>" + esc(info.nameKo) + "</span></span>"
+      );
+    })
+    .join("");
+  var icons = (c.items || [])
+    .slice(0, 4)
+    .map(function (it) {
+      if (!it || !it.icon) return "";
+      return (
+        '<img src="' + esc(it.icon) + '" alt="' + esc(it.nameKo || "") +
+        '" title="' + esc(it.nameKo || "") +
+        '" loading="lazy" decoding="async" width="30" height="30">'
+      );
+    })
+    .join("");
+  return (
+    '<div class="combo-card dex-combo">' +
+    '<p class="combo-title">' + esc(c.title || "시너지") +
+    (c.signature ? ' <span class="dex-badge-sig">시그니처</span>' : "") + "</p>" +
+    (c.whyFun ? '<p class="combo-why">' + esc(c.whyFun) + "</p>" : "") +
+    (chips ? '<div class="sig-augs dex-combo-augs">' + chips + "</div>" : "") +
+    (icons
+      ? '<div class="dex-combo-items"><span class="dex-items-label">핵심템</span>' +
+        icons + "</div>"
+      : "") +
+    (c.skills ? '<p class="dex-combo-skills">🎯 ' + esc(c.skills) + "</p>" : "") +
+    "</div>"
+  );
+}
+
+function dexDossierCombosHtml(dossier) {
+  var html = '<div class="rec-card dex-section"><h3>꿀잼 조합</h3>';
+  if (dossier.combos && dossier.combos.length) {
+    html +=
+      '<div class="item-list">' +
+      dossier.combos.map(dexDossierComboCardHtml).join("") +
+      "</div>";
+  } else {
+    /* 콤보 0건 폴백 (§2-3) — buildDossier의 tagRules 기반 범용 루트 */
+    html +=
+      '<p class="dex-empty-note">이 챔피언은 전용 콤보가 아직 없어요 — 범용 루트를 추천합니다.</p>' +
+      (dossier.fallbackRoutes || [])
+        .map(function (fr) {
+          var icons = (fr.items || [])
+            .slice(0, 3)
+            .map(function (it) {
+              if (!it || !it.icon) return "";
+              return (
+                '<img src="' + esc(it.icon) + '" alt="' + esc(it.nameKo || "") +
+                '" title="' + esc(it.nameKo || "") +
+                '" loading="lazy" decoding="async" width="30" height="30">'
+              );
+            })
+            .join("");
+          return (
+            '<div class="combo-card dex-combo dex-combo-generic">' +
+            '<p class="combo-title">' + esc(fr.title || "정석 루트") + "</p>" +
+            (fr.playstyle ? '<p class="combo-why">' + esc(fr.playstyle) + "</p>" : "") +
+            (icons
+              ? '<div class="dex-combo-items"><span class="dex-items-label">예시템</span>' +
+                icons + "</div>"
+              : "") +
+            "</div>"
+          );
+        })
+        .join("");
+  }
+  html += "</div>";
+  return html;
+}
+
+function dexDossierAbilityHtml(table) {
+  if (!Array.isArray(table) || !table.length) return "";
+  var rows = table
+    .map(function (row) {
+      var a = augByName(row.apiName);
+      var target = "";
+      if (row.fixed && row.fixed.key) {
+        target =
+          '<span class="dex-skill-fixed">' + esc(row.fixed.key) + " 강화 (확정)" +
+          (row.fixed.nameKo ? " · " + esc(row.fixed.nameKo) : "") + "</span>";
+      } else if (Array.isArray(row.candidates) && row.candidates.length) {
+        target =
+          '<span class="dex-skill-random">' +
+          esc(
+            row.candidates
+              .map(function (c2) {
+                return c2.key;
+              })
+              .join("/")
+          ) +
+          " 중 무작위 지정 — 근사</span>";
+      } else {
+        target = '<span class="dex-skill-random">Q/W/E/R 중 지정</span>';
+      }
+      var exHtml = (row.excluded || [])
+        .map(function (ex) {
+          return (
+            '<span class="dex-skill-excluded" title="' + esc(ex.reason || "") + '">' +
+            esc(ex.key) + (ex.nameKo ? " " + esc(ex.nameKo) : "") + " 제외</span>"
+          );
+        })
+        .join(" ");
+      return (
+        '<div class="dex-skill-row">' +
+        (a && a.icon
+          ? '<img src="' + esc(a.icon) +
+            '" alt="" loading="lazy" decoding="async" width="34" height="34">'
+          : "") +
+        '<div class="dex-skill-info">' +
+        '<span class="dex-skill-name">' + esc(row.nameKo) +
+        ' <span class="result-detail-tier tier-' + esc(row.tier || "silver") + '">' +
+        esc(TIER_LABEL[row.tier] || row.tier || "") + "</span>" +
+        (row.measured ? ' <span class="dex-badge-measured">실측</span>' : "") +
+        "</span>" +
+        '<span class="dex-skill-target">' + target + (exHtml ? " " + exHtml : "") +
+        "</span>" +
+        "</div></div>"
+      );
+    })
+    .join("");
+  return (
+    '<div class="rec-card dex-section"><h3>스킬 증강 — 어느 스킬이 강화되나</h3>' +
+    '<div class="dex-skill-table">' + rows + "</div>" +
+    '<p class="dex-note">"확정"은 게임 원본 매핑(spellPin/slot — 실측 근거) 기준, ' +
+    "무작위 표기는 적격 스킬 중 균등 지정 근사입니다. 취소선은 실측/공식 근거로 " +
+    "강화 대상에서 제외된 스킬.</p></div>"
+  );
+}
+
+function dexDossierItemsHtml(items) {
+  if (!Array.isArray(items) || !items.length) return "";
+  return (
+    '<div class="rec-card dex-section"><h3>예시 아이템 (범용 추천)</h3>' +
+    '<div class="item-list">' +
+    items
+      .slice(0, 8)
+      .map(function (it) {
+        return (
+          '<div class="item-row">' +
+          '<img src="' + esc(it.icon || "") +
+          '" alt="" loading="lazy" decoding="async" width="44" height="44">' +
+          '<div class="item-info"><div class="item-name">' + esc(it.nameKo || "") +
+          "</div>" +
+          (it.reason ? '<div class="item-reason">' + esc(it.reason) + "</div>" : "") +
+          "</div></div>"
+        );
+      })
+      .join("") +
+    "</div></div>"
+  );
+}
+
+function dexHeadHtml(champ) {
+  var entry = funEntry(champ.id);
+  var tags = (champ.tags || [])
+    .map(function (t) {
+      return '<span class="style-tag">' + esc(roleLabel(t)) + "</span>";
+    })
+    .join("");
+  return (
+    '<div class="dex-head">' +
+    '<img src="' + esc(champ.icon) +
+    '" alt="" loading="lazy" decoding="async" width="64" height="64">' +
+    '<div class="dex-head-meta">' +
+    '<div class="dex-head-title"><span class="dex-name">' + esc(champ.nameKo) +
+    "</span>" + funTierBadgeHtml(entry) + "</div>" +
+    (tags ? '<div class="style-tags dex-role-tags">' + tags + "</div>" : "") +
+    (entry && entry.oneLiner
+      ? '<p class="champ-oneliner">' + esc(entry.oneLiner) + "</p>"
+      : "") +
+    "</div></div>"
+  );
+}
+
+/* 이 챔피언에 적용 가능한 combo 전부 (§2-1-2): 챔피언 명시 combo 우선,
+ * 전 챔피언용 combo는 구성 증강을 이 챔피언이 받을 수 있을 때만. */
+function dexApplicableCombos(champ, poolNames) {
+  var syn = state.data.synergies;
+  var combos = syn && Array.isArray(syn.combos) ? syn.combos : [];
+  var champIdLc = String(champ.id || "").toLowerCase();
+  var out = [];
+  combos.forEach(function (combo, idx) {
+    if (!combo || !Array.isArray(combo.augments) || !combo.augments.length) return;
+    var champs = Array.isArray(combo.champions) ? combo.champions : [];
+    var specific = champs.length > 0;
+    if (
+      specific &&
+      !champs.some(function (c) {
+        return String(c).toLowerCase() === champIdLc;
+      })
+    )
+      return;
+    var avail = combo.augments.filter(function (n) {
+      return poolNames[n];
+    });
+    var ok =
+      combo.matchType === "all" ? avail.length === combo.augments.length : avail.length >= 1;
+    if (!ok) return;
+    out.push({ combo: combo, idx: idx, specific: specific });
+  });
+  /* 시그니처(챔피언 명시) 우선, 그 외 원본 순서 유지 */
+  out.sort(function (a, b) {
+    return ((b.specific ? 1 : 0) - (a.specific ? 1 : 0)) || (a.idx - b.idx);
+  });
+  return out;
+}
+
+function dexItemIconsHtml(ids, label, max) {
+  var icons = (Array.isArray(ids) ? ids : [])
+    .slice(0, max)
+    .map(function (id) {
+      var it = itemById(id);
+      if (!it || !it.icon) return "";
+      return (
+        '<img src="' + esc(it.icon) + '" alt="' + esc(it.nameKo || "") +
+        '" title="' + esc(it.nameKo || "") +
+        '" loading="lazy" decoding="async" width="30" height="30">'
+      );
+    })
+    .join("");
+  if (!icons) return "";
+  return (
+    '<div class="dex-combo-items"><span class="dex-items-label">' + esc(label) +
+    "</span>" + icons + "</div>"
+  );
+}
+
+function dexComboCardHtml(m, poolNames) {
+  var combo = m.combo;
+  var chips = combo.augments
+    .map(function (n) {
+      var a = augByName(n);
+      if (!a) return "";
+      var un = poolNames[n] ? "" : " unavailable";
+      return (
+        '<span class="sig-aug dex-aug-chip tier-' + esc(a.tier || "silver") + un + '"' +
+        (un ? ' title="이 챔피언은 받을 수 없는 증강"' : "") + ">" +
+        '<img src="' + esc(a.icon) +
+        '" alt="" loading="lazy" decoding="async" width="24" height="24">' +
+        "<span>" + esc(a.nameKo) + "</span></span>"
+      );
+    })
+    .join("");
+  return (
+    '<div class="combo-card dex-combo">' +
+    '<p class="combo-title">' + esc(combo.title || "시너지") +
+    (m.specific ? ' <span class="dex-badge-sig">시그니처</span>' : "") + "</p>" +
+    (combo.whyFun ? '<p class="combo-why">' + esc(combo.whyFun) + "</p>" : "") +
+    (chips ? '<div class="sig-augs dex-combo-augs">' + chips + "</div>" : "") +
+    dexItemIconsHtml(combo.items, "핵심템", 4) +
+    "</div>"
+  );
+}
+
+function dexCombosHtml(champ, pool) {
+  var poolNames = {};
+  pool.forEach(function (a) {
+    if (a && a.apiName) poolNames[a.apiName] = true;
+  });
+  var matched = dexApplicableCombos(champ, poolNames);
+  var html = '<div class="rec-card dex-section"><h3>꿀잼 조합</h3>';
+  if (matched.length) {
+    html +=
+      '<div class="item-list">' +
+      matched
+        .map(function (m) {
+          return dexComboCardHtml(m, poolNames);
+        })
+        .join("") +
+      "</div>";
+  } else {
+    /* 콤보 0건 폴백 (§2-3): tagRules 기반 범용 루트 2~3개로 기대를 배신하지 않는다 */
+    html +=
+      '<p class="dex-empty-note">이 챔피언은 전용 콤보가 아직 없어요 — 범용 루트를 추천합니다.</p>' +
+      dexFallbackRoutesHtml(champ);
+  }
+  html += "</div>";
+  return html;
+}
+
+function dexFallbackRoutesHtml(champ) {
+  var syn = state.data.synergies;
+  var rules = syn && Array.isArray(syn.tagRules) ? syn.tagRules : [];
+  var champTags = champ.tags || [];
+  var scored = [];
+  rules.forEach(function (rule, idx) {
+    if (!rule || typeof rule !== "object") return;
+    var cTags = Array.isArray(rule.ifChampTags) ? rule.ifChampTags : [];
+    if (
+      cTags.length &&
+      !cTags.some(function (t) {
+        return champTags.indexOf(t) !== -1;
+      })
+    )
+      return;
+    scored.push({
+      rule: rule,
+      idx: idx,
+      pr: typeof rule.priority === "number" ? rule.priority : 1,
+    });
+  });
+  scored.sort(function (a, b) {
+    return (b.pr - a.pr) || (a.idx - b.idx);
+  });
+  return scored
+    .slice(0, 3)
+    .map(function (s) {
+      var aTags = Array.isArray(s.rule.ifAugmentTags) ? s.rule.ifAugmentTags : [];
+      var title =
+        aTags
+          .map(function (t) {
+            return DEX_TAG_KO[t] || t;
+          })
+          .join("·") || "정석";
+      return (
+        '<div class="combo-card dex-combo dex-combo-generic">' +
+        '<p class="combo-title">' + esc(title) + " 루트</p>" +
+        (s.rule.playstyle
+          ? '<p class="combo-why">' + esc(s.rule.playstyle) + "</p>"
+          : "") +
+        dexItemIconsHtml(s.rule.items, "예시템", 3) +
+        "</div>"
+      );
+    })
+    .join("");
+}
+
+/* 스킬 증강 표 (§2-1-3 — 스킬 증강 강조 요구의 본체).
+ * "확정" 판정은 draft.js skillOdds(=presentAugment ①spellPin ②slot과 동일
+ * 해소기 공유)를 그대로 사용해 사전과 드래프트가 같은 답을 낸다 (§2-2 드리프트 방지).
+ * skillOdds는 game.champion만 읽는 순수 조회라 {champion} 라이트 객체로 호출한다. */
+function dexAbilityHtml(champ, pool) {
+  var abilities = pool.filter(function (a) {
+    return a && a.category === "ability";
+  });
+  if (!abilities.length) return "";
+  var spellName = {};
+  (champ.spells || []).forEach(function (s) {
+    if (s && s.key) spellName[s.key] = s.nameKo || "";
+  });
+  var rows = abilities
+    .map(function (a) {
+      var r = a.restrictions || {};
+      var odds = null;
+      try {
+        odds =
+          typeof draftApi.skillOdds === "function"
+            ? draftApi.skillOdds({ champion: champ }, a)
+            : null;
+      } catch (err) {
+        odds = null;
+      }
+      var fixedKey = null;
+      var cands = [];
+      if (odds) {
+        ["Q", "W", "E", "R"].forEach(function (k) {
+          if (odds[k] === 1) fixedKey = k;
+          else if (odds[k] > 0) cands.push(k);
+        });
+      }
+      var target = "";
+      if (fixedKey) {
+        target =
+          '<span class="dex-skill-fixed">' + esc(fixedKey) + " 강화 (확정)" +
+          (spellName[fixedKey] ? " · " + esc(spellName[fixedKey]) : "") + "</span>";
+      } else if (cands.length) {
+        /* 근사: 적격 스킬 중 무작위 지정은 실제 규칙 비공개라서의 균등 근사 (draft.js ③) */
+        target =
+          '<span class="dex-skill-random">' + esc(cands.join("/")) +
+          " 중 무작위 지정 — 근사</span>";
+      } else {
+        target = '<span class="dex-skill-random">Q/W/E/R 중 지정</span>';
+      }
+      /* "실측" 배지: spellPin(실측 306건 기반 확정 매핑)이 실제로 판정에 쓰인 행만 */
+      var measured =
+        !!fixedKey &&
+        !!(r.spellPin && r.spellPin[champ.id] === fixedKey);
+      var excluded =
+        r.spellExclude && Array.isArray(r.spellExclude[champ.id])
+          ? r.spellExclude[champ.id]
+          : [];
+      var exHtml = excluded.length
+        ? '<span class="dex-skill-excluded">제외: ' + esc(excluded.join(", ")) + "</span>"
+        : "";
+      return (
+        '<div class="dex-skill-row">' +
+        '<img src="' + esc(a.icon) +
+        '" alt="" loading="lazy" decoding="async" width="34" height="34">' +
+        '<div class="dex-skill-info">' +
+        '<span class="dex-skill-name">' + esc(a.nameKo) +
+        ' <span class="result-detail-tier tier-' + esc(a.tier || "silver") + '">' +
+        esc(TIER_LABEL[a.tier] || a.tier || "") + "</span>" +
+        (measured ? ' <span class="dex-badge-measured">실측</span>' : "") +
+        "</span>" +
+        '<span class="dex-skill-target">' + target + " " + exHtml + "</span>" +
+        "</div></div>"
+      );
+    })
+    .join("");
+  return (
+    '<div class="rec-card dex-section"><h3>스킬 증강 — 어느 스킬이 강화되나</h3>' +
+    '<div class="dex-skill-table">' + rows + "</div>" +
+    '<p class="dex-note">"확정"은 게임 원본 매핑(spellPin/slot — 실측 근거) 기준, ' +
+    "무작위 표기는 적격 스킬 중 균등 지정 근사입니다.</p></div>"
+  );
+}
+
+/* 예시 아이템 (§2-1-4): recommend()의 빈 picked 호출 = 역할 기반 범용 추천
+ * (fitScore 하드 미스매치 제외가 recommend 내부에서 적용된다) */
+function dexItemsHtml(champ) {
+  var rec = null;
+  try {
+    rec = recommend({
+      champion: champ,
+      picked: [],
+      synergies: state.data.synergies,
+      items: state.data.items,
+      augments: state.data.augments,
+    });
+  } catch (err) {
+    rec = null;
+  }
+  var items = rec && Array.isArray(rec.items) ? rec.items : [];
+  if (!items.length) return "";
+  return (
+    '<div class="rec-card dex-section"><h3>예시 아이템 (범용 추천)</h3>' +
+    '<div class="item-list">' +
+    items
+      .slice(0, 8)
+      .map(function (it) {
+        var full = it.icon ? it : itemById(it.id) || it;
+        return (
+          '<div class="item-row">' +
+          '<img src="' + esc(full.icon || "") +
+          '" alt="" loading="lazy" decoding="async" width="44" height="44">' +
+          '<div class="item-info"><div class="item-name">' +
+          esc(it.nameKo || full.nameKo || "") + "</div>" +
+          (it.reason ? '<div class="item-reason">' + esc(it.reason) + "</div>" : "") +
+          "</div></div>"
+        );
+      })
+      .join("") +
+    "</div></div>"
+  );
 }
 
 /* ---------------- ② 드래프트 화면 ---------------- */
@@ -884,6 +1540,304 @@ function previewInfo(candidate) {
   });
 }
 
+/* ---------- 리롤 확률 어드바이저 (SPEC-day2 §3) ----------
+ * draft.js의 순수 조회 API(T1: drawDistribution/rerollDistribution/
+ * goldenDistribution/hitProbability/remainingByTier)만 사용한다 — 전부
+ * rng 미소비라 확률 표시가 시드 결정론(드로우 바이트)을 절대 바꾸지 않는다.
+ * API 부재 시(typeof 방어) 스트립·카드 확률 줄을 통째로 생략한다.
+ * 정직성: 표시되는 모든 %는 "시뮬레이터 모델 기준"이다 — weightFor 계수
+ * (2.0/0.6/1.5)·tierWeights가 전부 근사 상수라서 (draft.js 주석 참조).
+ * "시뮬 기준" 캡션은 라운드 스트립 끝에 1회만 노출한다. */
+
+function oddsReady() {
+  return !!(
+    state.game &&
+    typeof draftApi.drawDistribution === "function" &&
+    typeof draftApi.remainingByTier === "function"
+  );
+}
+
+/* 정수 % 표기 규율 (§3-6): 1% 미만은 "<1%" — 소수점 가짜 정밀도 금지 */
+function fmtPct(p) {
+  if (!isFinite(p) || p <= 0) return "0%";
+  if (p < 0.01) return "<1%";
+  return Math.round(p * 100) + "%";
+}
+
+/* 분포 entries에서 술어 적중 p 합 — hitProbability 부재 시 동일 정의 로컬 폴백 */
+function sumHit(dist, pred) {
+  if (typeof draftApi.hitProbability === "function") {
+    try {
+      return draftApi.hitProbability(dist, pred);
+    } catch (err) {
+      /* 아래 로컬 폴백 */
+    }
+  }
+  if (!dist || !Array.isArray(dist.entries)) return 0;
+  var s = 0;
+  for (var i = 0; i < dist.entries.length; i++) {
+    if (pred(dist.entries[i].aug)) s += dist.entries[i].p;
+  }
+  return s;
+}
+
+/* 근사: 증강에는 수치 funScore가 없고 funTier(S~D)만 있어, 밴드 힌트(§3-5)의
+ * E[리롤 funScore] 계산용으로 티어를 0~100 스케일 스칼라로 근사한다.
+ * 티어 부재/어휘 밖은 중립값 55(B급 상당)로 취급 — 근사 상수. */
+var AUG_FUNTIER_SCORE = { S: 85, A: 70, B: 55, C: 40, D: 25 };
+
+function augFunScore(aug) {
+  var s = aug && AUG_FUNTIER_SCORE[aug.funTier];
+  return typeof s === "number" ? s : 55;
+}
+
+/* 목표 집합 T (§3-3): 이 카드가 여는 루트(매칭 combo들)의 구성 증강 중
+ * 아직 안 나온 것(game.pool − game.used)의 apiName Set + "이 카드가 루트 구성원인가".
+ * T2의 routeTargets(recommend.js)가 있으면 그것을 신뢰하고(typeof 방어 —
+ * routeSet: 루트 미완성분 Set, candidateInRoute: 비대칭 경고 근거),
+ * 없으면 스펙 정의를 로컬로 미러한다 (inRoute는 pv.newCombo로 근사). */
+function routeInfoFor(pv, candidate) {
+  if (typeof recommendApi.routeTargets === "function") {
+    try {
+      var rt = recommendApi.routeTargets({
+        champion: state.champion,
+        picked: resolvedPicks(),
+        candidate: candidate,
+        synergies: state.data.synergies,
+        augments: state.data.augments,
+        game: state.game,
+      });
+      if (rt && rt.routeSet && typeof rt.routeSet.has === "function") {
+        return { T: rt.routeSet, inRoute: !!rt.candidateInRoute };
+      }
+      if (rt && typeof rt.has === "function") {
+        return { T: rt, inRoute: !!(pv && pv.newCombo) };
+      }
+    } catch (err) {
+      /* 로컬 폴백 */
+    }
+  }
+  return { T: localRouteTargets(candidate), inRoute: !!(pv && pv.newCombo) };
+}
+
+function localRouteTargets(candidate) {
+  var out = new Set();
+  var g = state.game;
+  var syn = state.data && state.data.synergies;
+  var combos = syn && Array.isArray(syn.combos) ? syn.combos : [];
+  if (!g || !state.champion || !combos.length) return out;
+  var champIdLc = String(state.champion.id || "").toLowerCase();
+  var pickedNames = {};
+  resolvedPicks().forEach(function (p) {
+    if (p && p.apiName) pickedNames[p.apiName] = true;
+  });
+  if (candidate && candidate.apiName) pickedNames[candidate.apiName] = true;
+  /* 리롤로 아직 얻을 수 있는 증강 = pool − used (사용자 멘탈 모델 "나온 것/안 나온 것") */
+  var usedSet = {};
+  (g.used || []).forEach(function (n) {
+    usedSet[n] = true;
+  });
+  var remaining = {};
+  (g.pool || []).forEach(function (a) {
+    if (a && a.apiName && !usedSet[a.apiName]) remaining[a.apiName] = true;
+  });
+  combos.forEach(function (combo) {
+    if (!combo || !Array.isArray(combo.augments) || !combo.augments.length) return;
+    var champs = Array.isArray(combo.champions) ? combo.champions : [];
+    if (
+      champs.length &&
+      !champs.some(function (c) {
+        return String(c).toLowerCase() === champIdLc;
+      })
+    )
+      return;
+    var hit = combo.augments.filter(function (n) {
+      return pickedNames[n];
+    });
+    var pass =
+      combo.matchType === "all" ? hit.length === combo.augments.length : hit.length >= 1;
+    if (!pass) return;
+    combo.augments.forEach(function (n) {
+      if (remaining[n]) out.add(n);
+    });
+  });
+  return out;
+}
+
+/* "먹을까/리롤할까" 3밴드 힌트 (§3-5 — 결정1로 v1 활성화, "힌트" 라벨 명시).
+ * d = E[리롤 funScore] − funScore(현재 카드).
+ * 근사: 임계 ±8은 funScore 0~100 스케일의 근사 상수 (SPEC-day2 §3-5).
+ * 단정 어미 금지("~각" 유지) — 근사 가중치 위의 판단임을 톤으로 전달.
+ * 현재 카드가 진행 중 루트의 구성원이면 밴드와 무관하게 "먹는 각(루트 확정)" 우선. */
+function bandHint(dist, aug, inRoute) {
+  if (inRoute) return { cls: "eat", label: "먹는 각 (루트 확정)" };
+  if (!dist || !Array.isArray(dist.entries) || !dist.entries.length) return null;
+  var e = 0;
+  for (var i = 0; i < dist.entries.length; i++) {
+    e += dist.entries[i].p * augFunScore(dist.entries[i].aug);
+  }
+  var d = e - augFunScore(aug);
+  if (d > 8) return { cls: "reroll", label: "리롤 각 ▲" };
+  if (d < -8) return { cls: "eat", label: "먹는 각 ▼" };
+  return { cls: "even", label: "반반 ―" };
+}
+
+/* 카드별 확률 1줄 (§3-4-2) — 픽 미리보기 스트립에 이어붙는 12px 컴팩트 줄.
+ * 슬롯 리롤 소진(rerolled[i]) 시 줄 제거 (§3-4-4). API 부재/실패 시 "" (방어적). */
+function cardOddsHtml(aug, i, pv) {
+  if (!oddsReady()) return "";
+  var r = state.round;
+  if (!r || (r.rerolled && r.rerolled[i])) return "";
+  var dist = null;
+  try {
+    dist =
+      typeof draftApi.rerollDistribution === "function"
+        ? draftApi.rerollDistribution(state.game, i)
+        : null;
+  } catch (err) {
+    dist = null;
+  }
+  if (!dist || !Array.isArray(dist.entries) || !dist.entries.length) return "";
+
+  var route = routeInfoFor(pv, aug);
+  var T = route.T;
+  /* 이 카드가 루트(콤보) 구성원 — 비대칭 경고 대상 (§3-4-2) */
+  var inRoute = route.inRoute;
+  var rows = "";
+
+  if (T.size > 0) {
+    var pT = sumHit(dist, function (a) {
+      return T.has(a.apiName);
+    });
+    var m = 0;
+    for (var k = 0; k < dist.entries.length; k++) {
+      if (T.has(dist.entries[k].aug.apiName)) m++;
+    }
+    if (inRoute) {
+      /* 비대칭 경고 (§3-4-2): 먹기는 확정, 리롤은 이 카드를 영구 소각 */
+      rows +=
+        '<span class="aug-odds-warn">지금 먹으면 확정 — 리롤은 이 카드를 영구 소각하고 ' +
+        esc(fmtPct(pT)) + "에 거는 것</span>";
+    } else if (m > 0) {
+      rows +=
+        '<span class="aug-odds-route">→ 이 루트 증강이 리롤에서 또 나올 확률 ' +
+        esc(fmtPct(pT)) + " (잔여 " + m + "개)</span>";
+    }
+  } else if (inRoute) {
+    rows +=
+      '<span class="aug-odds-warn">지금 먹으면 확정 — 리롤은 이 카드를 영구 소각</span>';
+  }
+
+  var hint = bandHint(dist, aug, inRoute);
+  if (hint) {
+    rows +=
+      '<span class="odds-hint odds-hint-' + hint.cls + '">힌트 · ' +
+      esc(hint.label) + "</span>";
+  }
+  if (!rows) return "";
+  /* 카드 낭독 과밀 방지: 미리보기 스트립과 동일하게 정보성 줄은 aria-hidden */
+  return '<span class="aug-odds" aria-hidden="true">' + rows + "</span>";
+}
+
+/* 라운드 확률 스트립 (§3-4-1): 등급 배지 아래 1개 — 라운드 공통 정보만.
+ * 리롤 분포는 같은 등급·같은 used라 라운드 공통이다 (황금 리롤로 등급이 오른
+ * 슬롯만 예외 — 그 슬롯은 카드별 줄이 rerollDistribution으로 따로 계산).
+ * <details>로 접을 수 있게 (모바일 과밀 방지) — 펼침 상태는 state.oddsOpen에 유지. */
+function renderOddsStrip() {
+  var wrap = $("#odds-strip");
+  if (!wrap) return;
+  var r = state.round;
+  if (!oddsReady() || !r || !Array.isArray(r.slots) || !r.slots.length) {
+    wrap.innerHTML = "";
+    return;
+  }
+  var dist = null;
+  try {
+    dist = draftApi.drawDistribution(state.game, r.tier);
+  } catch (err) {
+    dist = null;
+  }
+  if (!dist || !Array.isArray(dist.entries) || !dist.entries.length) {
+    wrap.innerHTML = "";
+    return;
+  }
+  var counts = null;
+  try {
+    counts = draftApi.remainingByTier(state.game);
+  } catch (err) {
+    counts = null;
+  }
+  var total = counts
+    ? (counts.silver || 0) + (counts.gold || 0) + (counts.prismatic || 0)
+    : 0;
+
+  var tierLabel = TIER_LABEL[dist.resolvedTier] || dist.resolvedTier || "";
+  var pFunS = sumHit(dist, function (a) {
+    return a.funTier === "S";
+  });
+  var pAbility = sumHit(dist, function (a) {
+    return a.category === "ability";
+  });
+
+  /* 접힌 상태에서도 핵심 숫자가 보이는 요약 줄 */
+  var mini =
+    "꿀잼S " + fmtPct(pFunS) + " · 스킬 " + fmtPct(pAbility) +
+    " · 남은 " + tierLabel + " " + dist.entries.length + "개";
+
+  var body =
+    '<p class="odds-line">리롤하면 <strong>' + esc(tierLabel) + "</strong> " +
+    dist.entries.length + "개 중 1개 — 꿀잼 S급 " + esc(fmtPct(pFunS)) +
+    " · 스킬 증강 " + esc(fmtPct(pAbility)) + "</p>";
+
+  if (counts) {
+    body +=
+      '<p class="odds-line odds-line-pool">남은 풀 — 실버 ' + (counts.silver || 0) +
+      " · 골드 " + (counts.gold || 0) + " · 프리즘 " + (counts.prismatic || 0) +
+      " (전체 " + total + "개)</p>";
+  }
+
+  /* 황금 리롤 줄 — 사용 전에만 (§1-2 결정: 상위 등급 풀 기준이라 일반 리롤과 답이 다름).
+   * 사용 후에는 줄 제거 (§3-4-4 소진 처리). */
+  var goldenSpent = state.goldenUsed || (state.game && state.game.goldenUsed);
+  if (!goldenSpent && typeof draftApi.goldenDistribution === "function") {
+    var gi = 0;
+    for (var i = 0; i < r.slots.length; i++) {
+      if (r.slots[i] && r.slots[i].tier === r.tier) {
+        gi = i;
+        break;
+      }
+    }
+    var gd = null;
+    try {
+      gd = draftApi.goldenDistribution(state.game, gi);
+    } catch (err) {
+      gd = null;
+    }
+    if (gd && Array.isArray(gd.entries) && gd.entries.length) {
+      var gLabel = TIER_LABEL[gd.resolvedTier] || gd.resolvedTier || "";
+      body +=
+        '<p class="odds-line odds-line-golden">✨ 황금 리롤 시 <strong>' + esc(gLabel) +
+        "</strong> " + gd.entries.length + "개 중 1개 — 꿀잼 S급 " +
+        esc(fmtPct(sumHit(gd, function (a) { return a.funTier === "S"; }))) +
+        " · 스킬 증강 " +
+        esc(fmtPct(sumHit(gd, function (a) { return a.category === "ability"; }))) +
+        "</p>";
+    }
+  }
+
+  /* 재등장 금지 규칙(시뮬 내 정확) + 정직성 캡션 — "시뮬 기준" 고지는 여기 1회 (§3-6) */
+  body +=
+    '<p class="odds-caption">한 번 화면에 나온 카드는 이번 판에 다시 안 나와요 · ' +
+    "모든 %는 시뮬 기준 (가중치는 근사 상수)</p>";
+
+  wrap.innerHTML =
+    '<details class="odds-strip"' + (state.oddsOpen ? " open" : "") + ">" +
+    '<summary><span class="odds-summary-title">📊 리롤 확률</span>' +
+    '<span class="odds-strip-mini">' + esc(mini) + "</span></summary>" +
+    body +
+    "</details>";
+}
+
 function renderDraft() {
   var r = state.round;
   if (!r) {
@@ -905,6 +1859,9 @@ function renderDraft() {
   var badge = $("#tier-badge");
   badge.className = "tier-badge tier-" + tier;
   badge.textContent = TIER_LABEL[tier] || tier;
+
+  /* 라운드 확률 스트립 — 리롤/황금 리롤/라운드 진행 시 renderDraft 전체 재렌더로 자동 갱신 */
+  renderOddsStrip();
 
   /* 카드 3장 */
   var cardsHtml = (r.slots || [])
@@ -946,6 +1903,7 @@ function renderDraft() {
           : "") +
         '<span class="aug-desc">' + esc(aug.descKo) + "</span>" +
         pv.html +
+        cardOddsHtml(aug, i, pv) +
         "</button>" +
         '<button type="button" class="btn btn-reroll" data-slot="' + i +
         '" aria-label="' + esc(aug.nameKo) + " 리롤\"" +
@@ -1213,6 +2171,23 @@ function bindEvents() {
   var previewPanel = $("#champ-preview");
   if (previewPanel) previewPanel.addEventListener("click", onChampPreviewClick);
   $("#aug-cards").addEventListener("click", onAugCardsClick);
+
+  /* 꿀잼 사전: 해시 라우팅(#dex/{id}) + 뒤로가기 버튼 */
+  window.addEventListener("hashchange", onHashChange);
+  var dexBack = $("#btn-dex-back");
+  if (dexBack) dexBack.addEventListener("click", onDexBackClick);
+
+  /* 라운드 확률 스트립 접기/펼치기 상태 기억 — <details> 기본 토글에 편승.
+   * 클릭 시점엔 아직 토글 전이므로 새 상태 = !open. (innerHTML 재생성 대비
+   * 래퍼에 위임 바인딩) */
+  var oddsWrap = $("#odds-strip");
+  if (oddsWrap) {
+    oddsWrap.addEventListener("click", function (e) {
+      var s = e.target.closest ? e.target.closest("summary") : null;
+      if (!s || !s.parentNode) return;
+      state.oddsOpen = !s.parentNode.open;
+    });
+  }
   $("#btn-golden").addEventListener("click", toggleGoldenArmed);
   $("#btn-golden-cancel").addEventListener("click", function () {
     state.goldenArmed = false;
@@ -1255,6 +2230,14 @@ function init() {
         } catch (err) {
           console.error(err);
           replayed = false;
+        }
+      }
+      /* 직접 링크로 #dex/{id} 진입 (게임 재현이 없을 때만 — 재현이 우선) */
+      if (!replayed) {
+        var dexId = parseDexHash();
+        if (dexId) {
+          state.dexOpenedByApp = false;
+          if (showDexById(dexId)) return;
         }
       }
       if (!replayed) showSelectScreen();

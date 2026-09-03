@@ -51,6 +51,12 @@
       <p id="champ-empty" class="empty-msg" hidden>검색 결과가 없습니다.</p>
     </section>
 
+    <!-- ①-b 챔피언 꿀잼 사전 (해시 라우팅 #dex/{챔피언id} — 미리보기 패널에서 진입) -->
+    <section id="screen-dex" class="screen" hidden aria-label="챔피언 꿀잼 사전">
+      <button id="btn-dex-back" class="btn btn-dex-back" type="button">← 뒤로</button>
+      <div id="dex-body" class="dex-body"></div>
+    </section>
+
     <!-- ② 드래프트 -->
     <section id="screen-draft" class="screen" hidden aria-label="증강 드래프트">
       <ol id="draft-progress" class="progress" aria-label="드래프트 진행"></ol>
@@ -58,6 +64,8 @@
         <div id="draft-champ" class="draft-champ"></div>
         <span id="tier-badge" class="tier-badge"></span>
       </div>
+      <!-- 라운드 확률 스트립 (draft.js 확률 API 부재 시 JS가 비워 둔다 — 방어적) -->
+      <div id="odds-strip" class="odds-strip-wrap"></div>
       <div id="aug-cards" class="aug-cards"></div>
       <div class="draft-actions">
         <button id="btn-golden" class="btn btn-golden" type="button">✨ 황금 리롤 (게임당 1회)</button>

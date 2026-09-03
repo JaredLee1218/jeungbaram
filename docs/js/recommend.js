@@ -4,6 +4,24 @@
 // 반환: { headline, playstyle, matchedCombos, items:[{id,nameKo,icon,reason}](최대 6),
 //         skills, funScore(0~100), styleTags:[...] }
 //
+// export function routeTargets({champion, picked, candidate, synergies, augments, game})
+// "꿀조합을 진전시키는 증강 집합" T 산출 (SPEC-day2 §3-3) — 리롤 확률 어드바이저의 목표 집합.
+// 콤보 미완성분(진행 중/candidate로 열리는 콤보의 아직 안 나온 구성 증강) ∪ S티어(funTier 'S').
+// game(draft.js 상태)이 있으면 pool 교집합·used 제외를 적용한다. rng 미소비 순수 함수.
+// 반환: { targets:Set, routeSet:Set, sTierSet:Set, combos:[{title, missing:[apiName]}],
+//         candidateInRoute:boolean, candidateIsSTier:boolean }
+// targets/routeSet/sTierSet은 apiName Set — draft.js hitProbability(dist, set)에 바로 넣는다.
+//
+// export function buildDossier({champion, synergies, items, augments, funrank})
+// 챔피언 꿀잼 사전(#dex 화면) 데이터 셰이퍼 (SPEC-day2 §2) — DOM 금지, 표시용 데이터만.
+// 반환: { header, combos, fallbackRoutes, abilityTable, exampleItems }
+//  - combos: 이 챔피언에 적용 가능한(발동 가능한) combo 전부 — 시그니처·챔피언 명시 우선 정렬
+//  - fallbackRoutes: combos 0건일 때만 tagRules 점수화(matchRules 재사용)로 일반 루트 2~3개
+//  - abilityTable: eligibleAugments ∩ category==='ability' — 확정 스킬(fixed/fixedBy),
+//    적격 후보(candidates, ③ 균등 p — 근사), 제외 스킬(excluded), 실측 배지(measured).
+//    확정 판정은 draft.js skillOdds(=presentAugment ①②③ 공용 해소기) 재사용 — 드리프트 방지.
+//  - exampleItems: fitScore 상위 범용 아이템 최대 8개
+//
 // export function previewAugment({champion, candidate, picked, synergies, items, augments})
 // 드래프트 카드 1장(candidate)에 대한 "이걸 고르면?" 미리보기.
 // 내부에서 recommend()를 (picked)와 (picked+[candidate]) 두 번 호출해 차분만 계산한다
@@ -25,6 +43,12 @@
 //  ⑤ headline: styleTags 조합으로 한 줄 컨셉 생성. 매칭 0건이어도 champion tags 기반 기본 추천 반환.
 //
 // 방어적 파싱: 데이터 파일이 병렬 제작 중이므로 필드 누락/형식 불일치는 조용히 무시하고 진행한다.
+
+// draft.js 공용 헬퍼 재사용 (SPEC-day2 §2-2 드리프트 방지 원칙):
+//  - eligibleAugments: 사전·목표 집합의 "이 챔피언이 받을 수 있는 풀" 판정을 드래프트와 동일화
+//  - skillOdds: 스킬 증강 확정/후보 판정을 presentAugment ①spellPin ②slot ③무작위와 동일화
+//    (skillOdds는 game.champion만 읽는 순수 조회 — {champion}만 담은 셈 객체로 호출해도 계약상 동일)
+import { eligibleAugments, skillOdds } from "./draft.js";
 
 const MAX_ITEMS = 6;
 
@@ -138,24 +162,27 @@ function normalizePicked(picked, augmentList) {
 
 // ---------------------------------------------------------------- ① combo 정확 매칭
 
+// combo가 이 챔피언에게 적용 가능한가 (champions 비어 있음 = 모든 챔피언 허용).
+// matchCombos에서 추출한 공용 판정 — routeTargets/buildDossier가 같은 답을 내게 한다.
+function comboAppliesTo(combo, champId) {
+  const champs = toArray(combo && combo.champions).filter(isStr);
+  if (!champs.length) return true;
+  if (!isStr(champId)) return false;
+  return champs.some((c) => c.toLowerCase() === champId.toLowerCase());
+}
+
 function matchCombos(combos, champId, pickedNames) {
   const matched = [];
   combos.forEach((combo, idx) => {
     if (!combo || typeof combo !== "object") return;
-    const champs = toArray(combo.champions).filter(isStr);
-    // champions 비어 있음 = 모든 챔피언 허용
-    if (champs.length) {
-      if (!isStr(champId)) return;
-      const ok = champs.some((c) => c.toLowerCase() === champId.toLowerCase());
-      if (!ok) return;
-    }
+    if (!comboAppliesTo(combo, champId)) return;
     const req = toArray(combo.augments).filter(isStr);
     if (!req.length) return; // 요구 증강이 없으면 "정확 매칭"이 아님
     const hit = req.filter((name) => pickedNames.has(name));
     const type = combo.matchType === "all" ? "all" : "any"; // 누락 시 any로 관대하게
     const pass = type === "all" ? hit.length === req.length : hit.length >= 1;
     if (!pass) return;
-    matched.push({ combo, idx, hit: hit.length, specific: champs.length > 0 });
+    matched.push({ combo, idx, hit: hit.length, specific: toArray(combo.champions).filter(isStr).length > 0 });
   });
 
   // 여러 개 매칭 시 styleTags 겹침(다른 매칭 combo들과 공유하는 태그 수) 순 정렬
@@ -567,5 +594,415 @@ export function previewAugment(input) {
     };
   } catch (_) {
     return empty; // 미리보기는 부가 정보 — 어떤 오류도 UI를 깨뜨리지 않는다
+  }
+}
+
+// ---------------------------------------------------------------- 목표 집합 T (리롤 확률 어드바이저)
+
+/**
+ * routeTargets — "꿀조합을 진전시키는 증강 집합" T 산출 (SPEC-day2 §3-3).
+ * previewAugment와 같은 콤보 매칭 어휘(comboAppliesTo·apiName 기준)를 재사용해,
+ * champion+picked(+candidate) 기준으로 다음 두 집합의 합을 목표 T로 만든다:
+ *  · routeSet — 진행 중/열리는 콤보의 미완성 구성 증강: 이 챔피언에게 적용 가능한 combo 중
+ *    picked∪candidate와 1개 이상 겹치는 것(진행 중 루트)의 요구 증강에서
+ *    이미 확보분(picked·candidate)·이미 노출분(game.used)·풀 밖(비적격)을 뺀 나머지.
+ *  · sTierSet — funTier 'S' 증강(풀 내·미노출) — 콤보 밖에서도 "꿀잼 각"인 일반 목표.
+ * 반환 Set은 draft.js hitProbability(dist, set)에 그대로 넣을 수 있다.
+ *
+ * 순수 함수: game을 변경하지 않고 rng를 소비하지 않는다. 어떤 입력에도 throw 없이
+ * 항상 같은 형태를 반환한다 (previewAugment와 동일 방어 원칙).
+ *
+ * @param {Object} input { champion, picked, candidate?, synergies, augments, game? }
+ *   - candidate: 드래프트 카드 1장 (증강 객체 또는 apiName 문자열) — 카드별 T 계산용.
+ *     candidate 자신은 T에 넣지 않는다 (이미 화면에 노출된 카드는 리롤 목표가 아님).
+ *   - game: draft.js 게임 상태 — pool(챔피언 조건부 풀)·used(노출분 제외)에만 접근.
+ *     없으면 eligibleAugments(augments, champion)로 풀을 재산출한다 (드래프트와 동일 판정).
+ * @returns {{ targets: Set<string>, routeSet: Set<string>, sTierSet: Set<string>,
+ *   combos: Array<{title: string, missing: Array<string>}>,
+ *   candidateInRoute: boolean, candidateIsSTier: boolean }}
+ *   - combos: routeSet의 근거 — 콤보별 미완성 증강 목록 (UI의 "잔여 m개" 셈·툴팁용)
+ *   - candidateInRoute: candidate가 이 챔피언의 어느 콤보 구성원이면 true
+ *     ("지금 먹으면 확정 — 리롤은 이 카드를 영구 소각" 비대칭 경고 §3-4-2 근거)
+ *   - candidateIsSTier: candidate의 funTier가 'S'면 true
+ */
+export function routeTargets(input) {
+  const empty = {
+    targets: new Set(), routeSet: new Set(), sTierSet: new Set(),
+    combos: [], candidateInRoute: false, candidateIsSTier: false,
+  };
+  try {
+    const opts = input && typeof input === "object" ? input : {};
+    const champ = opts.champion && typeof opts.champion === "object" ? opts.champion : null;
+    const champId = champ && isStr(champ.id) ? champ.id : "";
+    const augmentList = unwrap(opts.augments, "augments");
+    const synergies = opts.synergies && typeof opts.synergies === "object" ? opts.synergies : {};
+    const combos = unwrap(synergies, "combos");
+    const game = opts.game && typeof opts.game === "object" ? opts.game : null;
+
+    // 확보분: picked(+candidate) apiName — 이들은 목표가 아니다 (이미 손에 있거나 화면에 있음)
+    const picked = normalizePicked(opts.picked, augmentList);
+    const names = new Set(picked.map((a) => a.apiName).filter(isStr));
+    const candidate = opts.candidate;
+    const candidateName = candidate && typeof candidate === "object" && isStr(candidate.apiName)
+      ? candidate.apiName
+      : (isStr(candidate) ? candidate : "");
+    if (candidateName) names.add(candidateName);
+
+    // 풀: game.pool(드래프트가 이미 계산한 챔피언 조건부 풀) 우선,
+    // 없으면 draft.js eligibleAugments로 동일 판정 재산출 (드리프트 방지).
+    let poolList = [];
+    if (game && Array.isArray(game.pool)) {
+      poolList = game.pool;
+    } else if (augmentList.length) {
+      try { poolList = eligibleAugments(augmentList, champ); } catch (_) { poolList = []; }
+    }
+    const poolNames = new Set();
+    for (const a of poolList) {
+      if (a && isStr(a.apiName)) poolNames.add(a.apiName);
+    }
+    const usedSet = new Set(game && Array.isArray(game.used) ? game.used.filter(isStr) : []);
+
+    // "아직 나올 수 있는" 판정: 확보분 아님 + 노출분 아님 + (풀을 알면) 풀 안
+    // 방어: 풀 미산출(augments 미제공)이면 풀 교집합은 생략한다 — 빈손 오탐 방지.
+    const available = (n) =>
+      !names.has(n) && !usedSet.has(n) && (poolNames.size === 0 || poolNames.has(n));
+
+    // ① routeSet — 진행 중 루트(콤보)의 미완성분
+    const routeSet = new Set();
+    const comboInfos = [];
+    let candidateInRoute = false;
+    for (const combo of combos) {
+      if (!combo || typeof combo !== "object") continue;
+      if (!comboAppliesTo(combo, champId)) continue;
+      const req = toArray(combo.augments).filter(isStr);
+      if (!req.length) continue;
+      if (candidateName && req.indexOf(candidateName) !== -1) candidateInRoute = true;
+      if (!req.some((n) => names.has(n))) continue; // 진행 0 콤보는 "진행 중 루트"가 아님 (§3-3)
+      const missing = req.filter(available);
+      if (!missing.length) continue; // 이미 완성(또는 잔여분 전부 소진) — 쫓을 것이 없음
+      for (const n of missing) routeSet.add(n);
+      comboInfos.push({ title: isStr(combo.title) ? combo.title : "시너지", missing });
+    }
+
+    // ② sTierSet — funTier 'S' 잔여분 (funTier는 큐레이션 데이터 — 없는 증강은 그냥 제외)
+    const sTierSet = new Set();
+    for (const a of poolList) {
+      if (a && a.funTier === "S" && isStr(a.apiName) && available(a.apiName)) {
+        sTierSet.add(a.apiName);
+      }
+    }
+
+    // 합집합 T (routeSet 우선 순서 보존 — Set 삽입 순서 = 표시 순서)
+    const targets = new Set(routeSet);
+    for (const n of sTierSet) targets.add(n);
+
+    let candidateIsSTier = false;
+    if (candidateName) {
+      let cand = (candidate && typeof candidate === "object") ? candidate : null;
+      if (!cand || cand.funTier === undefined) {
+        for (const a of augmentList) {
+          if (a && a.apiName === candidateName) { cand = a; break; }
+        }
+      }
+      candidateIsSTier = !!cand && cand.funTier === "S";
+    }
+
+    return {
+      targets,
+      routeSet,
+      sTierSet,
+      combos: comboInfos,
+      candidateInRoute,
+      candidateIsSTier,
+    };
+  } catch (_) {
+    return empty; // 확률 어드바이저는 부가 정보 — 어떤 오류도 UI를 깨뜨리지 않는다
+  }
+}
+
+// ---------------------------------------------------------------- 챔피언 꿀잼 사전 (#dex)
+
+const SKILL_KEYS = ["Q", "W", "E", "R"];
+
+/** champion.spells에서 스킬 키의 한국어명 조회 (없으면 null) — 사전 표시용 */
+function spellNameOf(champ, key) {
+  const spells = (champ && Array.isArray(champ.spells)) ? champ.spells : [];
+  for (const s of spells) {
+    if (s && s.key === key) return isStr(s.nameKo) ? s.nameKo : null;
+  }
+  return null;
+}
+
+/**
+ * buildDossier — 챔피언 꿀잼 사전(#dex/{챔피언id} 화면) 데이터 셰이퍼 (SPEC-day2 §2).
+ * DOM 접근 금지 — 표시용 plain 데이터만 조립한다. rng 미소비, 어떤 입력에도 throw 없음.
+ *
+ * @param {Object} input { champion, synergies, items, augments, funrank? }
+ *   funrank는 funrank.json 전체({ranks:[...]}) 또는 ranks 배열 — 없어도 동작(헤더만 빈약해짐).
+ * @returns {{
+ *   header: { id, nameKo, title, icon, tags, funTier, funScore, oneLiner, signatureAugments },
+ *   combos: Array<{ title, whyFun, matchType, skills, styleTags, source, signature,
+ *     augments: Array<{apiName, nameKo, tier, funTier, category, eligible}>,
+ *     items: Array<{id, nameKo, icon}> }>,
+ *   fallbackRoutes: Array<{ title, playstyle, tags, items: Array<{id, nameKo, icon}> }>,
+ *   abilityTable: Array<{ apiName, nameKo, tier, funTier, descKo,
+ *     fixed: {key, nameKo}|null, fixedBy: 'pin'|'slot'|'only'|null,
+ *     candidates: Array<{key, nameKo, p}>, excluded: Array<{key, nameKo, reason}>,
+ *     measured: boolean }>,
+ *   exampleItems: Array<{id, nameKo, icon, reason}>
+ * }}
+ *  - combos: comboAppliesTo(champion 필터) 통과 + 이 챔피언 풀로 발동 가능한 것만
+ *    (all이면 요구 증강 전부, any면 1개 이상이 풀에 있어야 함). 정렬: funrank
+ *    signatureAugments 포함 콤보 → 챔피언 명시 콤보 → 원래 순서 (§2-1 "시그니처 우선").
+ *  - fallbackRoutes: combos 0건일 때만 채움 (§2-3) — tagRules를 matchRules(recommend의
+ *    태그 점수화)로 재사용하되, picked 대신 "이 챔피언 풀의 증강 태그 전체"를 넣어
+ *    "어떤 증강이 떠도 갈 수 있는 일반 루트"를 뽑는다. 상위 3개.
+ *  - abilityTable의 확정 판정: draft.js skillOdds 재사용 (§2-2 — presentAugment
+ *    ①spellPin ②slot ③무작위와 단일 해소기 공유, pin·exclude 충돌 시 ③ 강등 포함).
+ *    fixed = 확률 1.0으로 지정되는 스킬. fixedBy: 'pin'(실측 확정 매핑)/'slot'(슬롯
+ *    고정형)/'only'(적격 스킬이 하나뿐이라 결과적으로 확정). candidates의 p는
+ *    ③ 균등 배정 확률 — 근사: 실제 지정 규칙은 비공개라 균등으로 근사 (draft.js 주석 참조).
+ *  - measured("실측" 배지): 이 챔피언에 대한 restrictions.spellPin 또는 spellExclude
+ *    항목이 있으면 true — 두 필드는 research/data/ability-augment-map.json 실측
+ *    306건에서 이식된 것만 존재한다 (근거: research/ABILITY-AUGMENT-DATA.md §4).
+ */
+export function buildDossier(input) {
+  const emptyHeader = {
+    id: "", nameKo: "챔피언", title: "", icon: "", tags: [],
+    funTier: null, funScore: null, oneLiner: "", signatureAugments: [],
+  };
+  const empty = { header: emptyHeader, combos: [], fallbackRoutes: [], abilityTable: [], exampleItems: [] };
+  try {
+    const opts = input && typeof input === "object" ? input : {};
+    const champ = opts.champion && typeof opts.champion === "object" ? opts.champion : null;
+    const champId = champ && isStr(champ.id) ? champ.id : "";
+    const champName = champ && isStr(champ.nameKo) ? champ.nameKo : "챔피언";
+    const champTags = champ ? toArray(champ.tags).filter(isStr) : [];
+    const champTagSet = new Set(champTags);
+
+    const augmentList = unwrap(opts.augments, "augments");
+    const itemList = unwrap(opts.items, "items");
+    const synergies = opts.synergies && typeof opts.synergies === "object" ? opts.synergies : {};
+    const combos = unwrap(synergies, "combos");
+    const tagRules = toArray(synergies.tagRules);
+    const ranks = unwrap(opts.funrank, "ranks");
+
+    const byId = new Map();
+    for (const it of itemList) {
+      if (it && it.id != null) byId.set(it.id, it);
+    }
+    const augByName = new Map();
+    for (const a of augmentList) {
+      if (a && isStr(a.apiName)) augByName.set(a.apiName, a);
+    }
+
+    // 이 챔피언의 조건부 풀 — 드래프트와 동일 판정 (draft.js eligibleAugments 재사용)
+    let pool = [];
+    try { pool = eligibleAugments(augmentList, champ); } catch (_) { pool = []; }
+    const poolNames = new Set();
+    for (const a of pool) {
+      if (a && isStr(a.apiName)) poolNames.add(a.apiName);
+    }
+
+    // ── 1) 헤더 (funrank 결합 — 없으면 챔피언 기본 정보만)
+    let rank = null;
+    for (const r of ranks) {
+      if (r && r.id === champId) { rank = r; break; }
+    }
+    const signatureAugments = rank ? toArray(rank.signatureAugments).filter(isStr) : [];
+    const header = {
+      id: champId,
+      nameKo: champName,
+      title: champ && isStr(champ.title) ? champ.title : "",
+      icon: champ && isStr(champ.icon) ? champ.icon : "",
+      tags: champTags,
+      funTier: rank && isStr(rank.tier) ? rank.tier : null,
+      funScore: rank && typeof rank.funScore === "number" ? rank.funScore : null,
+      oneLiner: rank && isStr(rank.oneLiner) ? rank.oneLiner.trim() : "",
+      signatureAugments,
+    };
+    const sigSet = new Set(signatureAugments);
+
+    // ── 2) 꿀잼 조합 카드 목록 — 적용 가능 + 발동 가능한 combo 전부
+    const comboEntries = [];
+    combos.forEach((combo, idx) => {
+      if (!combo || typeof combo !== "object") return;
+      if (!comboAppliesTo(combo, champId)) return;
+      const req = toArray(combo.augments).filter(isStr);
+      if (!req.length) return;
+      const augInfos = req.map((n) => {
+        const a = augByName.get(n);
+        return {
+          apiName: n,
+          nameKo: a && isStr(a.nameKo) ? a.nameKo : n,
+          tier: a && isStr(a.tier) ? a.tier : "",
+          funTier: a && isStr(a.funTier) ? a.funTier : "",
+          category: a && isStr(a.category) ? a.category : "",
+          eligible: poolNames.has(n), // 이 챔피언 풀에서 실제로 나올 수 있는가
+        };
+      });
+      // 발동 가능성: all은 요구 증강 전부, any는 1개 이상이 풀에 있어야 사전에 싣는다
+      const eligCount = augInfos.filter((x) => x.eligible).length;
+      const type = combo.matchType === "all" ? "all" : "any";
+      if (type === "all" ? eligCount < req.length : eligCount < 1) return;
+      comboEntries.push({
+        combo, idx, type, augInfos,
+        signature: augInfos.some((x) => sigSet.has(x.apiName)),
+        specific: toArray(combo.champions).filter(isStr).length > 0,
+      });
+    });
+    // 정렬: 시그니처 콤보 → 챔피언 명시 콤보 → 원래 순서 (§2-1 "funScore/시그니처 우선")
+    comboEntries.sort((a, b) =>
+      ((b.signature ? 1 : 0) - (a.signature ? 1 : 0)) ||
+      ((b.specific ? 1 : 0) - (a.specific ? 1 : 0)) ||
+      (a.idx - b.idx));
+    const comboOut = comboEntries.map((e) => {
+      const c = e.combo;
+      const comboItems = [];
+      for (const id of toArray(c.items)) {
+        const it = byId.get(id);
+        if (!it) continue;
+        // buildItems ①과 동일 정책: 챔피언 명시 combo는 큐레이션 신뢰(fitScore 무시),
+        // 전 챔피언용 combo의 아이템만 하드 미스매치(0)를 거른다.
+        if (!e.specific && fitScore(it, champ) === 0) continue;
+        comboItems.push({
+          id: it.id,
+          nameKo: isStr(it.nameKo) ? it.nameKo : String(it.id),
+          icon: isStr(it.icon) ? it.icon : "",
+        });
+      }
+      return {
+        title: isStr(c.title) ? c.title : "시너지",
+        whyFun: isStr(c.whyFun) ? c.whyFun.trim() : "",
+        matchType: e.type,
+        skills: isStr(c.skills) ? c.skills.trim() : "",
+        styleTags: toArray(c.styleTags).filter(isStr),
+        source: isStr(c.source) ? c.source : "",
+        signature: e.signature,
+        augments: e.augInfos,
+        items: comboItems,
+      };
+    });
+
+    // ── 3) 콤보 0건 폴백 (§2-3) — tagRules 점수화 재사용으로 일반 루트 2~3개
+    // picked가 없는 화면이므로 "이 챔피언 풀에 실재하는 증강 태그 전체"를 pickedTagSet
+    // 자리에 넣는다: 규칙이 요구하는 태그의 증강이 풀에 하나도 없으면 그 루트는 이
+    // 챔피언에게 애초에 불가능하므로 자연히 걸러지고, density(태그 보유 증강 수)는
+    // "그 루트를 열어 줄 증강이 풀에 몇 개나 있나"로 읽혀 정렬 근거가 된다.
+    let fallbackRoutes = [];
+    if (!comboOut.length) {
+      const poolTagSet = new Set();
+      const poolTagCounts = new Map();
+      for (const a of pool) {
+        for (const t of uniq(toArray(a && a.tags).filter(isStr))) {
+          poolTagSet.add(t);
+          poolTagCounts.set(t, (poolTagCounts.get(t) || 0) + 1);
+        }
+      }
+      const ruleMatches = matchRules(tagRules, poolTagSet, poolTagCounts, champTagSet);
+      fallbackRoutes = ruleMatches.slice(0, 3).map((m) => {
+        const label = m.aHit.slice(0, 2)
+          .map((t) => TAG_STYLE[t] || TAG_KO[t] || t)
+          .join("·");
+        const routeItems = [];
+        for (const id of toArray(m.rule.items)) {
+          const it = byId.get(id);
+          if (!it || fitScore(it, champ) === 0) continue; // 하드 미스매치 제외 (buildItems ②와 동일)
+          routeItems.push({
+            id: it.id,
+            nameKo: isStr(it.nameKo) ? it.nameKo : String(it.id),
+            icon: isStr(it.icon) ? it.icon : "",
+          });
+          if (routeItems.length >= 3) break;
+        }
+        return {
+          title: (label || "정석") + " 루트",
+          playstyle: isStr(m.rule.playstyle) ? m.rule.playstyle.trim() : "",
+          tags: m.aHit.slice(),
+          items: routeItems,
+        };
+      });
+    }
+
+    // ── 4) 스킬 증강 표 — eligibleAugments ∩ category==='ability' 전부 (풀 순서 유지)
+    const abilityTable = [];
+    for (const a of pool) {
+      if (!a || a.category !== "ability") continue;
+      const r = a.restrictions || {};
+      // 확정/후보 판정은 draft.js skillOdds에 위임 — presentAugment와 단일 해소기 공유
+      // (skillOdds는 game.champion만 읽으므로 {champion} 셈 객체로 호출)
+      const odds = skillOdds({ champion: champ }, a);
+      let fixedKey = null;
+      for (const k of SKILL_KEYS) {
+        if (odds[k] === 1) { fixedKey = k; break; }
+      }
+      // fixedBy는 표기용 주석일 뿐 판정은 위 odds가 전부다 (드리프트 방지):
+      // pin이 그 키를 가리키면 'pin'(실측 확정), 아니면 slot이면 'slot', 그 외 확정은
+      // "적격 스킬이 하나뿐"인 ③의 극단 케이스 → 'only'.
+      const pinKey = (champId && r.spellPin && typeof r.spellPin[champId] === "string")
+        ? r.spellPin[champId]
+        : null;
+      const slotKey = typeof r.slot === "string" ? r.slot : null;
+      const fixedBy = fixedKey === null
+        ? null
+        : (pinKey === fixedKey ? "pin" : (slotKey === fixedKey ? "slot" : "only"));
+      const candidates = [];
+      if (fixedKey === null) {
+        for (const k of SKILL_KEYS) {
+          if (odds[k] > 0) candidates.push({ key: k, nameKo: spellNameOf(champ, k), p: odds[k] });
+        }
+      }
+      const exKeys = (champId && r.spellExclude && Array.isArray(r.spellExclude[champId]))
+        ? r.spellExclude[champId].filter((k) => SKILL_KEYS.indexOf(k) !== -1)
+        : [];
+      const excluded = exKeys.map((k) => ({
+        key: k,
+        nameKo: spellNameOf(champ, k),
+        reason: isStr(r.note) ? r.note.trim() : "실측/공식 근거로 이 스킬은 강화 대상에서 제외",
+      }));
+      abilityTable.push({
+        apiName: a.apiName,
+        nameKo: isStr(a.nameKo) ? a.nameKo : a.apiName,
+        tier: isStr(a.tier) ? a.tier : "",
+        funTier: isStr(a.funTier) ? a.funTier : "",
+        descKo: isStr(a.descKo) ? a.descKo : "",
+        fixed: fixedKey === null ? null : { key: fixedKey, nameKo: spellNameOf(champ, fixedKey) },
+        fixedBy,
+        candidates,
+        excluded,
+        // "실측" 배지: 이 챔피언 항목이 spellPin/spellExclude에 있으면 실측 306건 이식분
+        measured: pinKey !== null || exKeys.length > 0,
+      });
+    }
+
+    // ── 5) 예시 아이템 — fitScore 상위 최대 8개 (조합 카드와 중복 허용 — 여긴 범용 추천)
+    const roleTags = new Set();
+    for (const rt of champTags) {
+      for (const t of ROLE_ITEM_TAGS[rt] || []) roleTags.add(t);
+    }
+    const scored = [];
+    itemList.forEach((it, idx) => {
+      if (!it || it.id == null) return;
+      const fit = fitScore(it, champ);
+      if (fit === 0) return; // 클래스 하드 미스매치는 사전에서도 제외
+      const shared = toArray(it.tags).filter((t) => roleTags.has(t));
+      scored.push({ it, idx, fit, shared });
+    });
+    scored.sort((a, b) =>
+      (b.fit - a.fit) ||
+      (b.shared.length - a.shared.length) ||
+      (a.idx - b.idx));
+    const exampleItems = scored.slice(0, 8).map((s) => ({
+      id: s.it.id,
+      nameKo: isStr(s.it.nameKo) ? s.it.nameKo : String(s.it.id),
+      icon: isStr(s.it.icon) ? s.it.icon : "",
+      reason: s.shared.length
+        ? (TAG_KO[s.shared[0]] || s.shared[0]) + " 계열 — " + champName + " 클래스와 잘 맞는 범용 추천"
+        : "클래스 불문 두루 어울리는 범용 추천",
+    }));
+
+    return { header, combos: comboOut, fallbackRoutes, abilityTable, exampleItems };
+  } catch (_) {
+    return empty; // 사전 화면은 참고서 — 어떤 오류도 UI를 깨뜨리지 않는다
   }
 }

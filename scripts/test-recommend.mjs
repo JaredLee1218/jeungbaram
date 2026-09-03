@@ -1,9 +1,13 @@
 // scripts/test-recommend.mjs — recommend.js 합성 fixture 검증 (Node v14.17.4 호환)
 // 실행: node scripts/test-recommend.mjs
 // 케이스: ① combo 정확 매칭 ② tagRules 태그 규칙 ③ 매칭 0건 폴백 (+방어적 입력)
+//         ④ class-fit(fitScore) ⑤ previewAugment ⑥ routeTargets(목표 집합 T)
+//         ⑦ buildDossier(챔피언 꿀잼 사전 셰이퍼) — SPEC-day2 §2·§3-3
 //
 // 참고: 저장소에 package.json("type":"module")이 없어도 돌아가도록,
-// docs/js/recommend.js 를 임시 .mjs 로 복사한 뒤 동적 import 한다.
+// docs/js/recommend.js 를 임시 디렉터리에 복사한 뒤 동적 import 한다.
+// recommend.js가 './draft.js'를 import하므로(skillOdds 재사용 — SPEC-day2 §4 T2)
+// draft.js도 함께 복사하고, .js를 ESM으로 읽히게 하는 package.json을 놓는다.
 
 import { promises as fs } from "fs";
 import os from "os";
@@ -12,7 +16,9 @@ import { fileURLToPath, pathToFileURL } from "url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const srcPath = path.join(here, "..", "docs", "js", "recommend.js");
-const tmpPath = path.join(os.tmpdir(), `jeungbaram-recommend-${process.pid}-${Date.now()}.mjs`);
+const draftPath = path.join(here, "..", "docs", "js", "draft.js");
+const tmpDir = path.join(os.tmpdir(), `jeungbaram-recommend-${process.pid}-${Date.now()}`);
+const tmpPath = path.join(tmpDir, "recommend.js");
 
 let pass = 0;
 let fail = 0;
@@ -191,11 +197,18 @@ function checkShape(r, label) {
 // ------------------------------------------------------------ 실행
 
 async function main() {
+  await fs.mkdir(tmpDir, { recursive: true });
+  await fs.writeFile(path.join(tmpDir, "package.json"), '{"type":"module"}\n');
   await fs.copyFile(srcPath, tmpPath);
+  await fs.copyFile(draftPath, path.join(tmpDir, "draft.js"));
   const mod = await import(pathToFileURL(tmpPath).href);
-  const { recommend, previewAugment } = mod;
+  // recommend가 import한 것과 같은 인스턴스의 draft 모듈 (케이스 6·7 대조용)
+  const draftMod = await import(pathToFileURL(path.join(tmpDir, "draft.js")).href);
+  const { recommend, previewAugment, routeTargets, buildDossier } = mod;
   ok(typeof recommend === "function", "recommend export 존재");
   ok(typeof previewAugment === "function", "previewAugment export 존재");
+  ok(typeof routeTargets === "function", "routeTargets export 존재");
+  ok(typeof buildDossier === "function", "buildDossier export 존재");
 
   // --- 케이스 1: combo 정확 매칭 (matchType all/any, 챔피언 필터, 겹침 순 정렬) ---
   console.log("\n[케이스 1] combo 정확 매칭");
@@ -513,6 +526,229 @@ async function main() {
   checkPreviewShape(p5fNoCand, "case5f-후보없음");
   ok(p5fNoCand.funDelta === 0 && p5fNoCand.newCombos.length === 0, "case5f: 후보 없으면 차분 0·신규 combo 없음", p5fNoCand.funDelta);
 
+  // --- 케이스 6: routeTargets 목표 집합 T (SPEC-day2 §3-3) ---
+  console.log("\n[케이스 6] routeTargets 목표 집합");
+
+  // S티어(funTier 'S') fixture — 기존 AUG_A~D에는 funTier가 없다(S 아님 취급 검증 겸)
+  const AUG_S = { apiName: "ARAM_PrismParty", nameKo: "프리즘 파티", tier: "prismatic", funTier: "S", enabled: true, tags: ["aoe"] };
+  const AUGMENTS_RT = { patch: "26.17", augments: [AUG_A, AUG_B, AUG_C, AUG_D, AUG_S] };
+
+  function checkRouteShape(t, label) {
+    ok(t && typeof t === "object", `${label}: 객체 반환`);
+    ok(t.targets instanceof Set && t.routeSet instanceof Set && t.sTierSet instanceof Set,
+      `${label}: targets/routeSet/sTierSet 전부 Set`);
+    ok(Array.isArray(t.combos) && t.combos.every((c) => c && typeof c.title === "string" && Array.isArray(c.missing)),
+      `${label}: combos [{title, missing[]}]`, t && t.combos);
+    ok(typeof t.candidateInRoute === "boolean" && typeof t.candidateIsSTier === "boolean",
+      `${label}: candidate 플래그 boolean`);
+  }
+
+  // 6a. picked=[번개 세례] → all-combo(번개 대포)의 미완성분(치명타 광란)이 routeSet에,
+  //     S티어(프리즘 파티)가 sTierSet에, 합집합이 targets에 온다.
+  const t6a = routeTargets({
+    champion: CHAMP_JAYCE, picked: [AUG_A],
+    synergies: SYNERGIES, augments: AUGMENTS_RT,
+  });
+  checkRouteShape(t6a, "case6a");
+  ok(t6a.routeSet.has("ARAM_CritFrenzy"), "case6a: 진행 중 all-combo의 미완성분 포함", [...t6a.routeSet]);
+  ok(!t6a.targets.has("ARAM_NotPicked"), "case6a: 풀에 없는(비적격) 콤보 증강은 제외", [...t6a.targets]);
+  ok(!t6a.targets.has("ARAM_LightningStrikes"), "case6a: 이미 확보한(picked) 증강은 목표가 아님", [...t6a.targets]);
+  ok(t6a.sTierSet.has("ARAM_PrismParty") && t6a.sTierSet.size === 1, "case6a: funTier 'S'만 sTierSet", [...t6a.sTierSet]);
+  ok(t6a.targets.has("ARAM_CritFrenzy") && t6a.targets.has("ARAM_PrismParty") && t6a.targets.size === 2,
+    "case6a: targets = routeSet ∪ sTierSet", [...t6a.targets]);
+  ok(t6a.combos.length === 1 && t6a.combos[0].title === "번개 대포 제이스" &&
+    JSON.stringify(t6a.combos[0].missing) === JSON.stringify(["ARAM_CritFrenzy"]),
+    "case6a: 근거 콤보에 미완성 목록 수록 (완성된 any-combo는 제외)", t6a.combos);
+  ok(!t6a.candidateInRoute && !t6a.candidateIsSTier, "case6a: candidate 없으면 플래그 false");
+
+  // 6b. candidate가 루트를 완성하는 카드면 candidateInRoute=true, 그 카드 자신과
+  //     완성된 콤보의 잔여분은 targets에서 빠진다 ("지금 먹으면 확정" 비대칭 경고 근거).
+  const t6b = routeTargets({
+    champion: CHAMP_JAYCE, picked: [AUG_A], candidate: AUG_C,
+    synergies: SYNERGIES, augments: AUGMENTS_RT,
+  });
+  ok(t6b.candidateInRoute === true, "case6b: 콤보 구성원 카드 → candidateInRoute true");
+  ok(!t6b.targets.has("ARAM_CritFrenzy"), "case6b: candidate 자신은 목표에서 제외", [...t6b.targets]);
+  ok(t6b.routeSet.size === 0, "case6b: 루트 완성 → 미완성분 없음", [...t6b.routeSet]);
+  const t6b2 = routeTargets({
+    champion: CHAMP_JAYCE, picked: [AUG_A], candidate: AUG_S,
+    synergies: SYNERGIES, augments: AUGMENTS_RT,
+  });
+  ok(t6b2.candidateIsSTier === true && t6b2.candidateInRoute === false,
+    "case6b: S티어 카드 → candidateIsSTier true (콤보 구성원은 아님)");
+  ok(!t6b2.targets.has("ARAM_PrismParty"), "case6b: S티어 candidate도 자기 자신은 목표에서 제외", [...t6b2.targets]);
+
+  // 6c. game이 있으면 used(이미 노출분) 제외 + pool 교집합 적용
+  const gameFake = { pool: AUGMENTS_RT.augments, used: ["ARAM_CritFrenzy"] };
+  const t6c = routeTargets({
+    champion: CHAMP_JAYCE, picked: [AUG_A],
+    synergies: SYNERGIES, augments: AUGMENTS_RT, game: gameFake,
+  });
+  ok(!t6c.targets.has("ARAM_CritFrenzy") && t6c.combos.length === 0,
+    "case6c: 이미 노출(used)된 증강은 목표에서 제외", [...t6c.targets]);
+  const gameNarrow = { pool: [AUG_A, AUG_C], used: [] };
+  const t6c2 = routeTargets({
+    champion: CHAMP_JAYCE, picked: [AUG_A],
+    synergies: SYNERGIES, augments: AUGMENTS_RT, game: gameNarrow,
+  });
+  ok(t6c2.targets.has("ARAM_CritFrenzy") && !t6c2.targets.has("ARAM_PrismParty"),
+    "case6c: game.pool 밖(S티어 포함) 증강은 목표에서 제외", [...t6c2.targets]);
+
+  // 6d. draft.js 실게임 통합: targets ⊆ pool − used 불변식 + hitProbability 계약
+  //     (routeTargets의 Set을 draft.hitProbability에 그대로 넣을 수 있어야 한다)
+  const game6d = draftMod.newGame({ augments: AUGMENTS_RT.augments, champion: CHAMP_JAYCE, seed: 123 });
+  draftMod.nextRound(game6d);
+  const t6d = routeTargets({
+    champion: CHAMP_JAYCE, picked: [], synergies: SYNERGIES, augments: AUGMENTS_RT, game: game6d,
+  });
+  const poolNames6d = new Set(game6d.pool.map((a) => a.apiName));
+  ok([...t6d.targets].every((n) => poolNames6d.has(n) && game6d.used.indexOf(n) === -1),
+    "case6d: targets ⊆ pool − used (실게임 상태)", [...t6d.targets]);
+  const dist6d = draftMod.rerollDistribution(game6d, 0);
+  const hit6d = draftMod.hitProbability(dist6d, t6d.targets);
+  const manual6d = dist6d.entries.reduce((s, e) => s + (t6d.targets.has(e.aug.apiName) ? e.p : 0), 0);
+  ok(typeof hit6d === "number" && hit6d >= 0 && hit6d <= 1 && Math.abs(hit6d - manual6d) < 1e-12,
+    "case6d: hitProbability(dist, targets Set) = Σp 수동 계산과 일치", [hit6d, manual6d]);
+
+  // 6e. 방어: 어떤 입력에도 throw 없이 빈 형태
+  checkRouteShape(routeTargets({}), "case6e-빈입력");
+  checkRouteShape(routeTargets(), "case6e-무인자");
+  const t6e = routeTargets({ champion: null, picked: null, candidate: null, synergies: null, augments: null, game: null });
+  ok(t6e.targets.size === 0 && t6e.combos.length === 0, "case6e: 널 데이터 → 빈 목표", t6e.targets.size);
+
+  // --- 케이스 7: buildDossier 챔피언 꿀잼 사전 셰이퍼 (SPEC-day2 §2) ---
+  console.log("\n[케이스 7] buildDossier 챔피언 사전");
+
+  // 스킬별 props가 있는 제이스 (③ 적격 스킬 필터 검증용 — 기존 fixture는 구스키마)
+  const CHAMP_JAYCE_PROPS = Object.assign({}, CHAMP_JAYCE, {
+    spells: [
+      { key: "Q", nameKo: "천상의 강타", props: ["projectile"] },
+      { key: "W", nameKo: "번개 질주", props: ["durationEffect"] },
+      { key: "E", nameKo: "천둥 강타", props: ["projectile", "knockback"] },
+      { key: "R", nameKo: "수은 대포/망치", props: [] },
+    ],
+  });
+  // 스킬 증강 fixture — 확정 판정 4종(pin/slot/무작위/충돌) + 비활성 제외
+  const AB_PIN = { apiName: "AB_Pin", nameKo: "핀 증강", tier: "gold", category: "ability", funTier: "A", enabled: true, tags: ["ap"], descKo: "W가 강해집니다.", restrictions: { spellPin: { Jayce: "W" } } };
+  const AB_SLOT = { apiName: "AB_Slot", nameKo: "슬롯 증강", tier: "silver", category: "ability", enabled: true, tags: ["ad"], descKo: "Q 고정.", restrictions: { slot: "Q" } };
+  const AB_RAND = { apiName: "AB_Rand", nameKo: "투사체 증강", tier: "gold", category: "ability", enabled: true, tags: ["poke"], descKo: "투사체 스킬 강화.", restrictions: { abilityPropsAll: ["projectile"] } };
+  const AB_EX = { apiName: "AB_Ex", nameKo: "제외 증강", tier: "silver", category: "ability", enabled: true, tags: ["as"], descKo: "-", restrictions: { spellExclude: { Jayce: ["E"] }, note: "실측: 제이스 E 제외" } };
+  const AB_CONF = { apiName: "AB_Conf", nameKo: "모순 증강", tier: "gold", category: "ability", enabled: true, tags: [], descKo: "-", restrictions: { spellPin: { Jayce: "E" }, spellExclude: { Jayce: ["E"] } } };
+  const AB_OFF = { apiName: "AB_Off", nameKo: "꺼진 증강", tier: "gold", category: "ability", enabled: false, tags: [], descKo: "-" };
+  const AUGMENTS_DEX = { patch: "26.17", augments: [AUG_A, AUG_C, AUG_S, AB_PIN, AB_SLOT, AB_RAND, AB_EX, AB_CONF, AB_OFF] };
+  const FUNRANK_FIX = { ranks: [{ id: "Jayce", tier: "S+", funScore: 73, oneLiner: "빵 포킹 장인", signatureAugments: ["ARAM_CritFrenzy"] }] };
+
+  function checkDossierShape(d, label) {
+    ok(d && typeof d === "object", `${label}: 객체 반환`);
+    ok(d.header && typeof d.header === "object" && typeof d.header.nameKo === "string", `${label}: header 존재`);
+    ok(Array.isArray(d.combos), `${label}: combos 배열`);
+    ok(Array.isArray(d.fallbackRoutes), `${label}: fallbackRoutes 배열`);
+    ok(Array.isArray(d.abilityTable), `${label}: abilityTable 배열`);
+    ok(Array.isArray(d.exampleItems) && d.exampleItems.length <= 8, `${label}: exampleItems 최대 8개`);
+  }
+
+  // 7a. 콤보 목록 — 적용 가능+발동 가능만, 시그니처 우선 정렬, 증강 해석
+  const d7a = buildDossier({
+    champion: CHAMP_JAYCE_PROPS, synergies: SYNERGIES, items: ITEMS,
+    augments: AUGMENTS_DEX, funrank: FUNRANK_FIX,
+  });
+  checkDossierShape(d7a, "case7a");
+  const titles7a = d7a.combos.map((c) => c.title);
+  ok(JSON.stringify(titles7a) === JSON.stringify(["번개 대포 제이스", "온힛 폭풍"]),
+    "case7a: 콤보 = 적용 가능 전부, 시그니처(치명타 광란 보유)·챔피언 명시 우선 정렬", titles7a);
+  ok(!titles7a.includes("매칭되면 안 되는 콤보(all인데 하나 부족)"),
+    "case7a: all인데 비적격 증강이 낀 콤보는 발동 불가 → 사전에서 제외", titles7a);
+  ok(!titles7a.includes("다른 챔피언 전용"), "case7a: 다른 챔피언 콤보 제외", titles7a);
+  const cJayce = d7a.combos[0];
+  ok(cJayce.signature === true && cJayce.matchType === "all", "case7a: 시그니처 플래그·matchType 전달");
+  ok(cJayce.augments.length === 2 && cJayce.augments[0].apiName === "ARAM_LightningStrikes" &&
+    cJayce.augments[0].nameKo === "번개 세례" && cJayce.augments[0].tier === "gold" && cJayce.augments[0].eligible === true,
+    "case7a: 구성 증강이 nameKo/tier/eligible로 해석됨", cJayce.augments[0]);
+  ok(JSON.stringify(cJayce.items.map((i) => i.id)) === JSON.stringify([1001, 1002]),
+    "case7a: 콤보 핵심 아이템 해석", cJayce.items.map((i) => i.id));
+  ok(cJayce.whyFun.length > 0 && cJayce.skills.length > 0, "case7a: whyFun/skills 전달");
+  ok(d7a.fallbackRoutes.length === 0, "case7a: 콤보가 있으면 폴백 루트 없음");
+  // 헤더 — funrank 결합
+  ok(d7a.header.id === "Jayce" && d7a.header.funTier === "S+" && d7a.header.funScore === 73 &&
+    d7a.header.oneLiner === "빵 포킹 장인" && d7a.header.signatureAugments.includes("ARAM_CritFrenzy"),
+    "case7a: 헤더에 funrank(티어·한줄·시그니처) 결합", d7a.header);
+
+  // 7b. 스킬 증강 표 — 확정(pin/slot)·무작위 후보·충돌 강등·비활성 제외 + draft.skillOdds 정합
+  const table7 = d7a.abilityTable;
+  const rowOf = (n) => table7.find((r) => r.apiName === n);
+  ok(JSON.stringify(table7.map((r) => r.apiName)) === JSON.stringify(["AB_Pin", "AB_Slot", "AB_Rand", "AB_Ex", "AB_Conf"]),
+    "case7b: 표 = 적격 ability 전부(풀 순서), 비활성(AB_Off)·비ability 제외", table7.map((r) => r.apiName));
+  const rPin = rowOf("AB_Pin");
+  ok(rPin.fixed && rPin.fixed.key === "W" && rPin.fixed.nameKo === "번개 질주" &&
+    rPin.fixedBy === "pin" && rPin.measured === true && rPin.candidates.length === 0,
+    "case7b: spellPin → 확정 W(실측 배지)", rPin);
+  const rSlot = rowOf("AB_Slot");
+  ok(rSlot.fixed && rSlot.fixed.key === "Q" && rSlot.fixedBy === "slot" && rSlot.measured === false,
+    "case7b: slot → 확정 Q (실측 배지는 아님)", rSlot);
+  const rRand = rowOf("AB_Rand");
+  ok(rRand.fixed === null &&
+    JSON.stringify(rRand.candidates.map((c) => c.key)) === JSON.stringify(["Q", "E"]) &&
+    rRand.candidates.every((c) => Math.abs(c.p - 0.5) < 1e-9),
+    "case7b: abilityPropsAll → 적격 스킬(Q/E)만 균등 후보", rRand.candidates);
+  const rEx = rowOf("AB_Ex");
+  ok(JSON.stringify(rEx.candidates.map((c) => c.key)) === JSON.stringify(["Q", "W", "R"]) &&
+    rEx.excluded.length === 1 && rEx.excluded[0].key === "E" && rEx.excluded[0].nameKo === "천둥 강타" &&
+    rEx.excluded[0].reason.includes("실측") && rEx.measured === true,
+    "case7b: spellExclude → 후보 제외 + excluded 사유·실측 배지", rEx);
+  const rConf = rowOf("AB_Conf");
+  ok(rConf.fixed === null && rConf.fixedBy === null &&
+    JSON.stringify(rConf.candidates.map((c) => c.key)) === JSON.stringify(["Q", "W", "R"]),
+    "case7b: pin·exclude 충돌 → 확정 무효화, ③ 강등 (draft 정책 미러)", rConf);
+  // 드리프트 방지 계약: 표의 확정/후보 확률이 draft.skillOdds와 완전 일치
+  let drift7 = 0;
+  for (const row of table7) {
+    const aug = AUGMENTS_DEX.augments.find((a) => a.apiName === row.apiName);
+    const odds = draftMod.skillOdds({ champion: CHAMP_JAYCE_PROPS }, aug);
+    const fromRow = { Q: 0, W: 0, E: 0, R: 0 };
+    if (row.fixed) fromRow[row.fixed.key] = 1;
+    else for (const c of row.candidates) fromRow[c.key] = c.p;
+    for (const k of ["Q", "W", "E", "R"]) {
+      if (Math.abs(fromRow[k] - odds[k]) > 1e-12) drift7++;
+    }
+  }
+  ok(drift7 === 0, "case7b: 표의 확정·후보 확률 = draft.skillOdds (단일 해소기, 드리프트 0)", drift7);
+
+  // 7c. 콤보 0건 폴백 — tagRules 점수화 재사용, 풀에 없는 태그 규칙은 자연 탈락
+  const d7c = buildDossier({
+    champion: CHAMP_ASHE,
+    synergies: { combos: [COMBO_JAYCE], tagRules: TAG_RULES },
+    items: ITEMS, augments: AUGMENTS,
+  });
+  checkDossierShape(d7c, "case7c");
+  ok(d7c.combos.length === 0, "case7c: 이 챔피언 콤보 0건");
+  ok(d7c.fallbackRoutes.length === 2 && d7c.fallbackRoutes.length <= 3,
+    "case7c: 폴백 루트 2건 (dot 규칙은 풀에 dot 증강이 없어 탈락)", d7c.fallbackRoutes.map((r) => r.title));
+  ok(d7c.fallbackRoutes[0].title === "온힛 루트" && d7c.fallbackRoutes[0].playstyle.includes("카이팅"),
+    "case7c: 점수 높은 규칙(onhit·priority 8)이 첫 루트", d7c.fallbackRoutes[0]);
+  ok(JSON.stringify(d7c.fallbackRoutes[0].items.map((i) => i.id)) === JSON.stringify([1002, 1006]),
+    "case7c: 루트 아이템 해석(fitScore 통과분)", d7c.fallbackRoutes[0].items);
+  ok(d7c.fallbackRoutes[1].title === "탱킹 루트" && d7c.fallbackRoutes[1].items.length === 0,
+    "case7c: 원딜에게 탱단독템은 루트에서도 걸러짐(fitScore 0)", d7c.fallbackRoutes[1]);
+  ok(d7c.header.funTier === null && d7c.header.oneLiner === "", "case7c: funrank 없으면 헤더 기본값");
+
+  // 7d. 예시 아이템 — fitScore 0 제외, 역할 태그 겹침 순 정렬, 최대 8개
+  const d7d = buildDossier({
+    champion: CHAMP_ASHE_AD, synergies: { combos: [], tagRules: [] },
+    items: ITEMS_FIT, augments: AUGMENTS_FIT,
+  });
+  const ids7d = d7d.exampleItems.map((i) => i.id);
+  ok(JSON.stringify(ids7d) === JSON.stringify([2007, 2006, 2004]),
+    "case7d: 예시템 = fit>0만, 역할 태그 겹침 많은 순", ids7d);
+  ok(!ids7d.includes(2001) && !ids7d.includes(2003) && !ids7d.includes(2005),
+    "case7d: 탱단독·support·AP코어는 ad 원딜 예시템에서 제외", ids7d);
+  ok(d7d.exampleItems.every((i) => typeof i.reason === "string" && i.reason.length > 0),
+    "case7d: 예시템마다 reason 존재");
+
+  // 7e. 방어: 어떤 입력에도 throw 없이 형태 유지
+  checkDossierShape(buildDossier({}), "case7e-빈입력");
+  checkDossierShape(buildDossier(), "case7e-무인자");
+  checkDossierShape(buildDossier({ champion: CHAMP_ASHE, synergies: null, items: null, augments: null, funrank: null }), "case7e-널데이터");
+
   // --- 결과 ---
   console.log(`\n${pass} passed, ${fail} failed`);
   if (fail > 0) process.exitCode = 1;
@@ -523,4 +759,4 @@ main()
     console.error("테스트 실행 실패:", e);
     process.exitCode = 1;
   })
-  .then(() => fs.unlink(tmpPath).catch(() => {}));
+  .then(() => fs.rm(tmpDir, { recursive: true, force: true }).catch(() => {}));

@@ -276,8 +276,11 @@ function mustSlot(round, i) {
   }
 }
 
-/** 등급별 남은(미노출) 증강 수 */
-function remainingByTier(game) {
+/**
+ * 등급별 남은(미노출) 증강 수 — { silver, gold, prismatic }.
+ * 순수 조회 (game 불변, rng 미소비). UI의 잔여 풀 표시("실버 n / 골드 m / 프리즘 k")용 export.
+ */
+export function remainingByTier(game) {
   const used = {};
   for (let i = 0; i < game.used.length; i++) used[game.used[i]] = true;
   const counts = { silver: 0, gold: 0, prismatic: 0 };
@@ -356,38 +359,67 @@ export function weightFor(aug, champion, opts) {
  * 전 등급 고갈이면 null.
  * 근사: 가중치 계수는 전부 추정치 (weightFor 주석 참조 — research/AUGMENT-POOLS-STUDY.md §3-2).
  */
-function drawAugment(game, tier, fallbackOrder) {
+/**
+ * 후보 분포 산출기 (단일 후보 산출기 — drawAugment와 확률 표시 UI가 공유해 드리프트 방지).
+ * 지정 등급에서 미노출 후보와 가중치·정규화 확률을 계산한다. 그 등급이 고갈이면
+ * fallbackOrder 순서로 다른 등급을 시도한다(drawAugment의 폴백 해소를 그대로 미러).
+ * **순수 조회**: game을 변경하지 않고 rng(nextFloat)를 소비하지 않는다.
+ *
+ * entries는 game.pool 순서를 보존한다 — drawAugment의 rng 1회 누적 스캔 인덱스가
+ * 종전 구현과 바이트 단위로 동일해야 하기 때문 (시드 결정론 회귀 가드: test-draft).
+ * 가중치 합이 0 이하면 p를 균등(1/n)으로 채운다(drawAugment의 균등 폴백 미러).
+ *
+ * 근사: weight는 weightFor의 추정 상수(2.0/0.6/1.5) 기반 — 실제 가중치는 서버 전용.
+ * 따라서 p는 "시뮬레이터 모델 기준" 확률이다 (weightFor 주석 참조).
+ *
+ * @param {Object} game 게임 상태 (불변 유지)
+ * @param {string} tier 시작 등급 ('silver'|'gold'|'prismatic')
+ * @param {Array<string>} [fallbackOrder] 고갈 시 보충 순서 (기본 FALLBACK_ORDER[tier])
+ * @returns {{ resolvedTier: string|null, entries: Array<{aug: Object, weight: number, p: number}>, totalWeight: number }}
+ *   전 등급 고갈 시 { resolvedTier: null, entries: [], totalWeight: 0 }
+ */
+export function drawDistribution(game, tier, fallbackOrder) {
   const used = {};
   for (let i = 0; i < game.used.length; i++) used[game.used[i]] = true;
   const order = [tier].concat(fallbackOrder || FALLBACK_ORDER[tier] || []);
   const wOpts = { trackL9: game.trackL9 === true };
   for (let t = 0; t < order.length; t++) {
-    const cands = [];
+    const entries = [];
+    let total = 0;
     for (let i = 0; i < game.pool.length; i++) {
       const a = game.pool[i];
-      if (a.tier === order[t] && !used[a.apiName]) cands.push(a);
+      if (a.tier === order[t] && !used[a.apiName]) {
+        const w = weightFor(a, game.champion, wOpts);
+        entries.push({ aug: a, weight: w, p: 0 });
+        total += w; // 종전 drawAugment와 같은 순서(pool 순서)의 부동소수 합산 — 결정론 유지
+      }
     }
-    if (cands.length > 0) {
-      // 가중 추출: rng 1회 → 누적 가중치 (결정론 유지)
-      const weights = [];
-      let total = 0;
-      for (let i = 0; i < cands.length; i++) {
-        const w = weightFor(cands[i], game.champion, wOpts);
-        weights.push(w);
-        total += w;
+    if (entries.length > 0) {
+      if (total > 0) {
+        for (let i = 0; i < entries.length; i++) entries[i].p = entries[i].weight / total;
+      } else {
+        for (let i = 0; i < entries.length; i++) entries[i].p = 1 / entries.length; // 균등 폴백 미러
       }
-      if (total <= 0) {
-        return cands[Math.floor(nextFloat(game) * cands.length)]; // 방어: 가중치 합 0이면 균등
-      }
-      let r = nextFloat(game) * total;
-      for (let i = 0; i < cands.length; i++) {
-        r -= weights[i];
-        if (r < 0) return cands[i];
-      }
-      return cands[cands.length - 1]; // 부동소수 잔여 방어
+      return { resolvedTier: order[t], entries: entries, totalWeight: total };
     }
   }
-  return null;
+  return { resolvedTier: null, entries: [], totalWeight: 0 };
+}
+
+function drawAugment(game, tier, fallbackOrder) {
+  const dist = drawDistribution(game, tier, fallbackOrder);
+  const entries = dist.entries;
+  if (entries.length === 0) return null; // 전 등급 완전 고갈
+  if (dist.totalWeight <= 0) {
+    return entries[Math.floor(nextFloat(game) * entries.length)].aug; // 방어: 가중치 합 0이면 균등
+  }
+  // 가중 추출: rng 1회 → 누적 가중치 스캔 (entries가 pool 순서·동일 가중치라 종전과 바이트 동일)
+  let r = nextFloat(game) * dist.totalWeight;
+  for (let i = 0; i < entries.length; i++) {
+    r -= entries[i].weight;
+    if (r < 0) return entries[i].aug;
+  }
+  return entries[entries.length - 1].aug; // 부동소수 잔여 방어
 }
 
 /** 스킬 증강이 아닌 경우 그대로, 스킬 증강이면 enhancedSkill 지정용 기본 스킬 키 */
@@ -423,8 +455,16 @@ const DEFAULT_SKILL_KEYS = ['Q', 'W', 'E', 'R'];
  * 근거: research/AUGMENT-POOLS-STUDY.md §3-3, research/ABILITY-AUGMENT-DATA.md §4,
  * research/data/eligibility-notes.json abilityAugments.tierSystem.
  */
-function presentAugment(game, aug) {
-  if (aug.category !== 'ability') return aug;
+/**
+ * 스킬 지정 규칙 ①②③의 해소기 (presentAugment와 skillOdds가 공유 — 드리프트 방지).
+ * **순수 함수**: game 불변, rng 미소비. 우선순위·충돌 정책은 presentAugment 주석과 동일:
+ *  ① spellPin 확정 매핑 (pin·exclude 충돌 시 무효화 → ② 건너뛰고 ③)
+ *  ② slot 고정형
+ *  ③ 적격 스킬(spellExclude 제외, abilityPropsAll 충족) 후보 목록 — 실제 추출은 호출부의 rng 몫.
+ * @returns {{ fixedKey: string|null, cands: Array<{key, nameKo}>|null }}
+ *   fixedKey가 있으면 결정적 지정(①②), 없으면 cands 중 무작위(③)가 계약.
+ */
+function resolveSkillTargets(game, aug) {
   const r = aug.restrictions || {};
   const champ = game.champion;
   const spells = (champ && Array.isArray(champ.spells)) ? champ.spells : null;
@@ -434,19 +474,6 @@ function presentAugment(game, aug) {
     ? r.spellExclude[champ.id]
     : [];
 
-  /** 스킬 키를 rng 소비 없이 결정적으로 지정 (①·② 공용 — nameKo는 champion.spells에서 조회) */
-  function fixSkill(key) {
-    let fixed = null;
-    if (spells) {
-      for (let i = 0; i < spells.length; i++) {
-        if (spells[i] && spells[i].key === key) { fixed = spells[i]; break; }
-      }
-    }
-    return Object.assign({}, aug, {
-      enhancedSkill: { key: key, nameKo: (fixed && fixed.nameKo !== undefined) ? fixed.nameKo : null },
-    });
-  }
-
   // ① 챔피언×증강 확정 매핑 (spellPin): rng 소비 없이 그 스킬로 고정 — slot보다 우선.
   //    방어: 필드 부재/키 이상은 무시(구스키마 하위 호환). pin이 spellExclude와 충돌하면
   //    데이터 오류 — exclude를 우선해 pin을 무시하고 ②도 건너뛰어 ③으로 간다(계약 정책).
@@ -455,16 +482,16 @@ function presentAugment(game, aug) {
     : null;
   const pinConflicts = pinnedKey !== null && excludedKeys.indexOf(pinnedKey) !== -1;
   if (pinnedKey !== null && !pinConflicts && DEFAULT_SKILL_KEYS.indexOf(pinnedKey) !== -1) {
-    return fixSkill(pinnedKey);
+    return { fixedKey: pinnedKey, cands: null };
   }
 
   // ② 슬롯 고정형 (예: Bread And Butter = Q): rng 소비 없이 결정적으로 지정
   //    (pin·exclude 충돌로 pin이 무효화된 경우에는 ②를 건너뛰고 ③으로 — 위 주석 참조)
   if (!pinConflicts && typeof r.slot === 'string' && DEFAULT_SKILL_KEYS.indexOf(r.slot) !== -1) {
-    return fixSkill(r.slot);
+    return { fixedKey: r.slot, cands: null };
   }
 
-  // ③ 적격 스킬 중 rng 무작위 (spellExclude 제외)
+  // ③ 적격 스킬 후보 (spellExclude 제외) — 무작위 추출 자체는 호출부(presentAugment)가 수행
   const required = Array.isArray(r.abilityPropsAll) ? r.abilityPropsAll : [];
   const notExcluded = function (s) { return !s || excludedKeys.indexOf(s.key) === -1; };
   let cands;
@@ -483,6 +510,32 @@ function presentAugment(game, aug) {
     // 챔피언 미지정/스킬 데이터 없음: 키만으로 후보 구성
     cands = DEFAULT_SKILL_KEYS.map(function (k) { return { key: k, nameKo: null }; });
   }
+  return { fixedKey: null, cands: cands };
+}
+
+function presentAugment(game, aug) {
+  if (aug.category !== 'ability') return aug;
+  const champ = game.champion;
+  const spells = (champ && Array.isArray(champ.spells)) ? champ.spells : null;
+
+  /** 스킬 키를 rng 소비 없이 결정적으로 지정 (①·② 공용 — nameKo는 champion.spells에서 조회) */
+  function fixSkill(key) {
+    let fixed = null;
+    if (spells) {
+      for (let i = 0; i < spells.length; i++) {
+        if (spells[i] && spells[i].key === key) { fixed = spells[i]; break; }
+      }
+    }
+    return Object.assign({}, aug, {
+      enhancedSkill: { key: key, nameKo: (fixed && fixed.nameKo !== undefined) ? fixed.nameKo : null },
+    });
+  }
+
+  const target = resolveSkillTargets(game, aug);
+  if (target.fixedKey !== null) return fixSkill(target.fixedKey); // ①② — rng 미소비
+
+  // ③ 적격 스킬 중 rng 무작위 (후보 목록은 resolveSkillTargets와 공유 — 종전과 동일 순서)
+  const cands = target.cands;
   const s = cands[Math.floor(nextFloat(game) * cands.length)];
   return Object.assign({}, aug, {
     enhancedSkill: { key: s.key, nameKo: (s.nameKo === undefined ? null : s.nameKo) },
@@ -602,4 +655,81 @@ export function pickAugment(game, i) {
   game.picked.push(aug);
   if (game.picked.length >= ROUND_LEVELS.length) game.finished = true;
   return aug;
+}
+
+/* ------------------------------------------------------------------ */
+/* 확률 조회 API (전부 순수 조회 — game 불변, rng(nextFloat) 미소비)      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * 슬롯 리롤 분포: rerollSlot이 실제로 뽑을 후보·확률을 미리 계산한다.
+ * rerollSlot과 동일하게 카드 자신의 tier(round.slots[i].tier — 폴백·황금 리롤로
+ * 라운드 등급과 다를 수 있음) + FALLBACK_ORDER로 drawDistribution을 래핑.
+ * rerolled[i]/goldenUsed 소진 여부는 검사하지 않는다(순수 조회) — 소진 처리는 app.js 몫.
+ * @returns drawDistribution 반환형 { resolvedTier, entries: [{aug, weight, p}], totalWeight }
+ */
+export function rerollDistribution(game, slotIndex) {
+  const round = mustActiveRound(game);
+  mustSlot(round, slotIndex);
+  const current = round.slots[slotIndex];
+  return drawDistribution(game, current.tier);
+}
+
+/**
+ * 황금 리롤 분포: goldenReroll이 실제로 뽑을 후보·확률을 미리 계산한다.
+ * goldenReroll과 동일하게 TIER_UP[현재 tier] + FALLBACK_ORDER_UPGRADE로 래핑.
+ * goldenUsed 소진 여부는 검사하지 않는다(순수 조회).
+ * @returns drawDistribution 반환형 { resolvedTier, entries: [{aug, weight, p}], totalWeight }
+ */
+export function goldenDistribution(game, slotIndex) {
+  const round = mustActiveRound(game);
+  mustSlot(round, slotIndex);
+  const current = round.slots[slotIndex];
+  const upTier = TIER_UP[current.tier] || current.tier;
+  return drawDistribution(game, upTier, FALLBACK_ORDER_UPGRADE[current.tier]);
+}
+
+/**
+ * 목표 집합 적중 확률: 분포 entries 중 predicate에 맞는 항목의 p 합.
+ * @param {Object} dist drawDistribution/rerollDistribution/goldenDistribution 결과
+ * @param {Set<string>|Function} predicate apiName Set 또는 술어 함수 (aug) => boolean
+ * @returns {number} 0~1 (빈 분포·무적중이면 0)
+ */
+export function hitProbability(dist, predicate) {
+  if (!dist || !Array.isArray(dist.entries)) return 0;
+  const test = (typeof predicate === 'function')
+    ? predicate
+    : function (a) { return !!(predicate && typeof predicate.has === 'function' && predicate.has(a.apiName)); };
+  let p = 0;
+  for (let i = 0; i < dist.entries.length; i++) {
+    if (test(dist.entries[i].aug)) p += dist.entries[i].p;
+  }
+  return p;
+}
+
+/**
+ * 스킬 증강의 강화 대상 스킬 배정 분포 — presentAugment의 ①②③ 규칙(resolveSkillTargets
+ * 공유)을 확률로 미러한다. 순수 조회 (rng 미소비).
+ *  ①spellPin/②slot(pin·exclude 충돌 시 ③ 강등 예외 포함) → 해당 키 1.0.
+ *  ③ 적격 스킬 후보 중 균등 1/|cands|.
+ * 근사: ③의 균등 가정은 실제 지정 규칙이 비공개라서의 근사다 (presentAugment 주석 참조).
+ * @param {Object} game 게임 상태 (champion의 spells/spellExclude/spellPin 평가에 사용)
+ * @param {Object} aug 증강 객체 — category!=='ability'면 전부 0
+ * @returns {{ Q: number, W: number, E: number, R: number }}
+ */
+export function skillOdds(game, aug) {
+  const odds = { Q: 0, W: 0, E: 0, R: 0 };
+  if (!aug || aug.category !== 'ability') return odds;
+  const target = resolveSkillTargets(game, aug);
+  if (target.fixedKey !== null) {
+    odds[target.fixedKey] = 1; // ①② 결정적 (fixedKey는 DEFAULT_SKILL_KEYS 검증 통과분)
+    return odds;
+  }
+  const cands = target.cands;
+  const each = 1 / cands.length; // 근사: ③ 균등 가정 (presentAugment의 rng 균등 추출 미러)
+  for (let i = 0; i < cands.length; i++) {
+    const k = cands[i] && cands[i].key;
+    if (odds[k] !== undefined) odds[k] += each; // 방어: Q/W/E/R 밖 키는 표시 대상 아님
+  }
+  return odds;
 }

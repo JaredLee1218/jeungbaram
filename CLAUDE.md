@@ -59,5 +59,6 @@ node scripts/test-draft.mjs && node scripts/test-recommend.mjs && node scripts/t
 - 2026-09-02: GitHub 배포 완료 — https://jaredlee1218.github.io/jeungbaram/ (JaredLee1218/jeungbaram, Pages main /docs)
 - 2026-09-02: 2차 심층 스터디(증강 풀 메커니즘) → 시뮬레이터 반영 완료. 이후 꿀잼 랭킹·아이템 클래스 보정(fitScore)·픽 미리보기(previewAugment) 배포.
 - 2026-09-03: 3차 스터디(챔피언×스킬×증강 실매핑 306건, `research/ABILITY-AUGMENT-DATA.md` + `research/data/ability-augment-map.json`) → 반영 완료: 스킬 속성을 게임 원본(mSpellTags/mCastType/mMissileSpec)으로 교체, spellPin 확정 지정, 제외 기록 이식. 테스트 7종(fidelity 84) 전부 통과, 배포됨.
+- 2026-09-03 (2일차): 결과 증강 상세 카드 → 증강 꿀잼 티어 S~D(테두리·칩) → 리롤 확률 어드바이저(`research/SPEC-day2.md`, draft.js 확률 API + test-odds MC 10만 회 4σ 검증) + 챔피언 꿀잼 사전(#dex) 배포.
 - 다음 확인 트리거: 26.18 패치노트(9/10 공개 예정) — ARAM_ClownCollege enabled 전환 여부 + Upgrade_DeathDance 티어 재확인 (`research/raw/17` 참조).
 <!-- 진행 상황이 생기면 완료 / 진행 중 / 다음 단계를 여기에 갱신 -->

@@ -448,8 +448,14 @@ button {
   flex-shrink: 0;
 }
 
-.champ-preview-actions { display: flex; }
+.champ-preview-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .champ-preview-actions .btn { width: 100%; }
+/* 사전 진입 버튼 — 보조 톤 (주 버튼과 시각 위계 분리) */
+.btn-dex {
+  border-color: var(--gold-dim);
+  color: var(--gold);
+  background: rgba(200, 170, 110, 0.06);
+}
 
 /* 결과 화면: "이 챔피언 꿀잼 티어: S+" 한 줄 */
 .result-fun-tier {
@@ -458,6 +464,160 @@ button {
   gap: 6px;
   font-size: 0.85rem;
   color: var(--muted);
+}
+
+/* ---------- ①-b 챔피언 꿀잼 사전 (#dex/{챔피언id}) ---------- */
+
+.btn-dex-back {
+  margin-bottom: 12px;
+  min-height: 40px;
+  padding: 8px 16px;
+}
+
+.dex-body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* 헤더: 초상·이름·꿀잼 티어·역할 태그·한 줄 컨셉 */
+.dex-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 14px;
+  border: 1px solid var(--gold-dim);
+  border-radius: var(--radius);
+  background:
+    radial-gradient(ellipse 80% 120% at 50% 0%, rgba(200, 170, 110, 0.08), transparent 70%),
+    var(--panel);
+}
+.dex-head > img {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  border: 2px solid var(--gold);
+  flex-shrink: 0;
+}
+.dex-head-meta { min-width: 0; display: flex; flex-direction: column; gap: 6px; }
+.dex-head-title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.dex-name { font-size: 1.2rem; font-weight: 800; color: var(--gold-bright); }
+.dex-role-tags { justify-content: flex-start; margin-top: 0; }
+.dex-head .champ-oneliner { font-size: 0.88rem; }
+
+.dex-section h3 { margin-bottom: 12px; }
+
+/* 조합 카드 내부: 구성 증강 칩(등급 테두리) + 핵심템 아이콘 */
+.dex-combo-augs { margin-top: 10px; }
+.dex-aug-chip { color: var(--text); }
+.dex-aug-chip.tier-silver { border-color: var(--silver); }
+.dex-aug-chip.tier-gold { border-color: var(--gold); }
+.dex-aug-chip.tier-prismatic {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--panel-2), var(--panel-2)) padding-box,
+    var(--prism-grad) border-box;
+}
+/* 전 챔피언용 combo의 구성 증강 중 이 챔피언이 못 받는 것 — 정직하게 흐림 처리 */
+.dex-aug-chip.unavailable { opacity: 0.45; }
+.dex-aug-chip.unavailable > span { text-decoration: line-through; }
+
+.dex-combo-items {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+.dex-items-label { font-size: 11px; color: var(--muted); flex-shrink: 0; }
+.dex-combo-items img {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel-2);
+  object-fit: contain;
+}
+
+.dex-combo-skills {
+  margin: 10px 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.dex-badge-sig {
+  display: inline-block;
+  vertical-align: 2px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1.7;
+  color: var(--bg-bottom);
+  background: var(--gold);
+}
+
+.dex-empty-note {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+.dex-combo-generic {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+}
+
+/* 스킬 증강 표 (모바일 1열 행 리스트) */
+.dex-skill-table { display: flex; flex-direction: column; gap: 10px; }
+.dex-skill-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--line);
+}
+.dex-skill-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.dex-skill-row > img {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel-2);
+  object-fit: contain;
+  flex-shrink: 0;
+}
+.dex-skill-info { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.dex-skill-name { font-size: 0.9rem; font-weight: 700; color: var(--gold-bright); }
+.dex-skill-target { font-size: 0.8rem; }
+.dex-skill-fixed { font-weight: 700; color: var(--gold); }
+.dex-skill-random { color: var(--muted); }
+.dex-skill-excluded {
+  margin-left: 6px;
+  font-size: 0.74rem;
+  color: var(--danger);
+  text-decoration: line-through;
+}
+.dex-badge-measured {
+  display: inline-block;
+  vertical-align: 2px;
+  padding: 0 7px;
+  border: 1px solid rgba(124, 244, 154, 0.6);
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 800;
+  line-height: 1.7;
+  color: #9df0b4;
+  background: rgba(124, 244, 154, 0.1);
+}
+.dex-note {
+  margin: 10px 0 0;
+  font-size: 0.74rem;
+  color: var(--muted);
+}
+.dex-caption {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--muted);
+  text-align: center;
 }
 
 /* ---------- ② 드래프트 ---------- */
@@ -543,6 +703,112 @@ button {
   color: #fff;
   text-shadow: 0 0 8px rgba(160, 107, 255, 0.8);
 }
+
+/* ---------- 라운드 확률 스트립 (리롤 확률 어드바이저 — SPEC-day2 §3-4) ----------
+ * 등급 배지 아래 1개, <details>로 접힘 가능 (모바일 과밀 방지).
+ * 12px 이하 컴팩트 — 카드(7층)와 시각 위계가 겹치지 않게 낮은 채도. */
+.odds-strip-wrap { margin: -4px 0 14px; }
+.odds-strip {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  padding: 0;
+  overflow: hidden;
+}
+.odds-strip summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 6px 12px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 12px;
+  -webkit-tap-highlight-color: rgba(200, 170, 110, 0.2);
+}
+.odds-strip summary::-webkit-details-marker { display: none; }
+.odds-strip summary::after {
+  content: "▾";
+  margin-left: auto;
+  color: var(--muted);
+  transition: transform 0.15s;
+}
+.odds-strip[open] summary::after { transform: rotate(180deg); }
+.odds-summary-title {
+  flex-shrink: 0;
+  font-weight: 800;
+  color: var(--gold);
+}
+.odds-strip-mini {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--muted);
+}
+.odds-strip[open] .odds-strip-mini { display: none; } /* 펼치면 본문과 중복 — 숨김 */
+.odds-line {
+  margin: 0;
+  padding: 4px 12px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text);
+}
+.odds-line strong { color: var(--gold); font-weight: 800; }
+.odds-line-pool { color: var(--muted); }
+.odds-line-golden { color: var(--gold-bright); }
+.odds-caption {
+  margin: 4px 0 0;
+  padding: 5px 12px 8px;
+  border-top: 1px dashed var(--line);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ---------- 카드별 확률 1줄 + 3밴드 힌트 (§3-4-2, §3-5) ----------
+ * 픽 미리보기 스트립 아래 이어붙는 줄 — 12px 이하 컴팩트 (카드 과밀 주의) */
+/* 인라인 플로우: 확률 문장 뒤에 힌트 칩이 같은 줄박스로 흐르게 해
+ * 카드 높이 증가를 최소화한다 (모바일 카드 높이 +30px 목표 — V2). */
+.aug-odds {
+  display: block;
+  align-self: stretch;
+  min-width: 0;
+  margin-top: 4px;
+  padding-top: 6px;
+  border-top: 1px dashed var(--line);
+  text-align: left;
+  line-height: 1.5;
+  pointer-events: none; /* 정보 표시 전용 — 탭은 카드(선택)로 통과 */
+}
+.aug-odds-route {
+  display: inline;
+  font-size: 11px;
+  color: #9fdcff;
+}
+/* 비대칭 경고: "리롤은 이 카드를 영구 소각" — 눈에 걸리되 소리 지르지 않게 */
+.aug-odds-warn {
+  display: inline;
+  font-size: 11px;
+  font-weight: 700;
+  color: #ffc9a3;
+}
+.aug-odds-route + .odds-hint,
+.aug-odds-warn + .odds-hint { margin-left: 6px; }
+.odds-hint {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  padding: 1px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--muted);
+  background: var(--panel-2);
+}
+.odds-hint-eat { border-color: rgba(124, 244, 154, 0.5); color: #9df0b4; }
+.odds-hint-reroll { border-color: rgba(94, 214, 255, 0.5); color: #9fdcff; }
+.odds-hint-even { border-color: var(--line); color: var(--muted); }
 
 /* 증강 카드 */
 .aug-cards {
