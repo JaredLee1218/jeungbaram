@@ -19,6 +19,12 @@
   --radius: 12px;
   --prism-grad: linear-gradient(135deg,
     #ff5f6d 0%, #ffc371 20%, #7cf49a 40%, #5ed6ff 60%, #a06bff 80%, #ff5fd2 100%);
+  /* 증강 꿀잼 티어 팔레트 (티어리스트 표준: S 빨강 → D 회색) */
+  --funtier-s: #ff6b6b;
+  --funtier-a: #ffa94d;
+  --funtier-b: #69db7c;
+  --funtier-c: #74c0fc;
+  --funtier-d: #868e96;
 }
 
 * { box-sizing: border-box; }
@@ -549,6 +555,7 @@ button {
 .aug-slot { display: flex; flex-direction: column; gap: 8px; }
 
 .aug-card {
+  position: relative; /* 꿀잼 티어 칩(.fun-chip) 코너 배치 기준 */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -577,6 +584,64 @@ button {
     linear-gradient(var(--panel), var(--panel)) padding-box,
     var(--prism-grad) border-box;
   box-shadow: 0 0 16px rgba(160, 107, 255, 0.3);
+}
+
+/* ---- 꿀잼 티어 테두리 (augments.json funTier — 부재 시 위 희귀 테두리 폴백) ----
+ * 한 화면 3장의 희귀 등급이 항상 같아 테두리 비교 정보가 없으므로,
+ * funTier가 있으면 테두리를 티어색으로 전환한다. 희귀 등급은 상단 배지와
+ * 카드 내 .aug-tier-label로 계속 보인다 — tier-* 클래스는 카드에 그대로
+ * 남아 있어 .tier-prismatic .aug-tier-label 프리즘 그라데이션 텍스트도 유지.
+ * tier-* 규칙보다 뒤에 두어 동점 특이도에서 이긴다 (골든 리롤 대기 시엔
+ * 더 뒤의 .golden-armed .aug-card가 금색으로 덮는다 — 의도). */
+.aug-card.aug-fun-s,
+.aug-card.aug-fun-a,
+.aug-card.aug-fun-b,
+.aug-card.aug-fun-c,
+.aug-card.aug-fun-d {
+  background: var(--panel); /* 프리즘 border-box 그라데이션 무력화 */
+  box-shadow: none;
+}
+.aug-card.aug-fun-s {
+  border: 2px solid var(--funtier-s);
+  box-shadow: 0 0 14px rgba(255, 107, 107, 0.4); /* S만 살짝 글로우 */
+}
+.aug-card.aug-fun-a { border: 2px solid var(--funtier-a); }
+.aug-card.aug-fun-b { border: 2px solid var(--funtier-b); }
+.aug-card.aug-fun-c { border: 2px solid var(--funtier-c); }
+.aug-card.aug-fun-d { border: 2px solid var(--funtier-d); }
+
+/* 꿀잼 티어 칩 (S~D 한 글자) — 드래프트 카드 코너 + 결과 상세 태그 줄 공용 */
+.fun-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 5px;
+  border-radius: 7px;
+  font-size: 0.85rem;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--bg-top); /* 티어색 배경 위 어두운 글자 — 명암비 확보 */
+}
+.fun-chip-s {
+  background: var(--funtier-s);
+  box-shadow: 0 0 8px rgba(255, 107, 107, 0.55);
+}
+.fun-chip-a { background: var(--funtier-a); }
+.fun-chip-b { background: var(--funtier-b); }
+.fun-chip-c { background: var(--funtier-c); }
+.fun-chip-d { background: var(--funtier-d); }
+
+/* 드래프트 카드에서는 우상단 코너 고정 (터치 방해 금지: pointer-events 차단) */
+.aug-card .fun-chip {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  min-width: 24px;
+  height: 24px;
+  font-size: 0.95rem;
+  pointer-events: none;
 }
 
 .aug-icon {

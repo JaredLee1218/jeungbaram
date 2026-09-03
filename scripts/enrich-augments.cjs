@@ -363,6 +363,289 @@ for (const api of Object.keys(MAP_DERIVED)) {
 }
 
 /* ------------------------------------------------------------------ */
+/* 2.7 funTier — 꿀잼 티어 큐레이션 (augment-fun-tier 계약)               */
+/* ------------------------------------------------------------------ */
+// 근거 우선순위(계약): ① research/raw/13 (aramgg 한국판 T1~T5 + 인벤/디시/증바람.com)
+//                     ② raw/16 §4·§7·§8 (스킬 증강 26종 실측 — 전역 승률·순위/209)
+//                     ③ raw/07 (영어권 통계·티어: u.gg/blitz/aramnerfs/esports.net/games.gg)
+//                     ④ raw/06 (한국 커뮤니티 체감 0티어·사기 증강). 상충 시 한국 소스 우선.
+// 라이브 대조(2026-09-03 WebFetch): aramgg.com/ko/augments — 26.17 T1 8종이 raw/13 기록과 동일함을 재확인.
+//   arammayhem.com/augments — 26.17 승률 상위 25/하위 15 (본 주석에서 "라이브 26.17"로 인용;
+//   arammayhem은 aramgg와 원천 공유 — raw/16 §3-1).
+// FUN_TIER: 근거 있는 큐레이션(항목별 주석 — S는 계약상 근거 한 줄 필수).
+// FUN_TIER_INFERRED: 어느 소스에도 등재되지 않아 태그·등급·유사 증강으로 유추한 것
+//   (계약: 근거 없는 고평가 방지 — A 이상 금지, B 또는 C만. 비활성+근거 없음 → C).
+const FUN_TIER = {
+  /* ===== S (23종) — 근거 한 줄씩 ===== */
+  ARAM_TransmutePrismatic: 'S',      // 전환: 프리즘 — aramgg(KR) T1 승률 전체 1위 65.37% (raw/13 §1-3, 라이브 26.17 재확인)
+  ARAM_HighRoller: 'S',              // 도박꾼 — aramgg T1 2위 64.55% + 펨코 하이롤 밈 (raw/13, raw/06 ㉘)
+  ShrinkEngine: 'S',                 // 축소 엔진 — aramgg T1 3위 61.59% (raw/13 §1-3)
+  ARAM_TankEngine: 'S',              // 탱크 엔진 — aramgg T1 60.48% + 라이엇 개발 인터뷰의 문도 재미 사례 (raw/13, raw/06 §1·⑫)
+  ARAM_DrawYourSword: 'S',           // 검을 뽑아라 — aramgg T1 60.46% + 디시 "그브·사미라 말 안 됨" (raw/13 §3-1, raw/06 ⑰)
+  ARAM_Recursion: 'S',               // 되풀이 — aramgg T1 60.35% + 인벤 "되풀이 > E가속 > Q가속" (raw/13 §2-3)
+  ARAM_Quest_SteelYourHeart: 'S',    // 강철 같은 심장 — aramgg T1 59.46% + 블로그 "탱커 최사기" + 나무위키 "체력 몇만" (raw/13, raw/06 ⑫)
+  BloodMoneyBurn: 'S',               // 타오르는 이자 — aramgg T1 59.37% (raw/13 §1-3)
+  ARAM_DualWield: 'S',               // 양손잡이 — 디시 "원딜 전용 0티어" + 인벤 S + 증바람.com 징크스 59%·픽률 36% (raw/13 §1-3·§3-1)
+  ARAM_InfernalConduit: 'S',         // 지옥의 전도체 — 디시 "브랜드 한정 압도적 0티어" + u.gg 프리즘 상위 (raw/13 §3-1, raw/07)
+  ARAM_BacktoBasics: 'S',            // 기본으로 돌아가기 — 인벤 "GOAT" + 펨코 갱플 술통 원킬 (raw/13 §3-3, raw/06 ②)
+  ARAM_TapDancer: 'S',               // 탭 댄서 — 블로그 "원딜은 탭댄서가 두말할 것 없이 최고" + 픽률 17~29% 실측 (raw/13 §3-4, raw/06 ⑱)
+  ARAM_EtherealWeapon: 'S',          // 환영 무기 — 펨코 "환무" 유명 조합 다수(헤카림·신지드·그라가스·에코) + 라이브 26.17 57.48% (raw/06 ⑤~⑧)
+  ARAM_MysticPunch: 'S',             // 신비한 주먹 — 인벤 프리즘 평가 S + arammayhem 54.99%·픽률 28% (raw/13 §3-3, raw/07 §1-1)
+  ARAM_GiantSlayer: 'S',             // 거인 학살자 — 인벤 프리즘 평가 S "모든 딜러" (raw/13 §3-3)
+  ARAM_Eureka: 'S',                  // 유레카 — 인벤 S + blitz S + 라이브 26.17 58.23% (raw/13 §3-3, raw/07 §1-4)
+  ARAM_JeweledGauntlet: 'S',         // 보석 건틀릿 — aramnerfs S+·blitz S + 디시 "스킬 치명타 2.5배 개꿀" (raw/07 §1-4, raw/06 ㉓)
+  ARAM_ItsKillingTime: 'S',          // 처형 시간 — 펨코 "처형시간 코그모 좌절감 GOAT·AP 나서스 개사기" (raw/06 ⑲)
+  ARAM_Typhoon: 'S',                 // 태풍 — 펨코 "세나 태풍 GOAT — 실버인데 프리즘급, 무조건 먹으셈" (raw/06 ⑩)
+  FinalForm: 'S',                    // 최종 형태 — 펨코 "퓨어탱커 최종형태 답없음·문도 재앙" (raw/06 ⑫)
+  ARAM_Quest_WoogletsWitchcap: 'S',  // 우글렛의 마녀 모자 — 인벤 프리즘 평가 S + 블로그 "AP딜러 최사기" (raw/13 §3-3·§3-4)
+  BiggestSnowballEver: 'S',          // 데굴데굴 눈덩이! — games.gg "모드 최강 단일 증강 논쟁 후보" + aussyelo·u.gg S (raw/07 §3-3·§3-4)
+  ARAM_ClownCollege: 'S',            // 광대 대학 — 인벤 프리즘 평가 S + 펨코 "광대 자폭샤코" (raw/13 §3-3, raw/06 ⑯) ※ 비활성 — 재활성 시 유효
+
+  /* ===== A (40종) ===== */
+  ARAM_ADAPt: 'A',                   // 펨코 "적능" 사기증강 리스트·"증바람에서만의 맛" + EloFactory 라이즈 콤보 (raw/06 ⑮·㉗, raw/07 §4)
+  ARAM_BluntForce: 'A',              // u.gg 실버 S 추천 + 라이브 26.17 58.26% 상위 (raw/07 §1-2)
+  ARAM_Deft: 'A',                    // 증바람.com 징크스 실측 59%·픽률 19% + esports.net 실버 추천 (raw/13 §1-3, raw/07 §3-2)
+  ARAM_HeavyHitter: 'A',             // 라이브 26.17 58.01% 상위 + esports.net 탐켄치·초가스·문도 (raw/07 §3-2)
+  ARAM_IceCold: 'A',                 // 펨코 챔피언별 사기증강 "차냉"(애쉬·아우렐리온 솔) (raw/06 ㉗)
+  ARAM_MindtoMatter: 'A',            // 펨코 라이즈·카사딘 "정신변환" 사기 리스트 + EloFactory 질리언·미포 콤보 (raw/06 ④·⑪, raw/07 §4)
+  ARAM_StackosaurusRex: 'A',         // games.gg "스택 챔피언에게 자동 승리 조건" + 베이가·스몰더·세나 (raw/07 §3-3, raw/06 ㉗)
+  TitansPulse: 'A',                  // 확고한 의지로 — 스킬 증강 실측 1위 52.29% #21/209 (raw/16 §4)
+  ARAM_ApexInventor: 'A',            // u.gg 골드 S 추천 (raw/07 §1-2)
+  CriticalMissile: 'A',              // blitz 골드 S + 라이브 26.17 59.20% 상위 (raw/07 §1-4)
+  ARAM_Firebrand: 'A',               // u.gg 골드 S + 펨코 카타리나=화염낙인 (raw/07 §1-2, raw/06 ㉑)
+  ARAM_Flashy: 'A',                  // u.gg 골드 S 추천 (raw/07 §1-2)
+  ARAM_FromBeginningToEnd: 'A',      // u.gg·esports.net·games.gg 골드 최상위 공통 추천 (raw/07)
+  ARAM_MagicMissile: 'A',            // blitz 골드 S + 펨코 아지르·오로라 추천 (raw/07 §1-4, raw/06 ㉗)
+  ARAM_Overflow: 'A',                // 인벤 "범람 = 미니 기돌, 딜 약 20%" + EloFactory 카사딘 루프 (raw/13 §3-3, raw/07 §3-5)
+  ARAM_PhenomenalEvil: 'A',          // blitz 골드 S + 라이브 26.17 58.09% + op.gg 브랜드·카서스 최적 (raw/07 §1-3·§1-4)
+  PressureCooker: 'A',               // 인벤 탱커 매핑 "찜솥" + aramnerfs S (raw/13 §3-3, raw/07 §1-4)
+  ARAM_ScopierWeapons: 'A',          // blitz 골드 S "Scopier Weapons" (raw/07 §1-4)
+  ARAM_SoulSiphon: 'A',              // u.gg 골드 S + games.gg 야스오·요네 + 라이브 26.17 58.24% (raw/07)
+  BurstingTeeth: 'A',                // 이빨 요정 — 라이브 26.17 57.76% 상위 + aramtheory 추천 (raw/07 §1-4)
+  ARAM_Upgrade_IE: 'A',              // 인벤 치명타 서열 1위 "인피" + 라이브 26.17 57.40% (raw/13 §3-3)
+  ARAM_Vulnerability: 'A',           // 인벤 치명타 서열 2위 "취약" + 라이브 26.17 57.59% + 나무위키 가렌 (raw/13 §3-3, raw/06 §7)
+  WarlockJuicebox: 'A',              // 라이브 26.17 59.31% 상위 10위권 (WebFetch 대조)
+  ARAM_BladeWaltz: 'A',              // 나무위키 "가렌 검무 — 무적+타겟팅 살인적 딜량" (raw/13 §3-2)
+  ARAM_CircleofDeath: 'A',           // 펨코 "자크 죽순 1대5" + EloFactory 자크·모데·트린 콤보 (raw/06 ⑭, raw/07 §4)
+  ARAM_Dashing: 'A',                 // 인벤 S·디시 "오로라·피즈 사기급" — 단 라이브 승률 하위권이라 S 제외 (raw/13 §3-1·§3-3)
+  ARAM_FanTheHammer: 'A',            // 인벤 원딜 매핑 "탄환 세례" + 베인·나르 "평타 한 방 삭제" 콤보 (raw/13 §3-3, raw/07 §4)
+  ARAM_FeyMagic: 'A',                // u.gg 뉴스 S + 나무위키 카사딘 + 인벤 "원형낫이랑 쓸만" (raw/07 §1-2, raw/13)
+  ARAM_Goliath: 'A',                 // 인벤 A + u.gg 뉴스 S + 라이브 26.17 57.58% (raw/13 §3-3, raw/07)
+  InfiniteRecursion: 'A',            // 라이브 26.17 59.26% 상위 + blitz S (raw/07 §1-4)
+  ARAM_MadScientist: 'A',            // u.gg 프리즘 상위 + 라이브 26.17 57.13% (raw/07 §1-2)
+  ARAM_MasterofDuality: 'A',         // 인벤 원딜 매핑 "결투의 대가" + 펨코 유나라 "결대+양잡" (raw/13 §3-3, raw/06 ㉗)
+  PoroCharge_Active: 'A',            // 게임플 1티어 "포로발사기" + 펨코 §4 화제성 (raw/06 ㉘·§4)
+  ARAM_ProteinShake: 'A',            // 펨코 "프로틴음료 존내맛잇음"·"크산테 실드 못 뚫음" (raw/06 ⑬)
+  ARAM_Quest_VoidImmolation: 'A',    // 증바람.com 말파이트 승률 1위 62% + 펨코 레오나 (raw/13 §1-3, raw/06 ㉗)
+  ARAM_Quest_UrfsChampion: 'A',      // esports.net 골드 추천 + 펨코 이렐리아 (raw/07 §3-2, raw/06 ㉗)
+  ARAM_ScopiestWeapons: 'A',         // u.gg 뉴스 S + 인벤 원딜 매핑 + 세나 "우물 저격" (raw/07)
+  UltimateAwakening: 'A',            // 인벤 A + u.gg 뉴스 S + 펨코 아리·카사딘 (raw/13 §3-3, raw/07 §1-2)
+  ARAM_UltimateRevolution: 'A',      // 인벤 A + games.gg "한타에 궁 2번" + 카서스·말파 (raw/13, raw/07 §3-3, raw/06 ㉒)
+  ARAM_WindspeakersBlessing: 'A',    // 디시 "소나 먹으면 죽고 싶어도 못 죽음" + u.gg 프리즘 상위 (raw/06 ⑳, raw/07 §1-2)
+
+  /* ===== B (34종 — 큐레이션분) ===== */
+  ARAM_escAPADe: 'B',                // 펨코 초가스 "마법사(물리) 걸어다니는 재난" (raw/06 ⑮)
+  ARAM_Homeguard: 'B',               // 인벤 "민병대 탈실버" (raw/13 §3-3)
+  ARAM_LegDay: 'B',                  // 인벤 "하체운동(신발 스킵)" + esports.net (raw/13 §3-3, raw/07 §3-2)
+  ARAM_ScopedWeapons: 'B',           // u.gg 실버 S 추천 + sheepesports (raw/07 §1-2·§3-1)
+  ARAM_SlapAround: 'B',              // 인벤 "우당탕탕 — CC 적중 시 적응형 스택(아트록스·쓰레쉬·자크)" (raw/06 §4)
+  ARAM_Snowday: 'B',                 // esports.net·games.gg 세트 S "눈덩이는 항상 쓸 수 있어" (raw/07 §3-2)
+  ARAM_TankItOrLeaveIt: 'B',         // u.gg 실버 S 추천 (raw/07 §1-2)
+  ARAM_UltimateUnstoppable: 'B',     // 펨코 카사딘 사기증강 "궁극기 저지불가" (raw/06 ⑪)
+  ARAM_WitchfulThinking: 'B',        // u.gg·esports.net 실버 추천 (raw/07 §1-2·§3-2)
+  Bonk: 'B',                         // 꽁! — 실측 51.22% #42 + 강화 평타 13챔프 한정 (raw/16 §4)
+  ARAM_CelestialBody: 'B',           // 증바람.com 말파이트 53%·픽률 12% (raw/13 §1-3)
+  ARAM_ItsCritical: 'B',             // esports.net 골드 추천 + 인벤 치명타 서열 중위 "치확50%" (raw/07 §3-2, raw/13 §3-3)
+  LittleExtraHelp: 'B',              // 실측 50.75% #59 + 애쉬 t0 픽률 14.8% (raw/16 §4·§5)
+  ARAM_Minionmancer: 'B',            // 펨코 "아이번+소환물 증강 개꿀잼"·자이라 추천 (raw/06 ㉖)
+  ARAM_Perseverance: 'B',            // 펨코 "프로틴+탱크엔진+강철심장+인내심 = 서렌" (raw/06 ⑬) ※ 비활성
+  ARAM_SkilledSniper: 'B',           // 펨코 모르가나·미포·멜·벨코즈·바루스 추천 (raw/06 ㉗)
+  SoulEater: 'B',                    // EloFactory 갈리오 "도발 후 사실상 무적" — 단 라이브 승률 하위권 (raw/07 §4)
+  ARAM_Upgrade_Sheen: 'B',           // 펨코 이즈리얼 "보건+광휘 업글" (raw/06 ㉗)
+  ARAM_WeeWooWeeWoo: 'B',            // aussyelo 세트 A — 소나 "치유·보호막 45% 증폭" (raw/07 §3-4)
+  ARAM_Archmage: 'B',                // EloFactory·aussyelo 대마법사 세트(브랜드·카사딘·라이즈) (raw/07 §3-4·§3-5)
+  ARAM_CantTouchThis: 'B',           // 펨코 카사딘 사기증강 "난공불락" (raw/06 ⑪)
+  ARAM_CourageoftheColossus: 'B',    // 인벤 A ↔ 라이브 26.17 하위 15위권 50.20% — 중간 판정 (raw/13 §3-3)
+  ARAM_Cruelty: 'B',                 // 펨코 CC챔프 다수 추천 "잔혹 행위" ↔ 라이브 하위권 — 중간 판정 (raw/06 ㉗·§4)
+  ARAM_DoubleTap: 'B',               // 자야 "Dual Wield+Double Tap" 콤보 영상 + 49.83% (raw/07 §1-1·§2)
+  ARAM_DropBear: 'B',                // u.gg 프리즘 상위 나열 (raw/07 §1-2)
+  ARAM_EndlessHunt: 'B',             // aramnerfs A "En Passant" (raw/07 §1-4)
+  HandOfBaron: 'B',                  // u.gg 프리즘 상위 나열 (raw/07 §1-2)
+  OminousPact: 'B',                  // 펨코 신지드·카사딘 "불길한 서약" ↔ 라이브 하위권 — 중간 판정 (raw/06 ⑥·⑪)
+  ARAM_OmniSoul: 'B',                // u.gg 프리즘 상위 나열 (raw/07 §1-2)
+  ARAM_QuantumComputing: 'B',        // 인벤 B + 펨코 "양자 연산 첫 증강 GOAT" (raw/13 §3-3, raw/06 ㉗) ※ 비활성
+  ARAM_SpiritBomb: 'B',              // u.gg 프리즘 상위 나열 (raw/07 §1-2)
+  SurgeField: 'B',                   // aramnerfs A "Surge Field" (raw/07 §1-4)
+  ARAM_SymphonyofWar: 'B',           // aramnerfs A "Symphony of War" (raw/07 §1-4)
+  Quest_UltraHydra: 'B',             // u.gg 프리즘 상위 나열 "Ultra Hydra" (raw/07 §1-2)
+
+  /* ===== C (27종 — 근거 있는 평범/하위권. 등재 없는 C는 FUN_TIER_INFERRED에) ===== */
+  DoubleDefense: 'C',                // 보강 — 실측 49.40% #101 (raw/16 §4)
+  EscapePlan: 'C',                   // aramtheory 챔피언 한정 추천 정도 (raw/07 §1-4)
+  ARAM_Firefox: 'C',                 // 라이브 26.17 하위 15위권 50.56% (WebFetch 대조)
+  HextechSoul: 'C',                  // 라이브 26.17 하위 15위권 50.72% (WebFetch 대조)
+  ARAM_InfernalSoul: 'C',            // 라이브 26.17 하위 15위권 50.30% (WebFetch 대조)
+  ItsGoTime: 'C',                    // 출발할 시간 — 실측 49.50% #97 (raw/16 §4)
+  ARAM_MountainSoul: 'C',            // 펨코 세라핀 한정 추천 정도 (raw/06 ㉗)
+  ARAM_SonicBoom: 'C',               // 나무위키 나미 한정 추천 정도 (raw/06 §7)
+  ARAM_SpinToWin: 'C',               // 나무위키 가렌 한정 추천 정도 (raw/06 §7)
+  ARAM_SustainingStrike: 'C',        // 흡수 — 전역 48.29% #138 (야스오 한정 t0 예외) (raw/16 §4·§5)
+  ARAM_AllForYou: 'C',               // 라이브 26.17 하위 15위권 50.56% (WebFetch 대조)
+  ARAM_BreadAndCheese: 'C',          // 실측 48.15% #145 — 단 인벤 "E가속 > Q가속" 상대 우위 (raw/16 §4, raw/13 §2-3)
+  CriticalRhythm: 'C',               // 인벤 치명타 서열 하위 (raw/13 §3-3)
+  DarkWind: 'C',                     // 굶주린 속박 — 실측 48.21% #143 (raw/16 §4)
+  MercysStrike: 'C',                 // 자비의 일격 — 실측 49.97% #82, 힐/실드 11챔프 한정 (raw/16 §4)
+  Nightstalking: 'C',                // aramtheory 챔피언 한정 추천 정도 (raw/07 §1-4)
+  Overextender: 'C',                 // 펨코 "무리한 진입 신지드" 난입 재미 정도 (raw/06 ⑥)
+  ARAM_RabbleRousing: 'C',           // 원기 회복 — 실측 48.47% #135 (raw/16 §4)
+  Sonata: 'C',                       // 나무위키 나미 한정 추천 정도 (raw/06 §7)
+  Terraind: 'C',                     // 지형 생성됨 — 실측 48.27% #139, 지형 6챔프 한정 (raw/16 §4)
+  ARAM_YowchMyCoins: 'C',            // 라이브 26.17 하위 15위권 50.55% (WebFetch 대조)
+  Ability_SelfAOE_DoubleCast: 'C',   // 메아리 시전 — 실측 49.26% #109, 나무위키 "특수 메커니즘" 개성파 (raw/16 §4, raw/13 §2-3)
+  EmpyreanPromise: 'C',              // 라이브 26.17 하위 15위권 50.60% (WebFetch 대조)
+  ARAM_PandorasBox: 'C',             // 라이브 26.17 하위권 50.23% (WebFetch 대조)
+  Missile_Split: 'C',                // 주문 분산 — 실측 48.09% #147 (raw/16 §4)
+  SpellVolley: 'C',                  // 3연발 — 실측 48.59% #129 + 증바람.com 47%·픽률 0.39% (raw/16 §4, raw/13 §2-2)
+
+  /* ===== D (15종) — 실측 하위·공인 함정 ===== */
+  // 스킬 증강 컷: mm 전역 순위 #157/209 이하(승률 ≤47.7%)를 D로 (raw/16 §4; 한국 실측도
+  // "스킬 증강 승률 44~49%·최하위권 C~D티어" — raw/13 §2-2·§2-3와 정합)
+  WardingWeapon: 'D',                // 적응형 와드 — 실측 47.66% #157/209 (raw/16 §4)
+  TrustyWeapon: 'D',                 // 믿음직한 무기 — 실측 47.49% #163 (raw/16 §4)
+  ARAM_BreadAndButter: 'D',          // 빵과 버터 — 실측 47.48% #164 + 증바람.com 47%·1.72% + 인벤 가속 서열 최하 (raw/16, raw/13)
+  ARAM_BreadAndJam: 'D',             // 빵과 잼 — 실측 47.54% #160 + 라이브 하위 15위권 (raw/16 §4)
+  ChainReaction: 'D',                // 연쇄 반응 — 실측 46.32% #197 + 증바람.com 44%·0.38% (raw/16 §4, raw/13 §2-2)
+  ARAM_CriticalHealing: 'D',         // 치명적 치유 — 인벤 치명타 서열 최하위 + 라이브 하위 15위권 (raw/13 §3-3)
+  ARAM_SpecializedRecursion: 'D',    // 가속 추구 — 실측 47.29% #174 (raw/16 §4)
+  SpecializedEmpowerment: 'D',       // 위력 추구 — 실측 47.63% #158 (raw/16 §4)
+  ARAM_Quickstep: 'D',               // 날쌘걸음 — 실측 46.54% #195 + 펨코 "픽률 29.7% 승률 46.2% 함정 증강" (raw/16, raw/06 ⑤)
+  ARAM_Terror: 'D',                  // 공포 — 실측 47.38% #171 (raw/16 §4)
+  GlassCannon: 'D',                  // 유리 대포 — 인벤 프리즘 평가 F (raw/13 §3-3)
+  KingMe: 'D',                       // 나는 왕이다 — 인벤 프리즘 평가 F (raw/13 §3-3)
+  ARAM_Multishot: 'D',               // 다중 공격 — 실측 45.58% #201/209 최하위권 (raw/16 §4)
+  Overloaded: 'D',                   // 과충전 — 실측 46.86% #186 + 나무위키 "카서스는 없는 증강"(라이즈 한정 예외) (raw/16, raw/13 §1-1)
+  Overkill: 'D',                     // 바늘꽂이(mm 표기 Pin Cushion) — 실측 46.72% #190 (raw/16 §4)
+};
+
+// 근거 미등재분 — 태그·등급·유사 증강 유추 (A 이상 금지: B/C만. 비활성+근거 없음 → C)
+const FUN_TIER_INFERRED = {
+  /* 실버 — 순수 스탯/소소한 효과 위주 → C */
+  Adamant: 'C',                      // 비활성
+  CritNCast: 'C',
+  ARAM_DiveBomber: 'C',
+  ARAM_DontBlink: 'C',
+  DontChangeTheChannel: 'C',
+  DoubleStrike: 'C',                 // 비활성(미출시)
+  ARAM_Erosion: 'C',
+  ARAM_FirstAidKit: 'C',
+  Flash2: 'C',
+  ARAM_Flashbang: 'C',
+  ForgedByTheMaster: 'C',
+  ARAM_Goredrink: 'C',
+  ARAM_GuiltyPleasure: 'C',
+  ARAM_Juiced: 'C',
+  KillSecured: 'C',
+  ARAM_LightemUp: 'C',
+  MightyShield: 'C',
+  ARAM_OceanSoul: 'C',
+  Poltergeist: 'C',
+  ARAM_Purist_Caster: 'C',
+  ARAM_ShadowRunner: 'C',
+  YouSpinMeRightRound: 'C',
+  ARAM_Stats: 'C',
+  SwiftAndSafe: 'C',
+  ARAM_TransmuteGold: 'C',
+  Twinfire: 'C',
+  ARAM_Upgrade_Collector: 'C',
+  Upgrade_DeathDance: 'C',
+  ARAM_Upgrade_Immolate: 'C',
+  ARAM_Upgrade_ZH: 'C',
+  VeilOfWarding: 'C',
+  ARAM_Zealot: 'C',
+  /* 골드 — 기본 C, 광역/소환/놀이성 태그(aoe·summoner·onkill 콤보류)는 B 유추 */
+  ARAM_BigBrain: 'C',
+  ARAM_DawnbringersResolve: 'C',
+  ARAM_DivineIntervention: 'C',
+  Donation: 'C',
+  EndlessDecimation: 'B',            // 유추: 골드 aoe/heal/ad 키스톤류 — 유사 광역 증강 준거
+  TrainOfTheDead: 'C',               // 비활성
+  ARAM_BangBang: 'C',
+  ARAM_GetExcited: 'C',
+  GrowthSpurt: 'B',                  // 유추: 소환수 성장(summoner/tank) — 소환물 계열(소환술사 B) 준거
+  BrushPower: 'C',
+  ARAM_Impassable: 'C',
+  ARAM_Marksmage: 'C',
+  NatureIsHealing: 'C',
+  ARAM_OkBoomerang: 'B',             // 유추: 골드 poke/aoe 투사체 놀이성 — 부메랑류
+  Equilibrium: 'C',
+  ARAM_OutlawsGrit: 'C',
+  PatOnTheBack: 'C',
+  PinballSnowball: 'B',              // 유추: 눈덩이 놀이성(summoner) — 눈덩이 계열(눈 오는 날 B) 준거
+  PinCushion: 'C',                   // 고슴도치(골드) — mm "Pin Cushion"(바늘꽂이=Overkill)와 다른 증강
+  ARAM_SearingDawn: 'C',
+  FishBait: 'B',                     // 유추: 상어 미끼 cc/aoe 놀이성
+  SharkTempest: 'B',                 // 유추: 상어 폭풍 summoner/aoe 놀이성
+  ARAM_ShrinkRay: 'C',
+  SnapBack: 'C',                     // 비활성(미출시)
+  SnowballUpgrade: 'C',              // 비활성
+  Snowbomb: 'B',                     // 유추: 눈덩이 폭발(summoner/cc) 놀이성
+  ARAM_SpiritualPurification: 'B',   // 유추: onkill/aoe/execute 연쇄 처치 콤보류
+  ARAM_StatsOnStats: 'C',
+  ARAM_ThreadtheNeedle: 'C',
+  Upgrade_Ravenous: 'C',
+  Upgrade_SunderedSky: 'C',
+  Vampirism: 'C',                    // 비활성
+  VoidDash: 'C',                     // 비활성
+  ARAM_WithHaste: 'C',
+  KeepGoing: 'C',                    // 비활성(미출시)
+  /* 프리즘 — 게임체인저 등급 유추 B, 순수 스탯/아이템 업글·비활성 무근거는 C */
+  ARAM_LittleDevil: 'C',             // 비활성
+  DimensionShift_Active: 'B',        // 유추: 프리즘 유틸 게임체인저류
+  ARAM_Dropkick: 'B',                // 유추: 프리즘 execute/aoe
+  Dropybara_Active: 'C',             // 비활성
+  ARAM_Earthwake: 'B',               // 유추: 프리즘 돌진 연계 광역 — 돌진 계열(돌진 A) 하위 준거
+  ARAM_EmpoweredByTheFaithful: 'B',  // 유추: 프리즘 서포트 게임체인저류
+  Goldrend: 'B',                     // 유추: 프리즘 골드 스노볼류
+  ARAM_Hellbent: 'B',                // 유추: 프리즘 heal/move/tank
+  GoldenSnowball: 'B',               // 유추: 프리즘 눈덩이 계열
+  PromQueen: 'B',                    // 유추: 프리즘 cc/move 게임체인저류
+  SquishySlappyGrab: 'B',            // 유추: 프리즘 다중 그랩류(cc/aoe)
+  ARAM_StatsOnStatsOnStats: 'C',     // 순수 스탯 3중 — 능력치 계열(C) 준거
+  ARAM_StuckInHereWithMe: 'B',       // 유추: 프리즘 궁 연계 감금류
+  ARAM_ImTheJuggernaut: 'B',         // 유추: 프리즘 탱커 스탯 대형화류
+  ARAM_TransmuteChaos: 'B',          // 유추: 프리즘 전환 도박류 — 전환: 프리즘(S) 하위 준거
+  ARAM_InfernoTriggered: 'B',        // 유추: 프리즘 move/aoe
+  SkipTheBasics: 'B',                // 유추: 프리즘 궁극기 특화 — 궁극기 계열(A) 하위 준거
+  ARAM_DivineDomain: 'B',            // 유추: 프리즘 onkill/heal/move
+  Quest_Sneakerhead: 'C',            // 비활성
+  Upgrade_SwordOfBlossom: 'C',       // 아이템 업그레이드 스탯류 — Upgrade_* 계열(C) 준거
+};
+
+// 무결성 가드: 전원 커버·중복 없음·어휘·유추분 A 이상 금지·S 폭주 방지 (계약)
+(function validateFunTier() {
+  const apiSet = {};
+  for (const a of augData.augments) apiSet[a.apiName] = true;
+  const seen = {};
+  function check(table, label, inferred) {
+    for (const k of Object.keys(table)) {
+      if (!apiSet[k]) throw new Error('funTier ' + label + ': 미실존 apiName ' + k);
+      if (seen[k]) throw new Error('funTier: ' + k + ' 두 표에 중복 등재');
+      seen[k] = true;
+      const v = table[k];
+      if (['S', 'A', 'B', 'C', 'D'].indexOf(v) === -1) throw new Error('funTier 어휘 위반: ' + k + '=' + v);
+      if (inferred && v !== 'B' && v !== 'C') throw new Error('funTier 유추분은 B/C만 (근거 없는 고평가 금지): ' + k + '=' + v);
+    }
+  }
+  check(FUN_TIER, '큐레이션', false);
+  check(FUN_TIER_INFERRED, '유추', true);
+  const missing = augData.augments.filter(function (a) { return !seen[a.apiName]; }).map(function (a) { return a.apiName; });
+  if (missing.length > 0) throw new Error('funTier 미부여 ' + missing.length + '건: ' + missing.join(', '));
+  let s = 0;
+  for (const k of Object.keys(FUN_TIER)) if (FUN_TIER[k] === 'S') s++;
+  if (s > 30) throw new Error('funTier S ' + s + '개 > 30 (분포 폭주)');
+})();
+
+/* ------------------------------------------------------------------ */
 /* 3. 적용                                                              */
 /* ------------------------------------------------------------------ */
 
@@ -372,6 +655,8 @@ const RESTR_KEY_ORDER = ['rangedOnly', 'meleeOnly', 'requiresMana', 'classRequir
 const logRows = []; // { apiName, nameKo, category, fields:[], why }
 const counts = { ability: 0, quest: 0, normal: 0, restrAdded: 0, weightAdded: 0,
   mapSpellPin: 0, mapSpellExclude: 0, mapChampionExclude: 0 };
+const funDist = { S: 0, A: 0, B: 0, C: 0, D: 0 };
+let funInferredCount = 0;
 
 function orderedRestrictions(r) {
   const out = {};
@@ -389,6 +674,11 @@ for (const aug of augData.augments) {
   // (1) category
   const category = ABILITY.has(api) ? 'ability' : (QUEST.has(api) ? 'quest' : 'normal');
   counts[category]++;
+
+  // (1b) funTier — 꿀잼 티어 (2.7 큐레이션 표; 가드에서 전원 커버 보장됨)
+  const funTier = FUN_TIER[api] !== undefined ? FUN_TIER[api] : FUN_TIER_INFERRED[api];
+  funDist[funTier]++;
+  if (FUN_TIER[api] === undefined) funInferredCount++;
 
   // (2) 스킬 증강 requiredProps → abilityPropsAll (스킬 단위 AND 원칙 — 계약서 기준)
   if (ABILITY.has(api)) {
@@ -480,15 +770,16 @@ for (const aug of augData.augments) {
   // (6) 재조립 — 키 순서: …tier 뒤 category, tags 뒤 favored/disfavored, restrictions는 마지막
   const rebuilt = {};
   for (const k of Object.keys(aug)) {
-    if (k === 'category' || k === 'favoredClasses' || k === 'disfavoredClasses' || k === 'restrictions') continue;
+    if (k === 'category' || k === 'funTier' || k === 'favoredClasses' || k === 'disfavoredClasses' || k === 'restrictions') continue;
     rebuilt[k] = aug[k];
-    if (k === 'tier') rebuilt.category = category;
+    if (k === 'tier') { rebuilt.category = category; rebuilt.funTier = funTier; }
     if (k === 'tags') {
       if (fav) rebuilt.favoredClasses = fav;
       if (dis) rebuilt.disfavoredClasses = dis;
     }
   }
   if (rebuilt.category === undefined) rebuilt.category = category; // tier 키가 없을 방어
+  if (rebuilt.funTier === undefined) rebuilt.funTier = funTier;
   rebuilt.restrictions = orderedRestrictions(r);
 
   const idx = augData.augments.indexOf(aug);
@@ -532,6 +823,8 @@ lines.push('|---|---|');
 lines.push('| category=ability | ' + counts.ability + ' |');
 lines.push('| category=quest | ' + counts.quest + ' |');
 lines.push('| category=normal | ' + counts.normal + ' |');
+lines.push('| funTier 분포 (S/A/B/C/D) | ' + funDist.S + '/' + funDist.A + '/' + funDist.B + '/' + funDist.C + '/' + funDist.D + ' |');
+lines.push('| funTier 근거 미등재 유추분 (B/C 한정) | ' + funInferredCount + ' |');
 lines.push('| 이진 restrictions 필드 보유(이번 이식으로 부여/갱신) | ' + counts.restrAdded + ' |');
 lines.push('| 가중치 필드(favored/disfavoredClasses) 보유 | ' + counts.weightAdded + ' |');
 lines.push('| map 이식: spellPin (챔피언×증강 지정 확정) | ' + counts.mapSpellPin + ' |');
@@ -594,6 +887,14 @@ lines.push('- **아이템 조건부(루난→Draw Your Sword, 워모그→Vampir
 lines.push('- **quest 분류**: 위키 09 §4 목록 + descKo 퀘스트 구조 명시분(From Downtown, Ultra Hydra). 스킬 지정형 퀘스트 3종(Multishot/Pursuit of Haste/Pursuit of Power)은 겸용이지만 계약상 category=ability 우선.');
 lines.push('- **Kalista×Dashing 효과 치환**: community 등급 → note로만.');
 lines.push('');
+lines.push('## funTier — 꿀잼 티어 (augment-fun-tier 계약)');
+lines.push('');
+lines.push('- 전 225종에 `funTier`(S/A/B/C/D) 부여 — 분포: S ' + funDist.S + ' / A ' + funDist.A + ' / B ' + funDist.B + ' / C ' + funDist.C + ' / D ' + funDist.D + '.');
+lines.push('- 근거 우선순위: raw/13(aramgg KR T1~T5·인벤·디시) > raw/16 §4·§7·§8(스킬 증강 실측) > raw/07(영어권) > raw/06(한국 체감). 상충 시 한국 소스 우선. 라이브 26.17 대조(2026-09-03 WebFetch aramgg·arammayhem).');
+lines.push('- S ' + funDist.S + '종의 근거 한 줄은 스크립트 `FUN_TIER` 상수 주석에 항목별 기재 (계약 요구).');
+lines.push('- 근거 미등재 ' + funInferredCount + '종은 태그·등급·유사 증강 유추(`FUN_TIER_INFERRED`) — 계약상 A 이상 금지(B/C만), 비활성+무근거는 C.');
+lines.push('- S 명단: ' + augData.augments.filter(function (a) { return a.funTier === 'S'; }).map(function (a) { return a.nameKo; }).join(', '));
+lines.push('');
 lines.push('## 증강별 변경 내역 (' + logRows.length + '건)');
 lines.push('');
 lines.push('| apiName | 이름 | 추가/변경 | 근거 |');
@@ -605,6 +906,7 @@ lines.push('');
 fs.writeFileSync(LOG_PATH, lines.join('\n'), 'utf8');
 
 console.log('[enrich-augments] category: ability=' + counts.ability + ' quest=' + counts.quest + ' normal=' + counts.normal);
+console.log('[enrich-augments] funTier: S=' + funDist.S + ' A=' + funDist.A + ' B=' + funDist.B + ' C=' + funDist.C + ' D=' + funDist.D + ' (유추 ' + funInferredCount + '건)');
 console.log('[enrich-augments] 이진 restrictions 부여/갱신: ' + counts.restrAdded + '건, 가중치 필드: ' + counts.weightAdded + '건');
 console.log('[enrich-augments] map 이식: spellPin=' + counts.mapSpellPin + ' spellExclude=' + counts.mapSpellExclude
   + ' championExclude(신규)=' + counts.mapChampionExclude + ' 보류=' + mapLog.skip.length + ' pin충돌=' + mapLog.conflict.length);

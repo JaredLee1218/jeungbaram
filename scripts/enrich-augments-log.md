@@ -11,6 +11,8 @@
 | category=ability | 30 |
 | category=quest | 9 |
 | category=normal | 186 |
+| funTier 분포 (S/A/B/C/D) | 23/40/57/90/15 |
+| funTier 근거 미등재 유추분 (B/C 한정) | 87 |
 | 이진 restrictions 필드 보유(이번 이식으로 부여/갱신) | 57 |
 | 가중치 필드(favored/disfavoredClasses) 보유 | 32 |
 | map 이식: spellPin (챔피언×증강 지정 확정) | 86 |
@@ -166,6 +168,14 @@
 - **아이템 조건부(루난→Draw Your Sword, 워모그→Vampirism)·팀 제한(Earthwake 2명)·맵 한정(Overextender)**: 1인 시뮬 범위 밖 → note로만.
 - **quest 분류**: 위키 09 §4 목록 + descKo 퀘스트 구조 명시분(From Downtown, Ultra Hydra). 스킬 지정형 퀘스트 3종(Multishot/Pursuit of Haste/Pursuit of Power)은 겸용이지만 계약상 category=ability 우선.
 - **Kalista×Dashing 효과 치환**: community 등급 → note로만.
+
+## funTier — 꿀잼 티어 (augment-fun-tier 계약)
+
+- 전 225종에 `funTier`(S/A/B/C/D) 부여 — 분포: S 23 / A 40 / B 57 / C 90 / D 15.
+- 근거 우선순위: raw/13(aramgg KR T1~T5·인벤·디시) > raw/16 §4·§7·§8(스킬 증강 실측) > raw/07(영어권) > raw/06(한국 체감). 상충 시 한국 소스 우선. 라이브 26.17 대조(2026-09-03 WebFetch aramgg·arammayhem).
+- S 23종의 근거 한 줄은 스크립트 `FUN_TIER` 상수 주석에 항목별 기재 (계약 요구).
+- 근거 미등재 87종은 태그·등급·유사 증강 유추(`FUN_TIER_INFERRED`) — 계약상 A 이상 금지(B/C만), 비활성+무근거는 C.
+- S 명단: 태풍, 타오르는 이자, 환영 무기, 처형 시간, 강철 같은 심장, 되풀이, 축소 엔진, 탱크 엔진, 전환: 프리즘, 기본으로 돌아가기, 데굴데굴 눈덩이!, 광대 대학, 검을 뽑아라, 양손잡이, 유레카, 최종 형태, 거인 학살자, 도박꾼, 지옥의 전도체, 보석 건틀릿, 신비한 주먹, 우글렛의 마녀 모자, 탭 댄서
 
 ## 증강별 변경 내역 (95건)
 

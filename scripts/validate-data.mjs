@@ -269,6 +269,30 @@ for (const a of augments) {
   if (!anyChamp) issues.push(`augment ${a.apiName}: abilityPropsAll ${JSON.stringify(req)} 충족 챔피언 0명 (dead gate)`);
 }
 
+// ===== 5-6. augments: funTier (증강 꿀잼 티어 — augment-fun-tier 계약, 위반 시 exit 1) =====
+// 생성: scripts/enrich-augments.cjs FUN_TIER/FUN_TIER_INFERRED (수작업 편집 금지)
+{
+  const FUNTIER_VOCAB = new Set(['S', 'A', 'B', 'C', 'D']);
+  const funDist = {};
+  for (const a of augments) {
+    if (a.funTier === undefined) {
+      issues.push(`augment ${a.apiName}: funTier 누락 — 225종 전원 필수 (비활성 포함)`);
+      continue;
+    }
+    if (!FUNTIER_VOCAB.has(a.funTier)) {
+      issues.push(`augment ${a.apiName}: funTier 어휘 위반 (${JSON.stringify(a.funTier)}) — S/A/B/C/D만 허용`);
+      continue;
+    }
+    funDist[a.funTier] = (funDist[a.funTier] || 0) + 1;
+  }
+  log('\n=== augments funTier ===');
+  log('funTier 분포: ' + JSON.stringify(funDist));
+  // 분포 폭주 가드 (계약: 분포 가이드 S 15~25, 상한 30 — 전원 S 같은 인플레 차단)
+  if ((funDist['S'] || 0) > 30) {
+    issues.push(`funTier: S가 ${funDist['S']}개 > 30 (분포 폭주 — 계약 가이드 S 15~25)`);
+  }
+}
+
 // ===== 6. funrank.json 검증 (꿀잼 티어 — 위반 시 exit 1) =====
 log('\n=== funrank.json ===');
 const funData = load('funrank.json');

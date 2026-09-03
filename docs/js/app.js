@@ -8,6 +8,8 @@
  * data/funrank.json 은 선택 데이터 (꿀잼 티어·정렬·oneLiner):
  * 부재/파싱 실패 시 관련 UI(배지·정렬 칩·미리보기·결과 티어 줄)를
  * 전부 생략하고 기존 4종 데이터만으로 동일하게 동작한다 (방어적).
+ * augments.json의 funTier(S~D, F1 병렬 생성 중)도 선택 필드:
+ * 부재 시 드래프트 카드는 기존 희귀 등급 테두리로 폴백한다.
  *
  * 공유 URL 형식: ?champ=<id>&seed=<정수>&picks=<라운드별 액션>-...&l9=1(선택)
  *   - 액션 2글자: p<슬롯>=선택, r<슬롯>=일반 리롤, g<슬롯>=황금 리롤
@@ -56,6 +58,12 @@ var TOTAL_ROUNDS = 4;
  * 어휘 밖 티어는 매핑 실패 → 배지를 그리지 않는다 (방어적).
  * "S+"를 클래스명에 그대로 넣지 않기 위한 화이트리스트이기도 하다. */
 var FUN_TIER_CLASS = { "S+": "splus", "S": "s", "A": "a", "B": "b", "C": "c" };
+
+/* 증강 꿀잼 티어(augments.json의 funTier — F1 병렬 생성 중) → CSS 접미사.
+ * 챔피언용 FUN_TIER_CLASS(S+ 포함)와 어휘가 달라 별도 상수(S~D).
+ * 어휘 밖/부재 시 매핑 실패 → 티어 테두리·칩을 그리지 않고
+ * 기존 희귀 등급 테두리로 폴백한다 (방어적). */
+var AUG_FUN_TIER_CLASS = { S: "s", A: "a", B: "b", C: "c", D: "d" };
 
 var SORT_CHIPS = [
   { key: "name", label: "이름순" },
@@ -193,6 +201,23 @@ function funScoreOf(champ) {
   var e = funEntry(champ.id);
   var n = e ? Number(e.funScore) : NaN;
   return isFinite(n) ? n : -1; // 점수 없는 챔피언은 꿀잼순에서 맨 뒤
+}
+
+/* 증강 꿀잼 티어 칩 HTML ("" = 칩 없음).
+ * labeled=false: 드래프트 카드용 — 카드 버튼 aria-label이 "꿀잼 티어 S"를
+ *   이미 낭독하므로 칩 글자는 aria-hidden (중복 낭독 방지).
+ * labeled=true: 결과 상세 카드용 — 낭독해 줄 상위 라벨이 없어
+ *   칩 자체에 접근성 이름을 붙인다. */
+function augFunChipHtml(funTier, labeled) {
+  var cls = AUG_FUN_TIER_CLASS[funTier];
+  if (!cls) return "";
+  var aria = labeled
+    ? ' role="img" aria-label="꿀잼 티어 ' + esc(funTier) + '"'
+    : ' aria-hidden="true"';
+  return (
+    '<span class="fun-chip fun-chip-' + cls + '"' + aria + ">" +
+    esc(funTier) + "</span>"
+  );
 }
 
 /* 꿀잼 티어 배지 HTML ("" = 배지 없음) */
@@ -757,18 +782,23 @@ function renderHistoryBar() {
  * - 메모 캐시: 키 = picked 증강 이름들 + 후보 이름. 리롤 시 바뀐 슬롯 1장만
  *   실제 계산되고 나머지 2장은 캐시 히트 (라운드 진행 시 picked가 바뀌어
  *   자연히 전 슬롯 재계산). 같은 게임 안에서 증강은 중복 제시되지 않으므로
- *   apiName 키로 충분하다. 새 게임 시작 시 startGame()에서 비운다. */
+ *   apiName 키로 충분하다. 새 게임 시작 시 startGame()에서 비운다.
+ * - 반환은 { html, newCombo } 객체: newCombo(이 후보로 새 조합 가동 여부)는
+ *   카드 꿀잼 티어 "S" 승격 판정에 재사용된다 — previewAugment를 티어 판정용으로
+ *   중복 호출하지 않기 위함 (호출 1회/슬롯 유지). */
 
 var previewCache = new Map();
 
-function cachePreview(key, html) {
-  if (key) previewCache.set(key, html);
-  return html;
+var PREVIEW_NONE = { html: "", newCombo: false };
+
+function cachePreview(key, info) {
+  if (key) previewCache.set(key, info);
+  return info;
 }
 
-function previewStripHtml(candidate) {
-  if (typeof recommendApi.previewAugment !== "function") return "";
-  if (!candidate || !state.champion || !state.data) return "";
+function previewInfo(candidate) {
+  if (typeof recommendApi.previewAugment !== "function") return PREVIEW_NONE;
+  if (!candidate || !state.champion || !state.data) return PREVIEW_NONE;
   var picks = resolvedPicks();
   var cacheKey = "";
   if (typeof candidate.apiName === "string" && candidate.apiName) {
@@ -794,9 +824,12 @@ function previewStripHtml(candidate) {
     });
   } catch (err) {
     console.warn("previewAugment 실패 — 미리보기 생략", err);
-    return "";
+    return PREVIEW_NONE;
   }
-  if (!pv || typeof pv !== "object") return cachePreview(cacheKey, "");
+  if (!pv || typeof pv !== "object") return cachePreview(cacheKey, PREVIEW_NONE);
+
+  /* 티어 승격 시그널: 이 후보를 골라야 새로 가동되는 조합이 1개 이상 */
+  var newCombo = Array.isArray(pv.newCombos) && pv.newCombos.length > 0;
 
   var rows = "";
 
@@ -842,13 +875,13 @@ function previewStripHtml(candidate) {
       "</span>";
   }
 
-  if (!rows) return cachePreview(cacheKey, "");
+  if (!rows) return cachePreview(cacheKey, { html: "", newCombo: newCombo });
   /* 카드 버튼에 aria-label이 이미 있어 접근성 이름은 중복되지 않지만,
    * 콘텐츠 낭독 중복을 피하기 위해 정보성 스트립은 aria-hidden 처리 */
-  return cachePreview(
-    cacheKey,
-    '<span class="aug-preview" aria-hidden="true">' + rows + "</span>"
-  );
+  return cachePreview(cacheKey, {
+    html: '<span class="aug-preview" aria-hidden="true">' + rows + "</span>",
+    newCombo: newCombo,
+  });
 }
 
 function renderDraft() {
@@ -884,10 +917,24 @@ function renderDraft() {
       var isAbility = aug.category === "ability";
       var enh =
         aug.enhancedSkill && aug.enhancedSkill.key ? aug.enhancedSkill : null;
+      /* 미리보기 계산 1회 — html(스트립)과 newCombo(티어 승격 시그널) 둘 다 사용 */
+      var pv = previewInfo(aug);
+      /* 카드 최종 꿀잼 티어: funTier(F1 병렬 생성 중) 기본, 단 새 조합이
+       * 1개 이상 가동되면 "S" 승격 (조합 발동이 최고 시그널).
+       * funTier 부재/어휘 밖 + 승격 없음 → null → 티어 테두리·칩 없이
+       * 기존 희귀 등급(tier-*) 테두리 그대로 (방어적 폴백). */
+      var funTier = pv.newCombo
+        ? "S"
+        : AUG_FUN_TIER_CLASS[aug.funTier]
+          ? aug.funTier
+          : null;
+      var funCls = funTier ? " aug-fun-" + AUG_FUN_TIER_CLASS[funTier] : "";
       return (
         '<div class="aug-slot">' +
-        '<button type="button" class="aug-card tier-' + esc(augTier) +
-        '" data-slot="' + i + '" aria-label="' + esc(aug.nameKo) + " 선택\">" +
+        '<button type="button" class="aug-card tier-' + esc(augTier) + funCls +
+        '" data-slot="' + i + '" aria-label="' + esc(aug.nameKo) + " 선택" +
+        (funTier ? ", 꿀잼 티어 " + esc(funTier) : "") + '">' +
+        augFunChipHtml(funTier, false) +
         '<img class="aug-icon" src="' + esc(aug.icon) +
         '" alt="" loading="lazy" decoding="async" width="64" height="64">' +
         '<span class="aug-tier-label">' + esc(TIER_LABEL[augTier] || augTier) + "</span>" +
@@ -898,7 +945,7 @@ function renderDraft() {
             (enh.nameKo ? " · " + esc(enh.nameKo) : "") + "</span>"
           : "") +
         '<span class="aug-desc">' + esc(aug.descKo) + "</span>" +
-        previewStripHtml(aug) +
+        pv.html +
         "</button>" +
         '<button type="button" class="btn btn-reroll" data-slot="' + i +
         '" aria-label="' + esc(aug.nameKo) + " 리롤\"" +
@@ -1013,7 +1060,10 @@ function renderResult() {
     picks
       .map(function (p) {
         var tier = esc(p.tier || "silver");
+        /* 태그 줄 맨 앞에 꿀잼 티어 칩 — funTier 부재/어휘 밖이면 "" (방어적).
+         * 결과 화면은 드래프트가 끝난 뒤라 newCombos 승격은 적용하지 않는다. */
         var tags =
+          augFunChipHtml(p.funTier, true) +
           '<span class="result-detail-tier tier-' + tier + '">' +
           esc(TIER_LABEL[p.tier] || p.tier || "") +
           "</span>" +
