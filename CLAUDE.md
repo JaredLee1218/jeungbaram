@@ -57,6 +57,7 @@ node scripts/test-draft.mjs && node scripts/test-recommend.mjs && node scripts/t
 
 - 2026-09-02: 스터디 완료(`research/STUDY.md`) → v1 구현 완료. 테스트 5종 전부 통과(몬테카를로 30게임 규칙 위반 0). 로컬 검증 완료.
 - 2026-09-02: GitHub 배포 완료 — https://jaredlee1218.github.io/jeungbaram/ (JaredLee1218/jeungbaram, Pages main /docs)
-- 2026-09-02: 2차 심층 스터디 완료 — 역할군별 증강 풀·능력 증강 티어 (`research/AUGMENT-POOLS-STUDY.md` + `research/raw/09~13` + 기계가독 `research/data/eligibility-notes.json`)
-- 다음 단계: eligibility-notes.json을 draft.js 필터/가중치에 반영 (STUDY §3의 6단계 작업 순서 참조 — champions.json에 immobilize 등 속성 추가 필요). 미커밋 상태.
+- 2026-09-02: 2차 심층 스터디(증강 풀 메커니즘) → 시뮬레이터 반영 완료. 이후 꿀잼 랭킹·아이템 클래스 보정(fitScore)·픽 미리보기(previewAugment) 배포.
+- 2026-09-03: 3차 스터디(챔피언×스킬×증강 실매핑 306건, `research/ABILITY-AUGMENT-DATA.md` + `research/data/ability-augment-map.json`) → 반영 완료: 스킬 속성을 게임 원본(mSpellTags/mCastType/mMissileSpec)으로 교체, spellPin 확정 지정, 제외 기록 이식. 테스트 7종(fidelity 84) 전부 통과, 배포됨.
+- 다음 확인 트리거: 26.18 패치노트(9/10 공개 예정) — ARAM_ClownCollege enabled 전환 여부 + Upgrade_DeathDance 티어 재확인 (`research/raw/17` 참조).
 <!-- 진행 상황이 생기면 완료 / 진행 중 / 다음 단계를 여기에 갱신 -->
