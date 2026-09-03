@@ -1,0 +1,2619 @@
+{
+  "_meta": {
+    "title": "챔피언 × 스킬 증강 실매핑 (ARAM: Mayhem, 라이브 26.17 기준)",
+    "collectedAt": "2026-09-03",
+    "patch": "26.17",
+    "sources": "research/raw/14-champion-bins.md(게임 데이터), 15-wiki-patch-mining.md(공식 패치노트·위키), 16-stats-ability-empirical.md(통계 실측), 17-official-latest.md(공식 최신), 18-kr-ability-community.md(한국 커뮤니티)",
+    "method": "근거 수록분만 등재(추측 금지). champion id는 docs/data/champions.json, augment apiName은 docs/data/augments.json과 스크립트 전수 대조 — 불일치는 _unresolved로 분리.",
+    "vocabulary": {
+      "skill": "Q|W|E|R — null은 슬롯 불명(챔피언 단위 근거) 또는 패시브/특수(note에 명기)",
+      "polarity": "offered=해당 조합이 제시 풀에 실재(존재 증명) / excluded=제시되면 안 됨(공식 제외·부정 실측)",
+      "confidence": "official=공식 패치노트·개발진 예시(그라운드트루스) > datamined=클라이언트 게임 데이터(mSpellTags 등, 서버 큐레이션 미반영 근사) > empirical=통계 사이트 실측(≥100판, 제시+선택의 증거) > community=위키 편집자·디시·나무위키 실측(전사 오차 가능)"
+    },
+    "caveats": [
+      "offered는 \"전체 적격 목록\"이 아니라 표본이다 — 미등재 ≠ 미제시(특히 empirical은 100판 임계, community는 화제성 편향).",
+      "empirical의 skill 지정 일부는 \"요구 속성 × 적격 스킬 유일\" 유추(source에 명기) — 시뮬레이터 반영 시 \"근사:\" 주석 필수.",
+      "26.12 초기 dead draw(우디르 불사조·라이즈 E 3연발·퀸 E 굶주린 속박·루시안 E 메아리 등)는 6/19 핫픽스로 제거 추정이라 미수록.",
+      "서버측 예외 목록 병존(26.15류 태그 무변경 버그픽스) — datamined 항목은 과포함 방향의 근사."
+    ],
+    "counts": {
+      "total": 306,
+      "byConfidence": {
+        "official": 43,
+        "datamined": 10,
+        "empirical": 192,
+        "community": 61
+      },
+      "byPolarity": {
+        "offered": 287,
+        "excluded": 19
+      },
+      "bySkill": {
+        "withSkill": 111,
+        "nullSkill": 195
+      }
+    }
+  },
+  "mappings": [
+    {
+      "champion": "Akshan",
+      "skill": "E",
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "excluded",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3]"
+    },
+    {
+      "champion": "Akshan",
+      "skill": "E",
+      "augment": "SpecializedEmpowerment",
+      "polarity": "excluded",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3]"
+    },
+    {
+      "champion": "Akshan",
+      "skill": "E",
+      "augment": "TrustyWeapon",
+      "polarity": "excluded",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3]"
+    },
+    {
+      "champion": "Akshan",
+      "skill": "E",
+      "augment": "WardingWeapon",
+      "polarity": "excluded",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3] \"Warding Weapon could still be offered to Akshan's (E).\""
+    },
+    {
+      "champion": "Anivia",
+      "skill": "Q",
+      "augment": "ARAM_SkilledSniper",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3]"
+    },
+    {
+      "champion": "Annie",
+      "skill": "R",
+      "augment": "ARAM_UltimateRevolution",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.16 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.16 [raw/15 §3-2]"
+    },
+    {
+      "champion": "Ashe",
+      "skill": "Q",
+      "augment": "ItsGoTime",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.14 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.14 [raw/15 §3] ‖ 교차: mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Azir",
+      "skill": "W",
+      "augment": "ARAM_Archmage",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.16 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.16 [raw/15 §3-2]"
+    },
+    {
+      "champion": "Belveth",
+      "skill": "E",
+      "augment": "ARAM_Dropkick",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.16 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.16 [raw/15 §3-2]"
+    },
+    {
+      "champion": "Blitzcrank",
+      "skill": "E",
+      "augment": "ARAM_Marksmage",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.16 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.16 [raw/15 §3-2] \"…including Blitzcrank (E), Nasus (Q), and Trundle (Q).\""
+    },
+    {
+      "champion": "Blitzcrank",
+      "skill": "Q",
+      "augment": "ARAM_Multishot",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.12 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.12 [raw/15 §3-2] \"Want your Blitzcrank Q to fire three hooks…\""
+    },
+    {
+      "champion": "Draven",
+      "skill": "Q",
+      "augment": "SpecializedEmpowerment",
+      "polarity": "excluded",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3] \"Pursuit of Power is offered to Akshan's (E), Draven's (Q), Illaoi's (E), and Malphite's (W).\""
+    },
+    {
+      "champion": "Ekko",
+      "skill": "Q",
+      "augment": "Missile_Split",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3] \"Ekko's (Q) failed to split with Spell Split…\" ‖ 교차: mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Garen",
+      "skill": "E",
+      "augment": "ARAM_Quickstep",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.12 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.12 [raw/15 §3-2] 공식 예시 \"Garen E and Kennen R are very happy about this!\""
+    },
+    {
+      "champion": "Illaoi",
+      "skill": "E",
+      "augment": "SpecializedEmpowerment",
+      "polarity": "excluded",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3]"
+    },
+    {
+      "champion": "Katarina",
+      "skill": "E",
+      "augment": "Overloaded",
+      "polarity": "excluded",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3] \"Overloaded could be offered to Katarina's (E) and Shaco's (E).\""
+    },
+    {
+      "champion": "Kennen",
+      "skill": "R",
+      "augment": "ARAM_Quickstep",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.12 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.12 [raw/15 §3-2]"
+    },
+    {
+      "champion": "Kled",
+      "skill": "Q",
+      "augment": "ARAM_Dashing",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.16 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.16 [raw/15 §3-2]"
+    },
+    {
+      "champion": "LeeSin",
+      "skill": "Q",
+      "augment": "ARAM_Dashing",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.16 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.16 [raw/15 §3-2] \"Dashing did not apply to Lee Sin Q, Kled Q, and Rek'Sai E.\""
+    },
+    {
+      "champion": "Locke",
+      "skill": "Q",
+      "augment": "ARAM_SkilledSniper",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3]"
+    },
+    {
+      "champion": "Locke",
+      "skill": "E",
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3]"
+    },
+    {
+      "champion": "Locke",
+      "skill": null,
+      "augment": "SpecializedEmpowerment",
+      "polarity": "excluded",
+      "confidence": "official",
+      "source": "공식 V26.16 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.16 [raw/15 §3-2] \"Pursuit of Power affected Locke (P) damage\" — P는 비대상",
+      "note": "패시브(P) 슬롯 — 효과 오적용 수정"
+    },
+    {
+      "champion": "Locke",
+      "skill": "E",
+      "augment": "SpecializedEmpowerment",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3] 2단 대시 퀘스트 진행 수정"
+    },
+    {
+      "champion": "Malphite",
+      "skill": "W",
+      "augment": "SpecializedEmpowerment",
+      "polarity": "excluded",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3]"
+    },
+    {
+      "champion": "MasterYi",
+      "skill": "Q",
+      "augment": "ARAM_Dashing",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3]"
+    },
+    {
+      "champion": "MasterYi",
+      "skill": "E",
+      "augment": "ItsGoTime",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.14 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.14 [raw/15 §3] \"It's Go Time did not correctly grant bonus move speed with Master Yi's E, Ashe's Q, and Twitch's Q.\""
+    },
+    {
+      "champion": "Mordekaiser",
+      "skill": "R",
+      "augment": "ARAM_StuckInHereWithMe",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.17 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.17 [raw/15 §3-2]"
+    },
+    {
+      "champion": "Morgana",
+      "skill": "R",
+      "augment": "Ability_SelfAOE_DoubleCast",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3] \"Morgana's (R) Echo cast…\""
+    },
+    {
+      "champion": "Nasus",
+      "skill": "Q",
+      "augment": "ARAM_Marksmage",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.16 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.16 [raw/15 §3-2]"
+    },
+    {
+      "champion": "Nidalee",
+      "skill": "Q",
+      "augment": "Missile_Split",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3] 인간 폼 Javelin Toss ‖ 교차: 디시 칼바람나락갤 622992 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=622992 [raw/18 §3] 외 6건 — Q 창 정황",
+      "note": "인간 폼 Q"
+    },
+    {
+      "champion": "RekSai",
+      "skill": "E",
+      "augment": "ARAM_Dashing",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.16 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.16 [raw/15 §3-2]"
+    },
+    {
+      "champion": "Shaco",
+      "skill": "E",
+      "augment": "Overloaded",
+      "polarity": "excluded",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3]"
+    },
+    {
+      "champion": "Sion",
+      "skill": null,
+      "augment": "SquishySlappyGrab",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.17 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.17 [raw/15 §3-2]",
+      "note": "사망 형태 상호작용"
+    },
+    {
+      "champion": "Smolder",
+      "skill": null,
+      "augment": "BloodMoneyBurn",
+      "polarity": "excluded",
+      "confidence": "official",
+      "source": "공식 V26.14 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.14 [raw/15 §3] \"Smolder could be offered Combusting Interest.\"",
+      "note": "챔피언 단위 제외"
+    },
+    {
+      "champion": "Trundle",
+      "skill": "Q",
+      "augment": "ARAM_Marksmage",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.16 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.16 [raw/15 §3-2]"
+    },
+    {
+      "champion": "Twitch",
+      "skill": "Q",
+      "augment": "ItsGoTime",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.14 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.14 [raw/15 §3]"
+    },
+    {
+      "champion": "Veigar",
+      "skill": "W",
+      "augment": "ARAM_Archmage",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.16 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.16 [raw/15 §3-2]"
+    },
+    {
+      "champion": "Velkoz",
+      "skill": "Q",
+      "augment": "ARAM_Multishot",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "라이엇 공식 예시(esports.gg 전재/지원 문서) [raw/17 §4] + kiwi.bin 전용 스펠 Augment_ARAM_Multishot_Velkoz(raw/10 §1.7)와 교차 확증 + 디시 628874·632136",
+      "note": "데이터마이닝·커뮤니티 3중 교차 검증(최고 신뢰)"
+    },
+    {
+      "champion": "Velkoz",
+      "skill": "Q",
+      "augment": "ARAM_SkilledSniper",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3] + V26.16(분열 Q)"
+    },
+    {
+      "champion": "Viego",
+      "skill": "R",
+      "augment": "ARAM_Dashing",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3]"
+    },
+    {
+      "champion": "Vladimir",
+      "skill": null,
+      "augment": "MercysStrike",
+      "polarity": "excluded",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3] \"Mercy Strike could be offered to non-support champions… like Vladimir.\"",
+      "note": "서포트 챔피언 전용 클래스 게이트의 공식 예시"
+    },
+    {
+      "champion": "Volibear",
+      "skill": "R",
+      "augment": "Ability_SelfAOE_DoubleCast",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.16 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.16 [raw/15 §3-2]"
+    },
+    {
+      "champion": "Yasuo",
+      "skill": "E",
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "excluded",
+      "confidence": "official",
+      "source": "공식 V26.14 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.14 [raw/15 §3] \"Fixed a bug where Pursuit of Haste was offered to Yasuo E.\""
+    },
+    {
+      "champion": "Anivia",
+      "skill": "W",
+      "augment": "Terraind",
+      "polarity": "offered",
+      "confidence": "datamined",
+      "source": "CommunityDragon 챔피언 bin mSpellTags(클라이언트 원본) https://raw.communitydragon.org/latest/game/data/characters/ [raw/14] Trait_CreateTerrain 보유 전수 6명 — mayhemmeta 6챔프 실측(raw/16 §4)과 정확 일치 ‖ 교차: 유튜브 https://www.youtube.com/watch?v=GXc1KwJxADo [raw/18 §3-8]"
+    },
+    {
+      "champion": "Azir",
+      "skill": "R",
+      "augment": "Terraind",
+      "polarity": "offered",
+      "confidence": "datamined",
+      "source": "CommunityDragon 챔피언 bin mSpellTags(클라이언트 원본) https://raw.communitydragon.org/latest/game/data/characters/ [raw/14] Trait_CreateTerrain 보유 전수 6명 — mayhemmeta 6챔프 실측(raw/16 §4)과 정확 일치"
+    },
+    {
+      "champion": "JarvanIV",
+      "skill": "R",
+      "augment": "Terraind",
+      "polarity": "offered",
+      "confidence": "datamined",
+      "source": "CommunityDragon 챔피언 bin mSpellTags(클라이언트 원본) https://raw.communitydragon.org/latest/game/data/characters/ [raw/14] Trait_CreateTerrain 보유 전수 6명 — mayhemmeta 6챔프 실측(raw/16 §4)과 정확 일치 ‖ 교차: 디시 칼바람나락갤 627955 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=627955 [raw/18 §3] + 628442"
+    },
+    {
+      "champion": "Ornn",
+      "skill": "Q",
+      "augment": "Terraind",
+      "polarity": "offered",
+      "confidence": "datamined",
+      "source": "CommunityDragon 챔피언 bin mSpellTags(클라이언트 원본) https://raw.communitydragon.org/latest/game/data/characters/ [raw/14] Trait_CreateTerrain 보유 전수 6명 — mayhemmeta 6챔프 실측(raw/16 §4)과 정확 일치"
+    },
+    {
+      "champion": "Taliyah",
+      "skill": "R",
+      "augment": "Terraind",
+      "polarity": "offered",
+      "confidence": "datamined",
+      "source": "CommunityDragon 챔피언 bin mSpellTags(클라이언트 원본) https://raw.communitydragon.org/latest/game/data/characters/ [raw/14] Trait_CreateTerrain 보유 전수 6명 — mayhemmeta 6챔프 실측(raw/16 §4)과 정확 일치"
+    },
+    {
+      "champion": "Trundle",
+      "skill": "E",
+      "augment": "Terraind",
+      "polarity": "offered",
+      "confidence": "datamined",
+      "source": "CommunityDragon 챔피언 bin mSpellTags(클라이언트 원본) https://raw.communitydragon.org/latest/game/data/characters/ [raw/14] Trait_CreateTerrain 보유 전수 6명 — mayhemmeta 6챔프 실측(raw/16 §4)과 정확 일치 ‖ 교차: 디시 칼바람나락갤 632122 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=632122 [raw/18 §3] 외 3건"
+    },
+    {
+      "champion": "Yasuo",
+      "skill": "Q",
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "excluded",
+      "confidence": "datamined",
+      "source": "CommunityDragon 챔피언 bin mSpellTags(클라이언트 원본) https://raw.communitydragon.org/latest/game/data/characters/ [raw/14] Trait_NotBenefitFromHaste — 16.14 야스오 버그픽스=태그 편집으로 의미 실증(raw/14 §3·§6)"
+    },
+    {
+      "champion": "Yone",
+      "skill": "Q",
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "excluded",
+      "confidence": "datamined",
+      "source": "CommunityDragon 챔피언 bin mSpellTags(클라이언트 원본) https://raw.communitydragon.org/latest/game/data/characters/ [raw/14] Trait_NotBenefitFromHaste — 16.14 야스오 버그픽스=태그 편집으로 의미 실증(raw/14 §3·§6)"
+    },
+    {
+      "champion": "Yone",
+      "skill": "W",
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "excluded",
+      "confidence": "datamined",
+      "source": "CommunityDragon 챔피언 bin mSpellTags(클라이언트 원본) https://raw.communitydragon.org/latest/game/data/characters/ [raw/14] Trait_NotBenefitFromHaste — 16.14 야스오 버그픽스=태그 편집으로 의미 실증(raw/14 §3·§6)"
+    },
+    {
+      "champion": "Zeri",
+      "skill": "Q",
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "excluded",
+      "confidence": "datamined",
+      "source": "CommunityDragon 챔피언 bin mSpellTags(클라이언트 원본) https://raw.communitydragon.org/latest/game/data/characters/ [raw/14] Trait_NotBenefitFromHaste — 16.14 야스오 버그픽스=태그 편집으로 의미 실증(raw/14 §3·§6)"
+    },
+    {
+      "champion": "Aatrox",
+      "skill": null,
+      "augment": "ARAM_Terror",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2065?patch=16.17 [raw/16 §4~5]",
+      "note": "공포 100판+ 전체 11챔프"
+    },
+    {
+      "champion": "Ahri",
+      "skill": null,
+      "augment": "ARAM_Multishot",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "증바람.com 챔피언 페이지 실측(Match-V5) https://xn--4i2by9f8qo.com/champion/Ahri [raw/18 §6] 다중 공격 181판"
+    },
+    {
+      "champion": "Ahri",
+      "skill": null,
+      "augment": "Missile_Split",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "증바람.com 챔피언 페이지 실측(Match-V5) https://xn--4i2by9f8qo.com/champion/Ahri [raw/18 §6] 주문 분산 244판"
+    },
+    {
+      "champion": "Ahri",
+      "skill": null,
+      "augment": "TitansPulse",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2076?patch=16.17 [raw/16 §4~5]",
+      "note": "확고한 의지로 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Alistar",
+      "skill": null,
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5]",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프)"
+    },
+    {
+      "champion": "Alistar",
+      "skill": null,
+      "augment": "TitansPulse",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2076?patch=16.17 [raw/16 §4~5]",
+      "note": "확고한 의지로 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Amumu",
+      "skill": null,
+      "augment": "TitansPulse",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2076?patch=16.17 [raw/16 §4~5]",
+      "note": "확고한 의지로 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Anivia",
+      "skill": null,
+      "augment": "SpellVolley",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2054?patch=16.17 [raw/16 §4~5]",
+      "note": "3연발 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Annie",
+      "skill": null,
+      "augment": "SpellVolley",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2054?patch=16.17 [raw/16 §4~5]",
+      "note": "3연발 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Ashe",
+      "skill": null,
+      "augment": "ARAM_BreadAndJam",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Ashe",
+      "skill": null,
+      "augment": "ARAM_Multishot",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Ashe",
+      "skill": null,
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Ashe",
+      "skill": "Q",
+      "augment": "LittleExtraHelp",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2096) ‖ 교차: mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]",
+      "note": "작은 도움 — 지속형 강화 평타 유일(유추)"
+    },
+    {
+      "champion": "Ashe",
+      "skill": null,
+      "augment": "Missile_Split",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Ashe",
+      "skill": "Q",
+      "augment": "Overkill",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2135) ‖ 교차: mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]",
+      "note": "바늘꽂이 — 지속형 효과 유일(유추)"
+    },
+    {
+      "champion": "Ashe",
+      "skill": null,
+      "augment": "SpecializedEmpowerment",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Bard",
+      "skill": null,
+      "augment": "ARAM_RabbleRousing",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/1067?patch=16.17 [raw/16 §4~5]",
+      "note": "원기 회복 100판+ 전체 13챔프"
+    },
+    {
+      "champion": "Bard",
+      "skill": null,
+      "augment": "MercysStrike",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2133?patch=16.17 [raw/16 §4~5]",
+      "note": "자비의 일격 100판+ 전체 11챔프(전원 인챈터)"
+    },
+    {
+      "champion": "Blitzcrank",
+      "skill": "E",
+      "augment": "Bonk",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2111)",
+      "note": "꽁! 100판+ 전체 13챔프 — 강화 평타 스킬 유일로 슬롯 확정(유추)"
+    },
+    {
+      "champion": "Brand",
+      "skill": null,
+      "augment": "ARAM_BreadAndButter",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Brand",
+      "skill": null,
+      "augment": "ARAM_BreadAndCheese",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Brand",
+      "skill": null,
+      "augment": "ARAM_BreadAndJam",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Brand",
+      "skill": null,
+      "augment": "ARAM_Multishot",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Brand",
+      "skill": null,
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Brand",
+      "skill": "Q",
+      "augment": "DarkWind",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2077) ‖ 교차: mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]",
+      "note": "굶주린 속박 — 속박기 유일로 슬롯 확정(유추)"
+    },
+    {
+      "champion": "Brand",
+      "skill": null,
+      "augment": "Missile_Split",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Brand",
+      "skill": null,
+      "augment": "Overloaded",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Brand",
+      "skill": null,
+      "augment": "SpecializedEmpowerment",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Brand",
+      "skill": "R",
+      "augment": "SpellVolley",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2054?patch=16.17 [raw/16 §4~5] ‖ 교차: mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5] ‖ 교차: 디시 칼바람나락갤 630263 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=630263 [raw/18 §3]",
+      "note": "3연발 100판+ 전체 16챔프; 스킬 슬롯은 community 근거"
+    },
+    {
+      "champion": "Briar",
+      "skill": "W",
+      "augment": "Bonk",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2111)",
+      "note": "꽁! 100판+ 전체 13챔프 — 강화 평타 스킬 유일로 슬롯 확정(유추)"
+    },
+    {
+      "champion": "Briar",
+      "skill": null,
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5]",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프)"
+    },
+    {
+      "champion": "Cassiopeia",
+      "skill": null,
+      "augment": "SpellVolley",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2054?patch=16.17 [raw/16 §4~5]",
+      "note": "3연발 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Darius",
+      "skill": null,
+      "augment": "Ability_SelfAOE_DoubleCast",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Darius",
+      "skill": null,
+      "augment": "ARAM_BreadAndButter",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Darius",
+      "skill": null,
+      "augment": "ARAM_BreadAndCheese",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Darius",
+      "skill": null,
+      "augment": "ARAM_BreadAndJam",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Darius",
+      "skill": null,
+      "augment": "ARAM_Quickstep",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Darius",
+      "skill": null,
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Darius",
+      "skill": "W",
+      "augment": "Bonk",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2111) ‖ 교차: mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]",
+      "note": "꽁! 100판+ 전체 13챔프 — 강화 평타 스킬 유일로 슬롯 확정(유추)"
+    },
+    {
+      "champion": "Darius",
+      "skill": null,
+      "augment": "Overloaded",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Darius",
+      "skill": null,
+      "augment": "SpecializedEmpowerment",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Darius",
+      "skill": null,
+      "augment": "TitansPulse",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2076?patch=16.17 [raw/16 §4~5] ‖ 교차: mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]",
+      "note": "확고한 의지로 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "DrMundo",
+      "skill": null,
+      "augment": "ARAM_Terror",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2065?patch=16.17 [raw/16 §4~5]",
+      "note": "공포 100판+ 전체 11챔프"
+    },
+    {
+      "champion": "DrMundo",
+      "skill": "E",
+      "augment": "Bonk",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2111)",
+      "note": "꽁! 100판+ 전체 13챔프 — 강화 평타 스킬 유일로 슬롯 확정(유추)"
+    },
+    {
+      "champion": "Ekko",
+      "skill": null,
+      "augment": "ARAM_BreadAndButter",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Ekko",
+      "skill": null,
+      "augment": "ARAM_BreadAndCheese",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Ekko",
+      "skill": null,
+      "augment": "ARAM_BreadAndJam",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Ekko",
+      "skill": null,
+      "augment": "ARAM_Multishot",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Ekko",
+      "skill": null,
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Ekko",
+      "skill": null,
+      "augment": "Overloaded",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Ekko",
+      "skill": null,
+      "augment": "SpecializedEmpowerment",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Elise",
+      "skill": null,
+      "augment": "SpellVolley",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2054?patch=16.17 [raw/16 §4~5]",
+      "note": "3연발 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Gangplank",
+      "skill": null,
+      "augment": "ARAM_BreadAndButter",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Gangplank",
+      "skill": null,
+      "augment": "ARAM_BreadAndCheese",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Gangplank",
+      "skill": null,
+      "augment": "ARAM_BreadAndJam",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Gangplank",
+      "skill": null,
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Gangplank",
+      "skill": null,
+      "augment": "ARAM_SustainingStrike",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Gangplank",
+      "skill": null,
+      "augment": "SpecializedEmpowerment",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Gangplank",
+      "skill": null,
+      "augment": "TrustyWeapon",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Garen",
+      "skill": "Q",
+      "augment": "Bonk",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2111)",
+      "note": "꽁! 100판+ 전체 13챔프 — 강화 평타 스킬 유일로 슬롯 확정(유추)"
+    },
+    {
+      "champion": "Garen",
+      "skill": null,
+      "augment": "TitansPulse",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2076?patch=16.17 [raw/16 §4~5]",
+      "note": "확고한 의지로 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Gnar",
+      "skill": null,
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5]",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프)"
+    },
+    {
+      "champion": "Gragas",
+      "skill": "R",
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5] ‖ 교차: 디시 칼바람나락갤 629646 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=629646 [raw/18 §3] 외 2건(630966·631611)",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프); 스킬 슬롯은 community 근거"
+    },
+    {
+      "champion": "Hecarim",
+      "skill": null,
+      "augment": "Ability_SelfAOE_DoubleCast",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Hecarim",
+      "skill": null,
+      "augment": "ARAM_BreadAndButter",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Hecarim",
+      "skill": null,
+      "augment": "ARAM_BreadAndCheese",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Hecarim",
+      "skill": null,
+      "augment": "ARAM_BreadAndJam",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Hecarim",
+      "skill": null,
+      "augment": "ARAM_Quickstep",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5] ‖ 교차: 디시 칼바람나락갤 624375 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=624375 [raw/18 §3] 외 2건 — E 정황"
+    },
+    {
+      "champion": "Hecarim",
+      "skill": null,
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Hecarim",
+      "skill": "E",
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5] ‖ 교차: mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2078) ‖ 교차: mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프); 스킬 슬롯은 empirical 근거; 연쇄 반응 — 넉백 유일(유추)"
+    },
+    {
+      "champion": "Hecarim",
+      "skill": null,
+      "augment": "TitansPulse",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2076?patch=16.17 [raw/16 §4~5] ‖ 교차: mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]",
+      "note": "확고한 의지로 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Hecarim",
+      "skill": null,
+      "augment": "TrustyWeapon",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Hecarim",
+      "skill": null,
+      "augment": "WardingWeapon",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Illaoi",
+      "skill": "W",
+      "augment": "Bonk",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2111)",
+      "note": "꽁! 100판+ 전체 13챔프 — 강화 평타 스킬 유일로 슬롯 확정(유추)"
+    },
+    {
+      "champion": "Ivern",
+      "skill": null,
+      "augment": "MercysStrike",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2133?patch=16.17 [raw/16 §4~5]",
+      "note": "자비의 일격 100판+ 전체 11챔프(전원 인챈터)"
+    },
+    {
+      "champion": "Janna",
+      "skill": null,
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5]",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프)"
+    },
+    {
+      "champion": "Janna",
+      "skill": null,
+      "augment": "MercysStrike",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2133?patch=16.17 [raw/16 §4~5]",
+      "note": "자비의 일격 100판+ 전체 11챔프(전원 인챈터)"
+    },
+    {
+      "champion": "Janna",
+      "skill": null,
+      "augment": "SpellVolley",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2054?patch=16.17 [raw/16 §4~5]",
+      "note": "3연발 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Jax",
+      "skill": null,
+      "augment": "ARAM_Terror",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2065?patch=16.17 [raw/16 §4~5]",
+      "note": "공포 100판+ 전체 11챔프"
+    },
+    {
+      "champion": "Jax",
+      "skill": "W",
+      "augment": "Bonk",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2111)",
+      "note": "꽁! 100판+ 전체 13챔프 — 강화 평타 스킬 유일로 슬롯 확정(유추)"
+    },
+    {
+      "champion": "Jayce",
+      "skill": null,
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5]",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프)"
+    },
+    {
+      "champion": "Jayce",
+      "skill": null,
+      "augment": "TitansPulse",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2076?patch=16.17 [raw/16 §4~5]",
+      "note": "확고한 의지로 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Jhin",
+      "skill": null,
+      "augment": "SpellVolley",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2054?patch=16.17 [raw/16 §4~5]",
+      "note": "3연발 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Jinx",
+      "skill": "Q",
+      "augment": "ARAM_BreadAndButter",
+      "polarity": "excluded",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 — 빵과 버터는 162챔프 광풀인데 징크스 페이지에서 미관측(Q가 쿨다운 없는 토글) [raw/16 §5 징크스]",
+      "note": "스킬 슬롯 단위 적격성 필터의 실측 증거 — 단 100판 임계 아래는 '적격성 0'과 '극저확률'을 구분 불가(raw/16 §9-4), 부정 단정 아님"
+    },
+    {
+      "champion": "Jinx",
+      "skill": null,
+      "augment": "ARAM_BreadAndCheese",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Jinx",
+      "skill": null,
+      "augment": "ARAM_BreadAndJam",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Karma",
+      "skill": null,
+      "augment": "MercysStrike",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2133?patch=16.17 [raw/16 §4~5]",
+      "note": "자비의 일격 100판+ 전체 11챔프(전원 인챈터)"
+    },
+    {
+      "champion": "Katarina",
+      "skill": null,
+      "augment": "SpellVolley",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2054?patch=16.17 [raw/16 §4~5]",
+      "note": "3연발 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "KSante",
+      "skill": null,
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5]",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프)"
+    },
+    {
+      "champion": "Leblanc",
+      "skill": null,
+      "augment": "SpellVolley",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2054?patch=16.17 [raw/16 §4~5]",
+      "note": "3연발 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "LeeSin",
+      "skill": null,
+      "augment": "ARAM_RabbleRousing",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/1067?patch=16.17 [raw/16 §4~5]",
+      "note": "원기 회복 100판+ 전체 13챔프"
+    },
+    {
+      "champion": "LeeSin",
+      "skill": null,
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5]",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프)"
+    },
+    {
+      "champion": "Leona",
+      "skill": null,
+      "augment": "TitansPulse",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2076?patch=16.17 [raw/16 §4~5]",
+      "note": "확고한 의지로 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Lissandra",
+      "skill": null,
+      "augment": "TitansPulse",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2076?patch=16.17 [raw/16 §4~5]",
+      "note": "확고한 의지로 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Lulu",
+      "skill": null,
+      "augment": "MercysStrike",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2133?patch=16.17 [raw/16 §4~5]",
+      "note": "자비의 일격 100판+ 전체 11챔프(전원 인챈터)"
+    },
+    {
+      "champion": "Lux",
+      "skill": null,
+      "augment": "ARAM_BreadAndButter",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Lux",
+      "skill": null,
+      "augment": "ARAM_BreadAndCheese",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Lux",
+      "skill": null,
+      "augment": "ARAM_BreadAndJam",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Lux",
+      "skill": null,
+      "augment": "ARAM_Multishot",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Lux",
+      "skill": null,
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Lux",
+      "skill": "Q",
+      "augment": "DarkWind",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2077) ‖ 교차: mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]",
+      "note": "굶주린 속박 — 속박기 유일로 슬롯 확정(유추)"
+    },
+    {
+      "champion": "Lux",
+      "skill": "W",
+      "augment": "DoubleDefense",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2144)",
+      "note": "보강 — 보호막 스킬 유일(유추)"
+    },
+    {
+      "champion": "Lux",
+      "skill": null,
+      "augment": "Overloaded",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Malphite",
+      "skill": null,
+      "augment": "Ability_SelfAOE_DoubleCast",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Malphite",
+      "skill": null,
+      "augment": "ARAM_BreadAndButter",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Malphite",
+      "skill": null,
+      "augment": "ARAM_BreadAndCheese",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Malphite",
+      "skill": null,
+      "augment": "ARAM_BreadAndJam",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Malphite",
+      "skill": null,
+      "augment": "ARAM_Quickstep",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Malphite",
+      "skill": null,
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Malphite",
+      "skill": null,
+      "augment": "ItsGoTime",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Malphite",
+      "skill": null,
+      "augment": "LittleExtraHelp",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Malphite",
+      "skill": null,
+      "augment": "Overkill",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Malphite",
+      "skill": null,
+      "augment": "Overloaded",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Malphite",
+      "skill": null,
+      "augment": "SpecializedEmpowerment",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Malphite",
+      "skill": null,
+      "augment": "SpellVolley",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2054?patch=16.17 [raw/16 §4~5] ‖ 교차: mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]",
+      "note": "3연발 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Malphite",
+      "skill": null,
+      "augment": "TitansPulse",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2076?patch=16.17 [raw/16 §4~5] ‖ 교차: mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]",
+      "note": "확고한 의지로 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Maokai",
+      "skill": null,
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5]",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프)"
+    },
+    {
+      "champion": "MasterYi",
+      "skill": null,
+      "augment": "ARAM_Terror",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2065?patch=16.17 [raw/16 §4~5]",
+      "note": "공포 100판+ 전체 11챔프"
+    },
+    {
+      "champion": "Milio",
+      "skill": null,
+      "augment": "ARAM_RabbleRousing",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/1067?patch=16.17 [raw/16 §4~5]",
+      "note": "원기 회복 100판+ 전체 13챔프"
+    },
+    {
+      "champion": "Milio",
+      "skill": null,
+      "augment": "MercysStrike",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2133?patch=16.17 [raw/16 §4~5]",
+      "note": "자비의 일격 100판+ 전체 11챔프(전원 인챈터)"
+    },
+    {
+      "champion": "MissFortune",
+      "skill": null,
+      "augment": "SpellVolley",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2054?patch=16.17 [raw/16 §4~5]",
+      "note": "3연발 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "MonkeyKing",
+      "skill": "Q",
+      "augment": "Bonk",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2111)",
+      "note": "꽁! 100판+ 전체 13챔프 — 강화 평타 스킬 유일로 슬롯 확정(유추)"
+    },
+    {
+      "champion": "Mordekaiser",
+      "skill": null,
+      "augment": "ARAM_RabbleRousing",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/1067?patch=16.17 [raw/16 §4~5]",
+      "note": "원기 회복 100판+ 전체 13챔프"
+    },
+    {
+      "champion": "Nami",
+      "skill": null,
+      "augment": "MercysStrike",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2133?patch=16.17 [raw/16 §4~5]",
+      "note": "자비의 일격 100판+ 전체 11챔프(전원 인챈터)"
+    },
+    {
+      "champion": "Nasus",
+      "skill": null,
+      "augment": "ARAM_Terror",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2065?patch=16.17 [raw/16 §4~5]",
+      "note": "공포 100판+ 전체 11챔프"
+    },
+    {
+      "champion": "Nasus",
+      "skill": "Q",
+      "augment": "Bonk",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2111) ‖ 교차: 나무위키 증강/챔피언별 추천 조합(2026-09-01판) https://namu.wiki/w/리그%20오브%20레전드/증강/챔피언별%20추천%20조합 [raw/18 §3-9]",
+      "note": "꽁! 100판+ 전체 13챔프 — 강화 평타 스킬 유일로 슬롯 확정(유추)"
+    },
+    {
+      "champion": "Nautilus",
+      "skill": null,
+      "augment": "TitansPulse",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2076?patch=16.17 [raw/16 §4~5]",
+      "note": "확고한 의지로 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Olaf",
+      "skill": null,
+      "augment": "ARAM_Terror",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2065?patch=16.17 [raw/16 §4~5]",
+      "note": "공포 100판+ 전체 11챔프"
+    },
+    {
+      "champion": "Poppy",
+      "skill": null,
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5]",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프)"
+    },
+    {
+      "champion": "Qiyana",
+      "skill": null,
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5]",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프)"
+    },
+    {
+      "champion": "Rakan",
+      "skill": null,
+      "augment": "ARAM_RabbleRousing",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/1067?patch=16.17 [raw/16 §4~5]",
+      "note": "원기 회복 100판+ 전체 13챔프"
+    },
+    {
+      "champion": "Rammus",
+      "skill": null,
+      "augment": "ARAM_RabbleRousing",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/1067?patch=16.17 [raw/16 §4~5]",
+      "note": "원기 회복 100판+ 전체 13챔프"
+    },
+    {
+      "champion": "Renata",
+      "skill": null,
+      "augment": "MercysStrike",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2133?patch=16.17 [raw/16 §4~5]",
+      "note": "자비의 일격 100판+ 전체 11챔프(전원 인챈터)"
+    },
+    {
+      "champion": "Renekton",
+      "skill": null,
+      "augment": "ARAM_Terror",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2065?patch=16.17 [raw/16 §4~5]",
+      "note": "공포 100판+ 전체 11챔프"
+    },
+    {
+      "champion": "Renekton",
+      "skill": "W",
+      "augment": "Bonk",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2111)",
+      "note": "꽁! 100판+ 전체 13챔프 — 강화 평타 스킬 유일로 슬롯 확정(유추)"
+    },
+    {
+      "champion": "Renekton",
+      "skill": null,
+      "augment": "TitansPulse",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2076?patch=16.17 [raw/16 §4~5]",
+      "note": "확고한 의지로 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Riven",
+      "skill": null,
+      "augment": "TitansPulse",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2076?patch=16.17 [raw/16 §4~5]",
+      "note": "확고한 의지로 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Rumble",
+      "skill": null,
+      "augment": "ARAM_RabbleRousing",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/1067?patch=16.17 [raw/16 §4~5]",
+      "note": "원기 회복 100판+ 전체 13챔프"
+    },
+    {
+      "champion": "Ryze",
+      "skill": null,
+      "augment": "SpellVolley",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2054?patch=16.17 [raw/16 §4~5]",
+      "note": "3연발 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Senna",
+      "skill": null,
+      "augment": "MercysStrike",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2133?patch=16.17 [raw/16 §4~5]",
+      "note": "자비의 일격 100판+ 전체 11챔프(전원 인챈터)"
+    },
+    {
+      "champion": "Shaco",
+      "skill": null,
+      "augment": "SpellVolley",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2054?patch=16.17 [raw/16 §4~5]",
+      "note": "3연발 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Shyvana",
+      "skill": "Q",
+      "augment": "Bonk",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2111)",
+      "note": "꽁! 100판+ 전체 13챔프 — 강화 평타 스킬 유일로 슬롯 확정(유추)"
+    },
+    {
+      "champion": "Singed",
+      "skill": null,
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5]",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프)"
+    },
+    {
+      "champion": "Sona",
+      "skill": null,
+      "augment": "MercysStrike",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2133?patch=16.17 [raw/16 §4~5]",
+      "note": "자비의 일격 100판+ 전체 11챔프(전원 인챈터)"
+    },
+    {
+      "champion": "Soraka",
+      "skill": null,
+      "augment": "Ability_SelfAOE_DoubleCast",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Soraka",
+      "skill": null,
+      "augment": "ARAM_BreadAndButter",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Soraka",
+      "skill": null,
+      "augment": "ARAM_BreadAndCheese",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Soraka",
+      "skill": null,
+      "augment": "ARAM_BreadAndJam",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Soraka",
+      "skill": null,
+      "augment": "ARAM_RabbleRousing",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/1067?patch=16.17 [raw/16 §4~5] ‖ 교차: mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]",
+      "note": "원기 회복 100판+ 전체 13챔프"
+    },
+    {
+      "champion": "Soraka",
+      "skill": null,
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Soraka",
+      "skill": "E",
+      "augment": "DarkWind",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2077) ‖ 교차: mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]",
+      "note": "굶주린 속박 — 속박기 유일로 슬롯 확정(유추)"
+    },
+    {
+      "champion": "Soraka",
+      "skill": null,
+      "augment": "MercysStrike",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2133?patch=16.17 [raw/16 §4~5] ‖ 교차: mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]",
+      "note": "자비의 일격 100판+ 전체 11챔프(전원 인챈터)"
+    },
+    {
+      "champion": "Soraka",
+      "skill": null,
+      "augment": "Overloaded",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Soraka",
+      "skill": null,
+      "augment": "SpecializedEmpowerment",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Syndra",
+      "skill": "E",
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5] ‖ 교차: 디시 칼바람나락갤 631756 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=631756 [raw/18 §3]",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프); 스킬 슬롯은 community 근거"
+    },
+    {
+      "champion": "TahmKench",
+      "skill": null,
+      "augment": "ARAM_RabbleRousing",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/1067?patch=16.17 [raw/16 §4~5]",
+      "note": "원기 회복 100판+ 전체 13챔프"
+    },
+    {
+      "champion": "Taliyah",
+      "skill": null,
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5]",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프)"
+    },
+    {
+      "champion": "Taric",
+      "skill": null,
+      "augment": "ARAM_RabbleRousing",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/1067?patch=16.17 [raw/16 §4~5]",
+      "note": "원기 회복 100판+ 전체 13챔프"
+    },
+    {
+      "champion": "Teemo",
+      "skill": null,
+      "augment": "SpellVolley",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2054?patch=16.17 [raw/16 §4~5]",
+      "note": "3연발 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Thresh",
+      "skill": "E",
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5] ‖ 교차: 디시 칼바람나락갤 627202 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=627202 [raw/18 §3] + 유튜브 쇼츠 https://www.youtube.com/shorts/_mc908rJnXQ",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프); 스킬 슬롯은 community 근거"
+    },
+    {
+      "champion": "Tristana",
+      "skill": null,
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5]",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프)"
+    },
+    {
+      "champion": "Tristana",
+      "skill": null,
+      "augment": "SpellVolley",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2054?patch=16.17 [raw/16 §4~5]",
+      "note": "3연발 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Trundle",
+      "skill": "Q",
+      "augment": "Bonk",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2111)",
+      "note": "꽁! 100판+ 전체 13챔프 — 강화 평타 스킬 유일로 슬롯 확정(유추)"
+    },
+    {
+      "champion": "Tryndamere",
+      "skill": null,
+      "augment": "ARAM_Terror",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2065?patch=16.17 [raw/16 §4~5]",
+      "note": "공포 100판+ 전체 11챔프"
+    },
+    {
+      "champion": "Udyr",
+      "skill": null,
+      "augment": "ARAM_RabbleRousing",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/1067?patch=16.17 [raw/16 §4~5]",
+      "note": "원기 회복 100판+ 전체 13챔프"
+    },
+    {
+      "champion": "Vayne",
+      "skill": null,
+      "augment": "ARAM_Terror",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2065?patch=16.17 [raw/16 §4~5]",
+      "note": "공포 100판+ 전체 11챔프"
+    },
+    {
+      "champion": "Vayne",
+      "skill": "Q",
+      "augment": "Bonk",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 실측 + 요구속성×적격스킬 유일성 유추 [raw/16 §4·§6] (id 2111)",
+      "note": "꽁! 100판+ 전체 13챔프 — 강화 평타 스킬 유일로 슬롯 확정(유추)"
+    },
+    {
+      "champion": "Veigar",
+      "skill": "R",
+      "augment": "SpellVolley",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2054?patch=16.17 [raw/16 §4~5] ‖ 교차: 디시 칼바람나락갤 631827 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=631827 [raw/18 §3]",
+      "note": "3연발 100판+ 전체 16챔프; 스킬 슬롯은 community 근거"
+    },
+    {
+      "champion": "Vi",
+      "skill": null,
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5]",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프)"
+    },
+    {
+      "champion": "Vladimir",
+      "skill": null,
+      "augment": "TitansPulse",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2076?patch=16.17 [raw/16 §4~5]",
+      "note": "확고한 의지로 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Warwick",
+      "skill": null,
+      "augment": "ARAM_RabbleRousing",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/1067?patch=16.17 [raw/16 §4~5]",
+      "note": "원기 회복 100판+ 전체 13챔프"
+    },
+    {
+      "champion": "XinZhao",
+      "skill": null,
+      "augment": "ARAM_Terror",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2065?patch=16.17 [raw/16 §4~5]",
+      "note": "공포 100판+ 전체 11챔프"
+    },
+    {
+      "champion": "XinZhao",
+      "skill": null,
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5]",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프)"
+    },
+    {
+      "champion": "Yasuo",
+      "skill": null,
+      "augment": "Ability_SelfAOE_DoubleCast",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Yasuo",
+      "skill": null,
+      "augment": "ARAM_BreadAndJam",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Yasuo",
+      "skill": null,
+      "augment": "ARAM_SustainingStrike",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Yasuo",
+      "skill": null,
+      "augment": "SpecializedEmpowerment",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Yasuo",
+      "skill": null,
+      "augment": "TrustyWeapon",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Yasuo",
+      "skill": null,
+      "augment": "WardingWeapon",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Zac",
+      "skill": null,
+      "augment": "TitansPulse",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2076?patch=16.17 [raw/16 §4~5]",
+      "note": "확고한 의지로 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Zed",
+      "skill": null,
+      "augment": "ARAM_BreadAndButter",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Zed",
+      "skill": null,
+      "augment": "ARAM_BreadAndCheese",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Zed",
+      "skill": null,
+      "augment": "ARAM_BreadAndJam",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Zed",
+      "skill": null,
+      "augment": "ARAM_Multishot",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Zed",
+      "skill": null,
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Zed",
+      "skill": null,
+      "augment": "Missile_Split",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Zed",
+      "skill": null,
+      "augment": "Overloaded",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Zed",
+      "skill": null,
+      "augment": "SpecializedEmpowerment",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]"
+    },
+    {
+      "champion": "Zed",
+      "skill": null,
+      "augment": "TitansPulse",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2076?patch=16.17 [raw/16 §4~5] ‖ 교차: mayhemmeta/aramgg/op.gg 12챔피언 통합 표(26.17, ≥100판) [raw/16 §5]",
+      "note": "확고한 의지로 100판+ 전체 16챔프"
+    },
+    {
+      "champion": "Zeri",
+      "skill": null,
+      "augment": "ARAM_Terror",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2065?patch=16.17 [raw/16 §4~5]",
+      "note": "공포 100판+ 전체 11챔프"
+    },
+    {
+      "champion": "Ziggs",
+      "skill": null,
+      "augment": "ChainReaction",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/2078?patch=16.17 [raw/16 §4~5]",
+      "note": "연쇄 반응 100판+ 명단(문서 수록 20챔프)"
+    },
+    {
+      "champion": "Zyra",
+      "skill": null,
+      "augment": "ARAM_RabbleRousing",
+      "polarity": "offered",
+      "confidence": "empirical",
+      "source": "mayhemmeta 26.17 실측(≥100판) https://mayhemmeta.com/augments/1067?patch=16.17 [raw/16 §4~5]",
+      "note": "원기 회복 100판+ 전체 13챔프"
+    },
+    {
+      "champion": "Aatrox",
+      "skill": null,
+      "augment": "DarkWind",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 623199 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=623199 [raw/18 §3] + 631493 — W 정황"
+    },
+    {
+      "champion": "Ahri",
+      "skill": "W",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Ahri",
+      "skill": "R",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Alistar",
+      "skill": null,
+      "augment": "ARAM_Quickstep",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 623381 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=623381 [raw/18 §3] — E 정황"
+    },
+    {
+      "champion": "Ambessa",
+      "skill": "Q",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Amumu",
+      "skill": "E",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Blitzcrank",
+      "skill": "E",
+      "augment": "ARAM_Quickstep",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 623666 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=623666 [raw/18 §3]"
+    },
+    {
+      "champion": "Blitzcrank",
+      "skill": "Q",
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 631169 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=631169 [raw/18 §3]",
+      "note": "버그 보고 맥락(제시 자체는 실측)"
+    },
+    {
+      "champion": "Blitzcrank",
+      "skill": null,
+      "augment": "Missile_Split",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 622992 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=622992 [raw/18 §3] + 632355"
+    },
+    {
+      "champion": "Darius",
+      "skill": "Q",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Draven",
+      "skill": "Q",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Draven",
+      "skill": "E",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Draven",
+      "skill": "R",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Evelynn",
+      "skill": "E",
+      "augment": "Overloaded",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 632056 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=632056 [raw/18 §3]"
+    },
+    {
+      "champion": "Ezreal",
+      "skill": null,
+      "augment": "Missile_Split",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 630986 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=630986 [raw/18 §3]"
+    },
+    {
+      "champion": "Garen",
+      "skill": "E",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Hecarim",
+      "skill": "Q",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Jax",
+      "skill": "E",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Jayce",
+      "skill": null,
+      "augment": "Overkill",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 630643 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=630643 [raw/18 §3] — 망치 폼 정황"
+    },
+    {
+      "champion": "Kalista",
+      "skill": null,
+      "augment": "ARAM_Dashing",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 MayhemAugmentData notes https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §1-1] — 칼리스타는 대신 공속 125% 치환"
+    },
+    {
+      "champion": "Katarina",
+      "skill": null,
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]",
+      "note": "패시브(Voracity)"
+    },
+    {
+      "champion": "Katarina",
+      "skill": "R",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Katarina",
+      "skill": "R",
+      "augment": "ARAM_StuckInHereWithMe",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 MayhemAugmentData notes https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §1-1] — R 정신 집중 시작 시 발동 특례"
+    },
+    {
+      "champion": "Kayn",
+      "skill": "Q",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Khazix",
+      "skill": null,
+      "augment": "Overloaded",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 632032 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=632032 [raw/18 §3]"
+    },
+    {
+      "champion": "Leona",
+      "skill": "W",
+      "augment": "Overkill",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 631483 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=631483 [raw/18 §3]"
+    },
+    {
+      "champion": "Lillia",
+      "skill": null,
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]",
+      "note": "패시브(Blooming Blows)"
+    },
+    {
+      "champion": "Lucian",
+      "skill": null,
+      "augment": "Missile_Split",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 631899 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=631899 [raw/18 §3] + 펨코 https://www.fmkorea.com/10033430572"
+    },
+    {
+      "champion": "Maokai",
+      "skill": null,
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 629358 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=629358 [raw/18 §3]"
+    },
+    {
+      "champion": "MonkeyKing",
+      "skill": "R",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Morgana",
+      "skill": null,
+      "augment": "Missile_Split",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 632559 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=632559 [raw/18 §3]"
+    },
+    {
+      "champion": "Naafiri",
+      "skill": null,
+      "augment": "Missile_Split",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 632117 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=632117 [raw/18 §3]"
+    },
+    {
+      "champion": "Nasus",
+      "skill": "R",
+      "augment": "Overkill",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 631480 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=631480 [raw/18 §3]"
+    },
+    {
+      "champion": "Nidalee",
+      "skill": null,
+      "augment": "Overloaded",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 628205 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=628205 [raw/18 §3]"
+    },
+    {
+      "champion": "Nidalee",
+      "skill": null,
+      "augment": "SpecializedEmpowerment",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 624176 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=624176 [raw/18 §3]"
+    },
+    {
+      "champion": "Nocturne",
+      "skill": null,
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]",
+      "note": "패시브(Umbra Blades)"
+    },
+    {
+      "champion": "Qiyana",
+      "skill": null,
+      "augment": "Overloaded",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 628537 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=628537 [raw/18 §3]"
+    },
+    {
+      "champion": "Rammus",
+      "skill": "Q",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "RekSai",
+      "skill": "Q",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Renekton",
+      "skill": null,
+      "augment": "ARAM_SpecializedRecursion",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 632604 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=632604 [raw/18 §3]"
+    },
+    {
+      "champion": "Renekton",
+      "skill": "Q",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Renekton",
+      "skill": "E",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Riven",
+      "skill": "Q",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Ryze",
+      "skill": "E",
+      "augment": "Overloaded",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "나무위키 무작위 총력전: 아수라장(2026-08-31판) https://namu.wiki/w/무작위%20총력전:%20아수라장 [raw/18] \"라이즈의 E 초기화로 무한 EQEQ\" + 디시 595854 등"
+    },
+    {
+      "champion": "Samira",
+      "skill": "W",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Samira",
+      "skill": "R",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Sivir",
+      "skill": "R",
+      "augment": "Ability_SelfAOE_DoubleCast",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 630846 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=630846 [raw/18 §3]"
+    },
+    {
+      "champion": "Sivir",
+      "skill": "Q",
+      "augment": "ARAM_Multishot",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 625146 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=625146 [raw/18 §3]"
+    },
+    {
+      "champion": "Smolder",
+      "skill": null,
+      "augment": "ARAM_Multishot",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 624541 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=624541 [raw/18 §3]"
+    },
+    {
+      "champion": "Sylas",
+      "skill": null,
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]",
+      "note": "패시브(Petricite Burst)"
+    },
+    {
+      "champion": "Syndra",
+      "skill": null,
+      "augment": "DarkWind",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 629446 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=629446 [raw/18 §3]",
+      "note": "미발동 버그 보고(제시 자체는 실측)"
+    },
+    {
+      "champion": "Trundle",
+      "skill": null,
+      "augment": "DarkWind",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 629881 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=629881 [raw/18 §3] + 630445",
+      "note": "속박기 부재 챔피언에 제시된 특이 사례 — 재확인 필요"
+    },
+    {
+      "champion": "Tryndamere",
+      "skill": "E",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "TwistedFate",
+      "skill": null,
+      "augment": "Ability_SelfAOE_DoubleCast",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 622992 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=622992 [raw/18 §3] 외 5건(630955·631831·632474·632542·632594)"
+    },
+    {
+      "champion": "Twitch",
+      "skill": null,
+      "augment": "Overloaded",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 631214 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=631214 [raw/18 §3]"
+    },
+    {
+      "champion": "XinZhao",
+      "skill": "R",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Yorick",
+      "skill": "W",
+      "augment": "Terraind",
+      "polarity": "excluded",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 631455 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=631455 [raw/18 §3] — 지형 생성기 보유인데 미제시(부정 실측)",
+      "note": "서버측 큐레이션(26.13 \"실질 이득 스킬만\")의 방증"
+    },
+    {
+      "champion": "Yunara",
+      "skill": null,
+      "augment": "LittleExtraHelp",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 631099 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=631099 [raw/18 §3]"
+    },
+    {
+      "champion": "Zac",
+      "skill": "W",
+      "augment": "ARAM_Quickstep",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "디시 칼바람나락갤 629424 https://gall.dcinside.com/mgallery/board/view/?id=howlingabyss&no=629424 [raw/18 §3]"
+    },
+    {
+      "champion": "Zed",
+      "skill": "E",
+      "augment": "ARAM_SpinToWin",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "위키 Spin To Win notes \"Eligible Abilities\"(편집자 실측, Editors needed 미완성) https://wiki.leagueoflegends.com/en-us/Module:MayhemAugmentData/data [raw/15 §2]"
+    },
+    {
+      "champion": "Zilean",
+      "skill": "W",
+      "augment": "Overloaded",
+      "polarity": "offered",
+      "confidence": "community",
+      "source": "나무위키 무작위 총력전: 아수라장(2026-08-31판) https://namu.wiki/w/무작위%20총력전:%20아수라장 [raw/18] \"질리언은 W 초기화로 무한 QWQW\""
+    }
+  ],
+  "_unresolved": [
+    {
+      "reason": "augment \"Quest_SupportMain\" not in augments.json",
+      "champion": "Milio",
+      "skill": "W",
+      "augment": "Quest_SupportMain",
+      "polarity": "offered",
+      "confidence": "official",
+      "source": "공식 V26.15 패치노트(위키 전사본) https://wiki.leagueoflegends.com/en-us/V26.15 [raw/15 §3] \"Milio's (W) did not grant Support Main quest progress\" — 해당 증강이 로컬 augments.json 225종에 없음"
+    }
+  ]
+}
