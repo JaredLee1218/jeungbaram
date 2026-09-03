@@ -1,5 +1,5 @@
 {
- "_note": "spells[i].props와 abilityProps(=전 스킬 props 합집합, 패시브 미포함)는 DDragon ko_KR 스킬 설명(description+tooltip) 한국어 키워드 매칭으로 판정한 근사치이며 실제 게임 메커니즘과 다를 수 있음(생성: scripts/enrich-champions.cjs — 판정 규칙·수동 보정 주석 참조). immobilize는 하드 CC만(둔화·침묵 제외)이며 조건부 CC(진 W 속박 등)도 포함. short/passiveKo는 설명 요약 발췌. dmg(ad/ap/mixed)는 DDragon info.attack/magic 격차 3 기준으로 산출한 주 피해 유형 근사치(수동 보정: 에코=ap).",
+ "_note": "spells[i].props는 CommunityDragon 챔피언 bin의 스킬 태그(mSpellTags — research/raw/14-champion-bins.md)와 mCastType=1(대상 지정 → targeted)을 1차 소스로 번역하고, 태그가 침묵하는 속성(global/spin 전부와 targeted/dash/knockback/projectile/empoweredAttack/durationEffect 일부)은 DDragon ko_KR 설명 키워드 매칭을 폴백 병합한 근사치(생성: scripts/enrich-champions.cjs ← scripts/fetch-spelltags.cjs. 번역표·병합 정책·수동 보정은 스크립트 주석 참조). 출처는 spells[i].propsSource(traits|merged|keywords)로 표기. abilityProps = 전 스킬 props 합집합(패시브 미포함). immobilize/terrain/shield/heal/aoe/stealth는 게임 태그 전담(태그 없는 7슬롯만 키워드). short/passiveKo는 설명 요약 발췌. dmg(ad/ap/mixed)는 DDragon info.attack/magic 격차 3 기준 근사치(수동 보정: 에코=ap).",
  "version": "16.17.1",
  "champions": [
   {
@@ -22,8 +22,10 @@
      "short": "아트록스가 대검을 내리쳐 물리 피해를 줍니다. 세 번까지 휘두를 수 있으며 각 공격은 피해 범위가 다릅니다.",
      "props": [
       "knockback",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -32,25 +34,26 @@
      "props": [
       "projectile",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "파멸의 돌진",
      "short": "기본 지속 효과로 아트록스가 적 챔피언에게 피해를 입히면 체력을 회복합니다. 사용 시, 아트록스가 지정한 방향으로 돌진합니다.",
      "props": [
-      "dash",
-      "heal"
-     ]
+      "dash"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "세계의 종결자",
      "short": "아트록스가 악마의 힘을 해방하여 근처 적 미니언에게 공포를 주고 자신의 공격력과 체력 회복량, 이동 속도가 증가합니다.",
      "props": [
-      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "사신 태세: 주기적으로 아트록스의 기본 공격이 대상 최대 체력에 비례하여 추가 마법 피해를 입히고 자신의 체력을 회복합…",
@@ -59,7 +62,6 @@
     "dash",
     "knockback",
     "aoe",
-    "heal",
     "immobilize",
     "durationEffect"
    ],
@@ -85,8 +87,10 @@
      "nameKo": "현혹의 구슬",
      "short": "아리가 구슬을 던지고 다시 받습니다. 던질 때는 마법 피해를 주며 돌아올 때는 고정 피해를 줍니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -94,10 +98,10 @@
      "short": "아리의 이동 속도가 잠시 동안 크게 증가하며 아리가 여우불 세 개를 생성하면, 각각 자동으로 적을 찾아 공격합니다.",
      "props": [
       "projectile",
-      "aoe",
       "spin",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -106,7 +110,8 @@
      "props": [
       "projectile",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -117,7 +122,8 @@
       "dash",
       "aoe",
       "spin"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "정기 흡수: 아리가 미니언 또는 몬스터를 9마리 처치하면 체력을 회복합니다.",
@@ -150,8 +156,10 @@
      "nameKo": "오연투척검",
      "short": "아칼리가 단검 다섯 개를 던져 추가 공격력과 주문력에 비례하여 피해를 입히고 둔화시킵니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -160,7 +168,8 @@
      "props": [
       "stealth",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -169,16 +178,19 @@
      "props": [
       "projectile",
       "dash"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "무결처형",
      "short": "아칼리가 지정한 방향으로 도약해 공격이 적중한 적들에게 피해를 입힙니다.",
      "props": [
+      "projectile",
       "dash",
       "aoe"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "암살자의 표식: 스킬 공격으로 챔피언에게 피해를 입히면 해당 챔피언의 주변에 원이 생깁니다.",
@@ -211,8 +223,10 @@
      "nameKo": "복수의 부메랑",
      "short": "아크샨이 날아가고 돌아오며 피해를 입히는 부메랑을 던집니다. 적에게 적중할 때마다 부메랑의 사거리가 증가합니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -220,7 +234,8 @@
      "short": "아크샨이 아군 챔피언을 처치한 적 챔피언에게 악당 표식을 남깁니다.",
      "props": [
       "stealth"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -228,7 +243,8 @@
      "short": "아크샨이 갈고리총을 발사해 지형에 고정시킨 후, 갈고리에 매달린 채 가장 가까운 적을 연속으로 공격하며 이동합니다.",
      "props": [
       "projectile"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -237,12 +253,14 @@
      "props": [
       "projectile",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "비열한 싸움: 아크샨의 기본 공격 및 스킬이 세 번 적중할 때마다 추가 물리 피해를 입힙니다.",
    "abilityProps": [
     "projectile",
+    "aoe",
     "stealth",
     "durationEffect"
    ],
@@ -271,15 +289,18 @@
       "knockback",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "박치기",
      "short": "알리스타가 적에게 박치기를 하여 피해를 입히고 적을 밀어냅니다.",
      "props": [
-      "knockback"
-     ]
+      "knockback",
+      "immobilize"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -289,13 +310,15 @@
       "aoe",
       "immobilize",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "꺾을 수 없는 의지",
      "short": "알리스타가 거친 함성을 지르며 자신에게 걸린 모든 방해 효과를 제거하고 일정 시간 동안 적의 물리 및 마법 피해를 감소시킵니다.",
-     "props": []
+     "props": [],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "승리의 포효: 근처에서 적이 죽거나, 알리스타가 적 챔피언을 기절 혹은 이동시킬 때마다 포효를 중첩시킵니다.",
@@ -326,7 +349,10 @@
      "key": "Q",
      "nameKo": "교활한 휩쓸기 / 파멸의 일격",
      "short": "암베사가 쌍둥이 용사냥개로 전방 반원을 휩쓸어 날에 적중한 적에게 추가 피해를 입힙니다.",
-     "props": []
+     "props": [
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -336,7 +362,8 @@
       "aoe",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -345,16 +372,17 @@
      "props": [
       "dash",
       "aoe"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "공개 처형",
      "short": "암베사가 선택한 일직선상에서 가장 멀리 있는 적 챔피언에게 순간 이동한 후 제압합니다.",
      "props": [
-      "heal",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "용사냥개의 발걸음: 스킬을 사용하는 동안 기본 공격 또는 이동 명령을 하면 암베사가 스킬을 사용한 후 짧은 거리를 돌진하며 다…",
@@ -362,7 +390,6 @@
     "dash",
     "aoe",
     "shield",
-    "heal",
     "immobilize",
     "durationEffect"
    ],
@@ -390,7 +417,8 @@
      "props": [
       "projectile",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -399,7 +427,8 @@
      "props": [
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -408,7 +437,8 @@
      "props": [
       "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -418,7 +448,8 @@
       "projectile",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "저주의 손길: 아무무의 기본 공격을 받은 대상은 저주에 걸려 마법 피해를 입을 때마다 추가 고정 피해를 받습니다.",
@@ -452,7 +483,8 @@
       "projectile",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -460,28 +492,35 @@
      "short": "애니비아가 공기 중의 수분을 빙결시켜 지나갈 수 없는 얼음 벽을 만듭니다. 벽은 얼마 지나지 않아 녹아버립니다.",
      "props": [
       "terrain"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "동상",
      "short": "애니비아가 날개를 퍼덕이며 적에게 얼음 바람을 일으켜 피해를 입힙니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "targeted"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "얼음 폭풍",
      "short": "애니비아가 얼음의 비와 폭풍우를 소환하여 적에게 피해를 입히고 이동 속도를 늦춥니다.",
      "props": [
+      "projectile",
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "환생: 애니비아는 치명적인 피해를 입으면 알 형태로 돌아가 체력을 완전히 회복한 후 환생합니다.",
    "abilityProps": [
     "projectile",
+    "targeted",
     "aoe",
     "immobilize",
     "terrain",
@@ -509,8 +548,10 @@
      "nameKo": "붕괴",
      "short": "애니가 마나로 가득 찬 화염구를 던져 피해를 입히고 결정타를 냈을 때 사용한 마나를 되돌려 받습니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "targeted"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -518,33 +559,36 @@
      "short": "애니가 원뿔 형태의 화염을 내뿜어 해당 지역에 있는 모든 적에게 피해를 입힙니다.",
      "props": [
       "projectile"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "용암 방패",
      "short": "애니나 아군에게 보호막을 부여하고 이동 속도가 증가하며, 기본 공격이나 스킬로 공격하는 적에게 피해를 입힙니다.",
      "props": [
+      "aoe",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "소환: 티버",
      "short": "애니가 자신의 곰 티버를 되살려 지정 구역에 있는 유닛에게 피해를 입힙니다. 티버는 주변의 적을 공격하거나 불태울 수도 있습니다.",
      "props": [
-      "aoe",
-      "immobilize"
-     ]
+      "aoe"
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "방화광: 애니가 스킬을 4번 사용한 후 다음 공격 스킬에 맞은 적은 기절합니다.",
    "abilityProps": [
     "projectile",
+    "targeted",
     "aoe",
     "shield",
-    "immobilize",
     "durationEffect"
    ],
    "dmg": "ap"
@@ -570,35 +614,42 @@
      "props": [
       "projectile",
       "aoe",
+      "shield",
+      "heal",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "위상 변화",
      "short": "아펠리오스가 주 무기와 보조 무기를 서로 교체해 기본 공격과 스킬을 변경합니다.",
-     "props": []
+     "props": [],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "무기 교체 시스템",
      "short": "아펠리오스는 세 번째 스킬이 없습니다. 이 칸은 알룬이 부여할 다음 무기를 보여 줍니다.",
-     "props": []
+     "props": [],
+     "propsSource": "keywords"
     },
     {
      "key": "R",
      "nameKo": "월광포화",
      "short": "적 챔피언에게 적중 시 폭발하는 달빛 에너지를 발사합니다. 아펠리오스가 장착한 주 무기의 고유 효과를 적용합니다.",
      "props": [
-      "projectile",
-      "aoe"
-     ]
+      "projectile"
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "암살자와 예언자: 아펠리오스는 쌍둥이 누이 알룬이 만든 다섯 가지의 루나리 무기를 사용합니다.",
    "abilityProps": [
     "projectile",
     "aoe",
+    "shield",
+    "heal",
     "immobilize"
    ],
    "dmg": "ad"
@@ -623,16 +674,20 @@
      "nameKo": "궁사의 집중",
      "short": "애쉬는 공격을 계속하면 집중이 오릅니다.",
      "props": [
+      "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "일제 사격",
      "short": "애쉬가 화살을 원뿔 모양으로 발사하여 더 큰 피해를 입힙니다. 이때 서리 화살의 효과도 적용됩니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -641,7 +696,8 @@
      "props": [
       "projectile",
       "global"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -652,7 +708,8 @@
       "aoe",
       "global",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "서리 화살: 애쉬의 공격을 받은 대상이 느려지며, 이 대상에 대한 애쉬의 공격력이 상승합니다.",
@@ -661,6 +718,7 @@
     "aoe",
     "global",
     "immobilize",
+    "empoweredAttack",
     "durationEffect"
    ],
    "dmg": "ad"
@@ -686,22 +744,27 @@
      "props": [
       "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "별의 비행",
      "short": "아우렐리온 솔이 지정한 방향으로 날아갑니다. 이 상태에서 다른 스킬을 사용할 수 있습니다.",
-     "props": []
+     "props": [
+      "dash"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "특이점",
      "short": "아우렐리온 솔이 적에게 피해를 입히며 적을 천천히 중심으로 끌어당기는 블랙홀을 소환합니다.",
      "props": [
-      "immobilize",
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -709,17 +772,17 @@
      "short": "유성: 아우렐리온 솔이 땅으로 별을 떨어뜨립니다.",
      "props": [
       "knockback",
-      "aoe",
-      "immobilize"
-     ]
+      "aoe"
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "우주의 창조자: 아우렐리온 솔이 스킬로 피해를 입히면 각 스킬을 영구히 강화하는 별가루를 획득합니다.",
    "abilityProps": [
     "projectile",
+    "dash",
     "knockback",
     "aoe",
-    "immobilize",
     "durationEffect"
    ],
    "dmg": "ap"
@@ -745,8 +808,9 @@
      "short": "오로라가 적중한 적에게 저주를 내리는 에너지를 발사합니다.",
      "props": [
       "projectile",
-      "immobilize"
-     ]
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -756,7 +820,8 @@
       "dash",
       "stealth",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -766,7 +831,8 @@
       "projectile",
       "dash",
       "aoe"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -777,7 +843,8 @@
       "dash",
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "영혼 방호술: 오로라가 스킬 또는 공격으로 피해를 입힌 적의 영혼을 제령합니다.",
@@ -786,7 +853,6 @@
     "dash",
     "aoe",
     "stealth",
-    "immobilize",
     "durationEffect"
    ],
    "dmg": "ap"
@@ -810,16 +876,20 @@
      "key": "Q",
      "nameKo": "사막의 맹습",
      "short": "아지르가 모든 모래 병사를 특정 위치로 보냅니다. 모래 병사들은 통과하는 적에게 마법 피해를 입히고, 1초 둔화 효과를 적용합니다.",
-     "props": []
+     "props": [
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "일어나라!",
      "short": "아지르가 모래 병사를 소환하여 근처에 있는 대상을 공격합니다. 아지르의 기본 공격은 모래 병사의 공격 범위 내에 있는 대상에게 가해집니다.",
      "props": [
-      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -830,7 +900,8 @@
       "aoe",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -838,16 +909,23 @@
      "short": "아지르가 일렬 횡대의 병사들을 앞으로 돌진시켜 적들을 밀어내고 피해를 입힙니다.",
      "props": [
       "dash",
-      "knockback"
-     ]
+      "knockback",
+      "aoe",
+      "immobilize",
+      "terrain"
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "슈리마의 유산: 아지르는 무너진 아군 포탑이나 적 포탑 위에 태양 포탑을 소환할 수 있습니다.",
    "abilityProps": [
+    "projectile",
     "dash",
     "knockback",
     "aoe",
     "shield",
+    "immobilize",
+    "terrain",
     "durationEffect"
    ],
    "dmg": "mixed"
@@ -874,7 +952,8 @@
      "props": [
       "projectile",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -882,26 +961,32 @@
      "short": "짧은 시간 동안 치유력이 증가하는 체력 회복 성소를 드러냅니다. 성소는 처음 발을 들이는 아군을 치유하고 속도를 높인 후 사라집니다.",
      "props": [
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "신비한 차원문",
      "short": "바드가 근처 지형지물에 차원문을 엽니다. 아군과 적 챔피언이 모두 이 차원문을 이용해 정해진 방향으로 해당 지형지물을 통과할 수 있습니다.",
-     "props": []
+     "props": [],
+     "propsSource": "keywords"
     },
     {
      "key": "R",
      "nameKo": "운명의 소용돌이",
      "short": "바드가 목표 지점에 영적 에너지를 발사하여 잠시 동안 모든 유닛과 포탑을 정지시킵니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe",
+      "immobilize"
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "방랑자의 부름: 정령: 바드에게 이끌려 모여든 정령들이 바드의 기본 공격을 도와 추가 마법 피해를 입힙니다.",
    "abilityProps": [
     "projectile",
+    "aoe",
     "heal",
     "immobilize"
    ],
@@ -928,7 +1013,8 @@
      "props": [
       "dash",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -936,17 +1022,21 @@
      "short": "벨베스가 지면에 꼬리를 내리쳐 적에게 피해를 입히며 공중으로 띄워 올리고 둔화시킵니다.",
      "props": [
       "knockback",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "여제의 소용돌이",
      "short": "벨베스가 제자리에 가만히 서서 정신을 집중하며 가장 체력이 낮은 적을 노리고 생명력 흡수와 피해량 감소 효과를 부여하는 칼바람 소용돌이를 일으…",
      "props": [
+      "aoe",
       "heal",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -955,7 +1045,8 @@
      "props": [
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "연보랏빛 죽음 : 벨베스가 대형 미니언과 몬스터 및 챔피언 처치에 관여한 후 공격 속도 영구 중첩을 얻습니다.",
@@ -991,7 +1082,8 @@
      "props": [
       "projectile",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -999,7 +1091,8 @@
      "short": "블리츠크랭크가 힘을 충전하여 이동 및 공격 속도를 크게 향상시킵니다. 이 효과가 끝나면 일시적으로 이동 속도가 느려집니다.",
      "props": [
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -1009,7 +1102,8 @@
       "knockback",
       "immobilize",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -1017,9 +1111,9 @@
      "short": "블리츠크랭크의 공격을 받은 적에게 표식을 남기고 1초 후 번개 피해를 입힙니다.",
      "props": [
       "aoe",
-      "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "마나 보호막: 체력이 낮아지면 블리츠크랭크가 마나에 비례하여 보호막을 얻습니다.",
@@ -1027,7 +1121,6 @@
     "projectile",
     "knockback",
     "aoe",
-    "shield",
     "immobilize",
     "empoweredAttack",
     "durationEffect"
@@ -1056,13 +1149,17 @@
      "props": [
       "projectile",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "화염 기둥",
      "short": "잠시 후 목표 지점에 화염 기둥을 생성하여 해당 지역에 있는 적 유닛에게 마법 피해를 입힙니다. 불이 붙은 적은 25%의 추가 피해를 받습니다.",
-     "props": []
+     "props": [
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -1070,7 +1167,8 @@
      "short": "브랜드가 목표에 강력한 폭발을 일으켜 마법 피해를 입힙니다. 폭발은 주변 적들에게 퍼집니다.",
      "props": [
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -1080,7 +1178,8 @@
       "projectile",
       "targeted",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "불길: 브랜드의 스킬이 적을 불길로 휘감아, 4초 동안 피해를 줍니다.",
@@ -1111,7 +1210,10 @@
      "key": "Q",
      "nameKo": "동상",
      "short": "브라움이 방패에서 빙결을 뿜어내 둔화를 적용하고 마법 피해를 입힙니다. 뇌진탕 펀치 중첩이 1회 쌓입니다.",
-     "props": []
+     "props": [
+      "projectile"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -1120,7 +1222,8 @@
      "props": [
       "dash",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -1128,7 +1231,8 @@
      "short": "브라움이 몇 초 동안 한 방향으로 방패를 들어 올려, 날아오는 투사체를 대신 맞고 파괴합니다.",
      "props": [
       "projectile"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -1136,9 +1240,11 @@
      "short": "브라움이 지면을 내리쳐 부근과 전방 직선상의 적들을 띄워올립니다. 이 직선을 따라 균열이 가며 적들을 둔화시킵니다.",
      "props": [
       "knockback",
+      "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "뇌진탕 펀치: 브라움의 기본 공격은 뇌진탕 펀치를 적용시킵니다.",
@@ -1146,6 +1252,7 @@
     "projectile",
     "dash",
     "knockback",
+    "aoe",
     "immobilize",
     "durationEffect"
    ],
@@ -1173,7 +1280,8 @@
      "props": [
       "dash",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -1183,9 +1291,10 @@
       "dash",
       "aoe",
       "heal",
-      "immobilize",
-      "empoweredAttack"
-     ]
+      "empoweredAttack",
+      "durationEffect"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -1193,10 +1302,13 @@
      "short": "브라이어가 마음을 다잡아 핏빛 광분 상태에서 벗어나고, 힘을 모아 강력한 비명을 내질러 적에게 피해를 입히고 둔화시킵니다.",
      "props": [
       "projectile",
+      "knockback",
+      "aoe",
       "heal",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -1204,16 +1316,17 @@
      "short": "브라이어가 족쇄의 혈석을 발로 찬 다음, 혈석이 첫 번째로 적중한 챔피언을 먹잇감으로 지정하고 대상을 향해 날아갑니다.",
      "props": [
       "aoe",
-      "heal",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "진홍빛 저주: 브라이어는 기본 공격과 스킬로 중첩 가능한 출혈 효과를 적용하며, 출혈 피해의 일정 비율만큼 체력을 회복합…",
    "abilityProps": [
     "projectile",
     "dash",
+    "knockback",
     "aoe",
     "heal",
     "immobilize",
@@ -1241,8 +1354,10 @@
      "nameKo": "필트오버 피스메이커",
      "short": "케이틀린이 소총을 1초 동안 조준한 후 관통하는 탄환을 발사하여 물리 피해를 입힙니다. (다음 명중하는 대상에게는 더 낮은 피해가 들어갑니다.)",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -1251,7 +1366,8 @@
      "props": [
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -1259,18 +1375,21 @@
      "short": "케이틀린이 무거운 그물을 발사하여 적을 느리게 합니다. 그 반동으로 케이틀린은 뒤로 밀려납니다.",
      "props": [
       "projectile"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "비장의 한 발",
      "short": "케이틀린이 공을 들인 완벽한 사격을 하여 먼 거리에서 하나의 대상에게 큰 피해를 입힙니다.",
-     "props": []
+     "props": [],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "헤드샷: 케이틀린은 덫 또는 투망에 걸린 대상을 공격할 때나 일정 횟수 이상의 기본 공격을 했을 때 헤드샷을 발사하…",
    "abilityProps": [
     "projectile",
+    "aoe",
     "immobilize",
     "durationEffect"
    ],
@@ -1298,15 +1417,18 @@
      "props": [
       "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "전술적 휩쓸기",
      "short": "카밀이 잠시 후 전방을 원뿔형으로 휩쓸어 피해를 입힙니다.",
      "props": [
+      "aoe",
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -1315,24 +1437,30 @@
      "props": [
       "projectile",
       "dash",
-      "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "마법공학 최후통첩",
      "short": "카밀이 대상 챔피언에게 돌진해 일정 지역 내에 가둡니다. 대상에게 기본 공격 시 추가 마법 피해를 입힙니다.",
      "props": [
-      "dash"
-     ]
+      "dash",
+      "knockback",
+      "aoe",
+      "immobilize",
+      "durationEffect"
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "적응형 방어 체계: 챔피언에게 기본 공격 시 잠시 동안 카밀 최대 체력의 일부에 해당하는 피해를 흡수하는 보호막이 생깁니다.",
    "abilityProps": [
     "projectile",
     "dash",
+    "knockback",
     "aoe",
     "heal",
     "immobilize",
@@ -1360,8 +1488,10 @@
      "nameKo": "맹독 폭발",
      "short": "카시오페아가 잠시 후 대상 지역에 독을 폭발시킵니다. 적 챔피언이 독에 맞을 경우 카시오페아의 이동 속도가 증가합니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -1369,9 +1499,10 @@
      "short": "카시오페아가 독구름을 일으킵니다.",
      "props": [
       "projectile",
-      "immobilize",
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -1379,8 +1510,10 @@
      "short": "카시오페아가 대상에게 강력한 공격을 가하고 그 피해량에 비례해 자신의 체력을 회복합니다.",
      "props": [
       "projectile",
+      "targeted",
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -1388,13 +1521,17 @@
      "short": "카시오페아가 눈에서 마법의 에너지를 발사하여 정면에서 자신을 바라보는 적을 기절시키고, 등지고 있는 적의 속도를 늦춥니다.",
      "props": [
       "projectile",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "독사의 품격: 카시오페아의 모든 이동 속도 추가 효과가 증가합니다.",
    "abilityProps": [
     "projectile",
+    "targeted",
+    "aoe",
     "heal",
     "immobilize",
     "durationEffect"
@@ -1421,35 +1558,45 @@
      "nameKo": "파열",
      "short": "선택한 지역의 지면을 파열시켜 해당 지역에 있는 적을 공중으로 띄워 피해를 입히고 이동 속도를 늦춥니다.",
      "props": [
+      "projectile",
       "knockback",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "흉포한 울부짖음",
      "short": "초가스가 원뿔 형태의 지역에 무시무시한 비명을 질러 마법 피해를 입히고 몇 초 동안 적을 침묵시킵니다.",
-     "props": []
+     "props": [
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "날카로운 가시",
      "short": "초가스가 공격할 때마다 치명적인 가시가 발사되어 정면에 있는 모든 적에게 피해를 입히고 둔화시킵니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "포식",
      "short": "적 유닛을 먹어치워 적의 방어력을 무시하고 큰 고정 피해를 입힙니다. 대상을 처치하면 초가스가 성장하며 최대 체력이 증가합니다.",
-     "props": []
+     "props": [],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "육식: 초가스는 유닛을 죽이면 체력과 마나를 회복합니다. 회복량은 초가스의 레벨이 높아질수록 증가합니다.",
    "abilityProps": [
     "projectile",
     "knockback",
+    "aoe",
     "immobilize"
    ],
    "dmg": "ap"
@@ -1476,21 +1623,29 @@
      "props": [
       "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "발키리",
      "short": "코르키가 목표 위치로 비행하며 폭탄을 투하하여 불타는 흔적을 남겨, 그 안에 있는 적에게 피해를 입힙니다.",
-     "props": []
+     "props": [
+      "dash",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "개틀링 건",
      "short": "코르키가 정면에 원뿔 형태로 개틀링 건을 발사하여 적의 방어력과 마법 저항력을 낮추고 피해를 입힙니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe",
+      "durationEffect"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -1499,13 +1654,16 @@
      "props": [
       "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "마법공학 탄약: 코르키의 기본 공격 피해량의 일부가 추가 고정 피해로 전환됩니다.",
    "abilityProps": [
     "projectile",
-    "aoe"
+    "dash",
+    "aoe",
+    "durationEffect"
    ],
    "dmg": "mixed"
   },
@@ -1532,7 +1690,8 @@
       "aoe",
       "heal",
       "spin"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -1540,7 +1699,8 @@
      "short": "다리우스의 다음 공격은 적의 대동맥을 가격합니다. 적들이 출혈을 일으키면서 이동 속도가 감소합니다.",
      "props": [
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -1548,14 +1708,17 @@
      "short": "다리우스가 도끼날을 날카롭게 세워, 물리 피해를 가할 때 대상의 방어력 중 일정 비율을 무시합니다.",
      "props": [
       "knockback",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "녹서스의 단두대",
      "short": "다리우스가 적 챔피언에게 뛰어올라 치명적 타격을 가해 고정 피해를 입힙니다. 대상에 중첩된 과다출혈에 비례하여 피해량이 증가합니다.",
-     "props": []
+     "props": [],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "과다출혈: 다리우스의 기본 공격과 스킬 공격은 적에게 출혈을 일으켜 5초 동안 물리 피해를 입힙니다.",
@@ -1589,8 +1752,10 @@
      "nameKo": "초승달 검기",
      "short": "달 에너지를 휘어지게 발사하여 마법 피해를 입힙니다. 적중당한 적들은 은신 상태가 아닐 경우 달빛을 받아 3초 동안 위치가 노출됩니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -1600,7 +1765,8 @@
       "aoe",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -1608,16 +1774,17 @@
      "short": "복수심에 불타는 달의 화신이 되어, 적에게 돌진하여 마법 피해를 입힙니다.",
      "props": [
       "dash"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "달빛 낙하",
      "short": "다이애나가 주위 모든 적을 드러내 끌어당긴 다음 이동 속도를 늦춥니다.",
      "props": [
-      "aoe",
-      "immobilize"
-     ]
+      "aoe"
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "서늘한 달빛 검: 3번째 공격마다 근처 적들을 베어 추가 마법 피해를 입힙니다.",
@@ -1626,7 +1793,6 @@
     "dash",
     "aoe",
     "shield",
-    "immobilize",
     "durationEffect"
    ],
    "dmg": "mixed"
@@ -1653,7 +1819,8 @@
      "props": [
       "projectile",
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -1661,24 +1828,30 @@
      "short": "문도 박사가 스스로를 감전시켜 주변 적에게 지속 피해를 입히고 자신이 입는 피해의 일부를 저장합니다.",
      "props": [
       "aoe",
-      "heal"
-     ]
+      "heal",
+      "durationEffect"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "둔기에 의한 외상",
      "short": "기본 지속 효과 - 문도 박사가 최대 체력에 비례하여 추가 공격력을 얻습니다.",
      "props": [
+      "aoe",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "최대 투여량",
      "short": "문도 박사가 화학 물질을 투여하여 잃은 체력의 일부를 즉시 회복합니다.",
      "props": [
-      "heal"
-     ]
+      "heal",
+      "durationEffect"
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "가고 싶은 데로 간다: 문도 박사가 처음으로 적중하는 이동 불가 효과에 저항하며, 체력을 잃고 근처에 화학 물질이 든 통을 떨어뜨…",
@@ -1686,7 +1859,8 @@
     "projectile",
     "aoe",
     "heal",
-    "empoweredAttack"
+    "empoweredAttack",
+    "durationEffect"
    ],
    "dmg": "mixed"
   },
@@ -1711,7 +1885,8 @@
      "props": [
       "spin",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -1719,7 +1894,8 @@
      "short": "드레이븐의 이동 속도와 공격 속도가 증가합니다. 이동 속도 증가 효과는 시간이 지날수록 급격하게 감소합니다.",
      "props": [
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -1727,8 +1903,11 @@
      "short": "드레이븐이 도끼를 던져 물리 피해를 입히며, 도끼에 맞은 적들을 옆으로 밀어냅니다. 타격을 받은 대상들은 이동 속도가 감소합니다.",
      "props": [
       "projectile",
-      "knockback"
-     ]
+      "knockback",
+      "aoe",
+      "immobilize"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -1736,18 +1915,20 @@
      "short": "드레이븐이 두 개의 거대한 도끼를 던져 맞은 적 각각에게 물리 피해를 입힙니다.",
      "props": [
       "projectile",
-      "heal",
+      "aoe",
       "global"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "드레이븐의 리그: 드레이븐이 회전 도끼를 받아내거나 미니언 또는 몬스터를 처치하고 포탑을 철거하면 팬들의 환호를 받습니다.",
    "abilityProps": [
     "projectile",
     "knockback",
-    "heal",
+    "aoe",
     "global",
     "spin",
+    "immobilize",
     "empoweredAttack",
     "durationEffect"
    ],
@@ -1773,8 +1954,10 @@
      "nameKo": "시간의 톱니바퀴",
      "short": "에코가 적 챔피언에게 맞으면 펼쳐져서 시간 왜곡 지대를 만들고, 지대 안에 있는 적 모두를 둔화시키며 피해를 입히는 시간 톱니바퀴를 던집니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -1782,10 +1965,12 @@
      "short": "에코의 기본 공격이 체력이 낮은 적에게 추가 마법 피해를 입힙니다.",
      "props": [
       "projectile",
+      "aoe",
       "shield",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -1794,22 +1979,27 @@
      "props": [
       "dash",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "시공간 붕괴",
      "short": "에코가 시공간을 붕괴시켜 대상으로 지정할 수 없게 되며 더 유리한 지점으로 시간을 되돌립니다.",
      "props": [
+      "dash",
+      "aoe",
       "heal",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "Z 드라이브 공진: 같은 대상에 대한 세 번째 기본 공격 및 스킬 공격마다 추가 마법 피해를 입힙니다.",
    "abilityProps": [
     "projectile",
     "dash",
+    "aoe",
     "shield",
     "heal",
     "immobilize",
@@ -1837,13 +2027,20 @@
      "key": "Q",
      "nameKo": "신경독 / 독이빨",
      "short": "인간 형태: 대상 적의 체력에 비례하여 피해를 입힙니다. 거미 형태: 적 하나를 덮쳐, 적이 잃은 체력에 비례하여 피해를 입힙니다.",
-     "props": []
+     "props": [
+      "projectile",
+      "targeted"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "위험한 새끼 거미 / 광란의 질주",
      "short": "인간 형태: 독을 품은 새끼 거미를 풀어놓으면 대상 적 근처에 가서 터집니다. 거미 형태: 엘리스와 새끼 거미들의 공격 속도가 상승합니다.",
-     "props": []
+     "props": [
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -1852,18 +2049,22 @@
      "props": [
       "projectile",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "거미 형태",
      "short": "무서운 거미로 변해 공격 사거리가 줄어드는 대신 이동 속도가 상승하며, 새로운 스킬을 사용하고, 새끼 거미 떼가 적을 공격합니다.",
-     "props": []
+     "props": [],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "거미 여왕: 인간 형태: 엘리스의 스킬이 적에 적중하면 휴면 상태의 새끼 거미가 생깁니다.",
    "abilityProps": [
     "projectile",
+    "targeted",
+    "aoe",
     "immobilize"
    ],
    "dmg": "mixed"
@@ -1890,7 +2091,8 @@
      "props": [
       "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -1898,7 +2100,8 @@
      "short": "이블린이 대상에게 저주를 겁니다. 이 대상에게 공격 또는 스킬을 시전하면 잠시 후 매혹 효과가 발동되며 대상의 마법 저항력이 감소합니다.",
      "props": [
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -1907,7 +2110,8 @@
      "props": [
       "dash",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -1915,8 +2119,10 @@
      "short": "이블린이 잠시 대상으로 지정할 수 없게 되며 전방 범위 내의 적에게 피해를 준 다음 순간적으로 뒤쪽으로 이동합니다.",
      "props": [
       "projectile",
+      "dash",
       "aoe"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "악의 장막: 이블린은 전투에서 벗어나 있을 때 악의 장막에 휩싸입니다.",
@@ -1950,16 +2156,17 @@
      "short": "이즈리얼이 에너지로 이루어진 화살을 발사합니다. 적 유닛에게 명중하면 모든 스킬의 재사용 대기시간이 약간 감소합니다.",
      "props": [
       "projectile"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "정수의 흐름",
      "short": "이즈리얼이 구체를 발사해 처음으로 적중한 챔피언이나 목표물에 남아있게 합니다. 구체에 적중된 적을 공격하면 구체가 폭발하며 피해를 입힙니다.",
      "props": [
-      "projectile",
-      "aoe"
-     ]
+      "projectile"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -1968,7 +2175,8 @@
      "props": [
       "projectile",
       "dash"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -1976,8 +2184,10 @@
      "short": "이즈리얼이 힘을 모은 후 강력한 에너지를 발사해 관통하는 적 모두에게 큰 피해를 입힙니다.",
      "props": [
       "projectile",
+      "aoe",
       "global"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "끓어오르는 주문의 힘: 이즈리얼이 스킬을 적중시킬 때마다 공격 속도가 증가합니다. (최대 5회 중첩)",
@@ -2010,7 +2220,8 @@
      "short": "피들스틱이 적의 시야에 보이지 않을 때 적에게 스킬로 피해를 입히거나 공포를 사용하면 대상을 공포에 질리게 하여 일정 시간 도망치게 합니다.",
      "props": [
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -2019,26 +2230,34 @@
      "props": [
       "aoe",
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "수확",
      "short": "피들스틱이 넓은 범위를 낫으로 베어 적중한 모든 적을 둔화시키고 가운데에 있는 적을 침묵시킵니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "까마귀 폭풍",
      "short": "피들스틱 주변을 까마귀 떼가 헤집고 다니며 매초 해당 지역에 있는 모든 적 유닛에게 피해를 입힙니다.",
-     "props": []
+     "props": [
+      "dash",
+      "aoe"
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "무해한 허수아비: 피들스틱의 장신구는 허수아비로 대체됩니다.",
    "abilityProps": [
     "projectile",
+    "dash",
     "aoe",
     "heal",
     "immobilize"
@@ -2065,9 +2284,9 @@
      "nameKo": "찌르기",
      "short": "피오라가 한 방향으로 돌진하며 근처 적 하나를 찔러 물리 피해를 입히고 적중 시 효과를 적용합니다.",
      "props": [
-      "dash",
-      "aoe"
-     ]
+      "dash"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -2075,13 +2294,15 @@
      "short": "피오라가 잠시 동안 받는 모든 공격과 이동 불가 효과를 막아낸 다음 대상이 있는 방향으로 검을 찌릅니다.",
      "props": [
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "대가의 검술",
      "short": "피오라는 다음 두 번의 공격에 대해 공격 속도가 상승합니다. 첫 번째 공격은 대상을 둔화시키고, 두 번째 공격은 치명타가 됩니다.",
-     "props": []
+     "props": [],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -2089,13 +2310,13 @@
      "short": "피오라가 적 챔피언의 급소 네 군데를 모두 드러내고 해당 적 근처에서 이동 속도가 증가합니다.",
      "props": [
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "치명적인 검무: 피오라가 챔피언의 급소 하나를 드러냅니다. 급소를 가격하면 체력을 회복하고 이동 속도가 상승합니다.",
    "abilityProps": [
     "dash",
-    "aoe",
     "heal",
     "immobilize"
    ],
@@ -2122,7 +2343,8 @@
      "short": "피즈가 대상을 뚫고 지나가며 마법 피해를 줍니다. 적중 시 효과도 적용됩니다.",
      "props": [
       "dash"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -2131,7 +2353,8 @@
      "props": [
       "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -2140,7 +2363,8 @@
      "props": [
       "dash",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -2148,8 +2372,10 @@
      "short": "피즈가 지정한 방향으로 마법 물고기를 풀어놓으면, 이 물고기를 건드리는 챔피언에게 들러붙어 이동 속도를 늦춥니다.",
      "props": [
       "knockback",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "영리한 싸움꾼: 피즈는 유닛을 통과할 수 있으며 모든 공격으로부터 받는 피해가 고정된 수치만큼 감소합니다.",
@@ -2183,8 +2409,10 @@
      "nameKo": "전장의 돌풍",
      "short": "갈리오가 두 개의 돌풍을 발사해 지속 피해를 입히는 거대한 소용돌이를 만듭니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -2192,10 +2420,11 @@
      "short": "갈리오가 방어 태세를 갖추며 움직임이 느려집니다. 스킬을 다시 사용하면 근처의 적을 모두 도발하고 피해를 줍니다.",
      "props": [
       "projectile",
-      "shield",
+      "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -2205,7 +2434,8 @@
       "dash",
       "knockback",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -2213,9 +2443,11 @@
      "short": "갈리오가 아군이 있는 위치를 착지 지점으로 정해, 해당 지점 주변의 모든 아군에게 마법 보호막을 씌웁니다.",
      "props": [
       "knockback",
+      "aoe",
       "shield",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "석상의 강타: 몇 초마다 갈리오의 다음 기본 공격이 일정 영역에 추가 마법 피해를 입힙니다.",
@@ -2223,6 +2455,7 @@
     "projectile",
     "dash",
     "knockback",
+    "aoe",
     "shield",
     "immobilize",
     "durationEffect"
@@ -2249,7 +2482,8 @@
      "short": "대상에게 총을 발사해 처치한 적 유닛마다 골드를 약탈합니다.",
      "props": [
       "projectile"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -2257,15 +2491,18 @@
      "short": "귤을 먹어서 군중 제어 효과를 제거하고 체력을 회복합니다.",
      "props": [
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "화약통",
      "short": "갱플랭크가 대상 위치에 화약통을 비치합니다. 갱플랭크가 이 통을 공격하면 폭발하여 주위 적들에게 피해를 입히며 둔화를 적용합니다.",
      "props": [
+      "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -2273,9 +2510,11 @@
      "short": "갱플랭크가 특정 지역을 포격하도록 배에 신호하여 적의 이동 속도를 늦추며 피해를 입힙니다.",
      "props": [
       "projectile",
+      "aoe",
       "global",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "불의 심판: 몇 초에 한 번씩 갱플랭크의 근접 공격이 적에게 불을 붙입니다.",
@@ -2310,7 +2549,8 @@
      "props": [
       "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -2319,7 +2559,8 @@
      "props": [
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -2328,13 +2569,15 @@
      "props": [
       "aoe",
       "spin"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "데마시아의 정의",
      "short": "가렌이 적 챔피언을 처단할 데마시아의 힘을 소환합니다.",
-     "props": []
+     "props": [],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "인내심: 가렌이 잠시 적의 기본 공격 및 스킬 공격에 맞지 않으면 1초마다 총 체력의 일정 비율씩 회복됩니다.",
@@ -2367,24 +2610,27 @@
      "nameKo": "부메랑 던지기 / 돌덩이 던지기",
      "short": "나르가 부메랑을 던지면 맞힌 적에게 피해를 입히고 속도를 늦춘 다음 나르에게 돌아옵니다. 나르가 부메랑을 받으면 재사용 대기시간이 감소합니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "슝슝 / 쿵쾅",
      "short": "나르는 기본 공격과 스킬 공격을 하면 신이 나서 추가 피해를 입히며 이동 속도가 상승합니다.",
-     "props": [
-      "immobilize"
-     ]
+     "props": [],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "폴짝 / 우지끈",
      "short": "나르가 대상 지점으로 폴짝 뛰며, 유닛의 머리 위에 착지하는 경우에는 튕겨서 더 멀리 날아갑니다.",
      "props": [
+      "dash",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -2395,12 +2641,14 @@
       "knockback",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "분노 유전자: 나르는 전투 중 분노가 생성됩니다.",
    "abilityProps": [
     "projectile",
+    "dash",
     "knockback",
     "aoe",
     "immobilize",
@@ -2429,7 +2677,8 @@
      "short": "그라가스가 술통을 굴려 폭발시킵니다. 술통은 4초 뒤 자동으로 폭발하며 스킬을 다시 사용하여 직접 폭발시킬 수도 있습니다.",
      "props": [
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -2438,7 +2687,8 @@
      "props": [
       "aoe",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -2450,7 +2700,8 @@
       "knockback",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -2459,8 +2710,10 @@
      "props": [
       "projectile",
       "knockback",
-      "aoe"
-     ]
+      "aoe",
+      "immobilize"
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "서비스 시간: 그라가스가 스킬을 사용하면 주기적으로 체력을 회복합니다.",
@@ -2495,7 +2748,8 @@
      "props": [
       "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -2503,8 +2757,10 @@
      "short": "그레이브즈가 목표 지점에 연막탄을 발사하여 시야를 좁히는 연기 구름을 만들어냅니다.",
      "props": [
       "projectile",
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -2513,7 +2769,8 @@
      "props": [
       "dash",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -2522,7 +2779,8 @@
      "props": [
       "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "새로운 운명: 그레이브즈의 산탄총에는 몇 가지 특징이 있습니다. 총탄이 떨어지면 총을 새로 장전해야 합니다.",
@@ -2552,7 +2810,10 @@
      "key": "Q",
      "nameKo": "싹둑싹둑!",
      "short": "그웬이 최대 6회까지 가위질하여 원뿔 범위에 마법 피해를 입힙니다.",
-     "props": []
+     "props": [
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -2560,7 +2821,8 @@
      "short": "그웬이 안개를 소환하여 안개 밖에 있는 적으로부터 자신을 보호합니다. 안개에 들어오는 적만이 그웬을 대상으로 지정할 수 있습니다.",
      "props": [
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -2570,21 +2832,25 @@
       "dash",
       "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "바느질",
      "short": "그웬이 바늘을 던져 적중한 적에게 마법 피해를 입히고 둔화시킵니다. 챔피언에게 적중 시 가위 난도질을 적용합니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "가위 난도질: 그웬의 기본 공격이 대상의 체력에 비례해 추가 마법 피해를 입힙니다.",
    "abilityProps": [
     "projectile",
     "dash",
+    "aoe",
     "empoweredAttack",
     "durationEffect"
    ],
@@ -2610,8 +2876,10 @@
      "nameKo": "회오리 베기",
      "short": "헤카림이 주변 적을 베어 물리 피해를 입힙니다. 한 명의 적이라도 적중 시 다음 회오리 베기의 피해량이 증가하며 재사용 대기시간이 감소합니다.",
      "props": [
-      "aoe"
-     ]
+      "aoe",
+      "empoweredAttack"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -2620,7 +2888,8 @@
      "props": [
       "aoe",
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -2628,8 +2897,10 @@
      "short": "잠깐 동안 헤카림의 이동 속도가 빨라지고 다른 유닛을 통과해 이동할 수 있습니다.",
      "props": [
       "knockback",
+      "immobilize",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -2639,7 +2910,8 @@
       "dash",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "출정: 헤카림의 공격력이 추가 이동 속도의 일정 비율만큼 증가합니다.",
@@ -2674,15 +2946,18 @@
      "short": "하이머딩거가 관통 광선 공격이 추가된 속사포 포탑을 설치합니다. (하이머딩거의 포탑은 적 포탑에 절반의 피해만 줍니다.)",
      "props": [
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "마법공학 초소형 로켓",
      "short": "하이머딩거가 마우스 커서 위치로 모이는 초소형 로켓들을 발사합니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -2690,8 +2965,10 @@
      "short": "하이머딩거가 목표 위치에 수류탄을 던져 적에게 피해를 입힙니다. 수류탄에 직격당한 적은 기절하며, 빗겨맞은 유닛은 느려집니다.",
      "props": [
       "projectile",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -2699,9 +2976,9 @@
      "short": "하이머딩거가 업그레이드를 개발하여, 다음 스킬의 효과가 증가합니다.",
      "props": [
       "projectile",
-      "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "마법공학 전문가: 아군 포탑이나 하이머딩거가 설치한 포탑 주변에서 이동 속도가 증가합니다.",
@@ -2732,16 +3009,17 @@
      "key": "Q",
      "nameKo": "주제: 참사",
      "short": "흐웨이가 일련의 참사를 상상하며 파괴적인 일격을 그립니다. 흐웨이의 스킬을 공격 스킬인 파멸의 화염, 절단의 번개, 녹아내린 균열로 교체합니다.",
-     "props": []
+     "props": [],
+     "propsSource": "keywords"
     },
     {
      "key": "W",
      "nameKo": "주제: 평온",
      "short": "흐웨이가 일련의 평온을 상상하며 힘을 북돋는 배경을 그립니다.",
      "props": [
-      "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -2750,22 +3028,20 @@
      "props": [
       "projectile",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "절망의 소용돌이",
      "short": "흐웨이가 순수한 절망의 환상을 그립니다. 처음 맞은 적을 중심으로 그림이 점점 커지며 주변 적을 둔화시키고 피해를 입힙니다.",
-     "props": [
-      "aoe"
-     ]
+     "props": [],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "몽상가의 서명: 흐웨이가 스킬로 적 챔피언에게 피해를 입히면 서명으로 마무리할 준비를 합니다.",
    "abilityProps": [
     "projectile",
-    "aoe",
-    "shield",
     "immobilize",
     "durationEffect"
    ],
@@ -2790,7 +3066,10 @@
      "key": "Q",
      "nameKo": "촉수 강타",
      "short": "촉수의 피해량이 증가합니다. 사용 시 일라오이가 촉수로 내리쳐 물리 피해를 입힙니다.",
-     "props": []
+     "props": [
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -2799,25 +3078,30 @@
      "props": [
       "dash",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "영혼의 시험",
      "short": "일라오이가 적의 몸에서 영혼을 분리해 자신의 앞에 서게 만듭니다. 영혼은 자신이 입는 피해량의 일부를 원래의 대상에게 돌려줍니다.",
-     "props": []
+     "props": [],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "믿음의 도약",
      "short": "일라오이가 자신의 성상을 바닥에 내리쳐 근처 적들에게 물리 피해를 입힙니다. 피해를 입는 적 챔피언 한 명당 하나의 촉수가 소환됩니다.",
      "props": [
+      "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "고대신의 예언자: 일라오이와 그녀의 숙주는 근처의 통과할 수 없는 지형에 촉수를 소환합니다.",
    "abilityProps": [
+    "projectile",
     "dash",
     "aoe",
     "empoweredAttack"
@@ -2846,7 +3130,8 @@
      "props": [
       "dash",
       "heal"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -2854,8 +3139,10 @@
      "short": "이렐리아가 칼날에 힘을 충전한 뒤 공격합니다. 충전 중에는 이렐리아가 받는 물리 피해량이 감소하며 충전을 오래 할수록 공격이 강력해집니다.",
      "props": [
       "projectile",
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -2863,8 +3150,10 @@
      "short": "이렐리아가 칼날 두 개를 던진 후 두 칼날이 서로를 향해 날아갑니다. 날아가는 칼날에 맞은 적은 피해를 입으며 기절한 뒤 표식이 생깁니다.",
      "props": [
       "projectile",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -2873,7 +3162,8 @@
      "props": [
       "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "아이오니아의 열정: 이렐리아의 스킬이 적에게 적중하면 중첩이 쌓이며, 중첩에 따라 추가 공격 속도가 적용됩니다.",
@@ -2910,7 +3200,8 @@
       "projectile",
       "dash",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -2918,7 +3209,8 @@
      "short": "아이번과 주변 아군이 수풀 속에 있으면 기본 공격 시 추가 마법 피해를 입힙니다. 이 스킬을 사용하면 수풀을 심을 수 있습니다.",
      "props": [
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -2928,7 +3220,8 @@
       "aoe",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -2939,7 +3232,8 @@
       "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "숲의 친구: 아이번은 에픽 몬스터를 제외한 몬스터와는 서로 공격할 수 없지만, 대신 정글 캠프에 마법의 덤불을 심을 수…",
@@ -2978,13 +3272,18 @@
       "knockback",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "서풍",
      "short": "잔나가 기본 지속 효과로 정령을 소환하여 이동 속도를 높이고 다른 유닛 사이로 지나갈 수 있게 됩니다.",
-     "props": []
+     "props": [
+      "projectile",
+      "targeted"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -2993,7 +3292,8 @@
      "props": [
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -3002,14 +3302,17 @@
      "props": [
       "knockback",
       "aoe",
-      "heal"
-     ]
+      "heal",
+      "immobilize"
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "순풍: 아군이 잔나를 향해 움직일 때 이동 속도가 증가합니다.",
    "abilityProps": [
     "projectile",
     "knockback",
+    "targeted",
     "aoe",
     "shield",
     "heal",
@@ -3040,8 +3343,10 @@
      "props": [
       "dash",
       "knockback",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -3051,7 +3356,8 @@
       "aoe",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -3059,8 +3365,10 @@
      "short": "데마시아의 긍지를 품은 자르반 4세의 공격 속도가 상승합니다.",
      "props": [
       "projectile",
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -3070,7 +3378,8 @@
       "dash",
       "aoe",
       "terrain"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "전장의 군가: 자르반의 첫 기본 공격이 적의 현재 체력에 비례하여 추가 물리 피해를 입힙니다.",
@@ -3106,7 +3415,8 @@
      "short": "잭스가 목표 유닛을 향해 뛰어오릅니다. 대상이 적일 경우 무기로 내려칩니다.",
      "props": [
       "dash"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -3114,7 +3424,8 @@
      "short": "잭스가 무기에 힘을 모아 다음 번 적을 공격할 때 강력한 추가 피해를 입힙니다.",
      "props": [
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -3122,8 +3433,10 @@
      "short": "잭스가 뛰어난 전투 실력으로 짧은 시간동안 적의 공격을 모두 피할 수 있게 됩니다.",
      "props": [
       "aoe",
-      "immobilize"
-     ]
+      "immobilize",
+      "durationEffect"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -3132,7 +3445,8 @@
      "props": [
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "가차없는 맹공: 잭스가 연속해서 기본 공격을 가하면 공격 속도가 상승합니다.",
@@ -3168,7 +3482,8 @@
       "projectile",
       "dash",
       "aoe"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -3177,7 +3492,8 @@
      "props": [
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -3185,8 +3501,10 @@
      "short": "해머 사용 시: 적에게 마법 피해를 가하고 짧은 거리 만큼 뒤로 밀쳐냅니다.",
      "props": [
       "projectile",
-      "knockback"
-     ]
+      "knockback",
+      "immobilize"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -3194,7 +3512,8 @@
      "short": "해머 사용 시: 머큐리 해머를 머큐리 캐논으로 변환하여 새로운 스킬을 사용하며 사거리가 늘어납니다.",
      "props": [
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "마법공학 축전기: 제이스가 무기를 바꾸면 잠시 동안 이동 속도가 증가합니다.",
@@ -3203,6 +3522,7 @@
     "dash",
     "knockback",
     "aoe",
+    "immobilize",
     "empoweredAttack",
     "durationEffect"
    ],
@@ -3228,8 +3548,11 @@
      "nameKo": "춤추는 유탄",
      "short": "진이 마법 폭탄을 적에게 던집니다. 최대 네 명의 대상에게 적중하며, 적을 처치할 때마다 피해량이 증가합니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "targeted",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -3239,7 +3562,8 @@
       "projectile",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -3248,20 +3572,24 @@
      "props": [
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "커튼 콜",
      "short": "진이 정신 집중을 해 속삭임을 견착식 저격포로 변신시킵니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "속삭임: '속삭임'이라고 불리는 진의 총은 우월한 살상력을 위해 설계된 정밀 기계입니다.",
    "abilityProps": [
     "projectile",
+    "targeted",
     "aoe",
     "immobilize",
     "durationEffect"
@@ -3289,16 +3617,17 @@
      "props": [
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "빠직!",
      "short": "징크스가 빠직!으로 전기 충격파를 발사해 처음 적중한 적을 둔화시키고 위치를 드러내며 피해를 입힙니다.",
      "props": [
-      "projectile",
-      "aoe"
-     ]
+      "projectile"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -3309,7 +3638,8 @@
       "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -3319,7 +3649,8 @@
       "projectile",
       "aoe",
       "global"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "신난다!: 징크스는 적 챔피언이나 에픽 정글 몬스터 처치에 관여하거나 구조물 파괴를 도우면 이동 속도와 공격 속도가…",
@@ -3356,7 +3687,8 @@
       "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -3365,8 +3697,10 @@
      "props": [
       "dash",
       "knockback",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -3376,7 +3710,8 @@
       "dash",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -3386,8 +3721,9 @@
       "projectile",
       "dash",
       "knockback",
-      "heal"
-     ]
+      "immobilize"
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "불굴의 본능: 크산테의 스킬이 대상에게 표식을 남겨 다음번 기본 공격 시 추가 피해를 입힙니다.",
@@ -3397,7 +3733,6 @@
     "knockback",
     "aoe",
     "shield",
-    "heal",
     "immobilize",
     "durationEffect"
    ],
@@ -3425,7 +3760,8 @@
      "props": [
       "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -3434,7 +3770,8 @@
      "props": [
       "projectile",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -3443,7 +3780,8 @@
      "props": [
       "stealth",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -3453,7 +3791,8 @@
       "dash",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "두 번째 피부: 카이사는 기본 공격으로 플라즈마 중첩을 쌓아 그에 따른 추가 마법 피해를 입힙니다.",
@@ -3487,14 +3826,17 @@
      "short": "칼리스타가 빠르게 날아가는 창을 던집니다. 적이 처치될 경우 관통해 날아갑니다.",
      "props": [
       "projectile",
-      "dash"
-     ]
+      "dash",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "감시하는 혼",
      "short": "칼리스타와 계약을 맺은 아군이 같은 대상을 공격하면 추가 피해를 입힙니다. 사용 시 혼이 일정한 경로를 순찰하며 자기 앞의 지역을 드러냅니다.",
-     "props": []
+     "props": [],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -3503,7 +3845,8 @@
      "props": [
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -3511,9 +3854,9 @@
      "short": "칼리스타가 계약을 맺은 아군을 자신에게로 순간 이동시킵니다.",
      "props": [
       "dash",
-      "knockback",
-      "aoe"
-     ]
+      "knockback"
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "전투 태세: 칼리스타가 기본 공격이나 꿰뚫는 창의 준비 동작을 하는 동안 이동 명령을 하면, 칼리스타가 기본 공격과 함…",
@@ -3548,7 +3891,8 @@
      "props": [
       "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -3557,27 +3901,28 @@
      "props": [
       "heal",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "고무",
      "short": "카르마가 보호막을 소환하여 적이 가하는 피해를 막아내고, 보호받는 아군은 이동 속도가 상승합니다.",
      "props": [
+      "aoe",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "만트라",
      "short": "카르마가 다음 스킬을 강화하여 추가 효과를 부여합니다. 만트라는 1레벨부터 사용할 수 있으며 스킬 포인트가 필요 없습니다.",
      "props": [
-      "shield",
-      "heal",
-      "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "열정 응집: 카르마가 스킬로 피해를 입히면 만트라의 재사용 대기시간이 감소합니다.",
@@ -3611,15 +3956,18 @@
      "short": "카서스가 특정 위치에 잠시 후 폭발을 일으켜 근처 적에게 피해를 입힙니다. 단일 대상에게는 더 큰 피해를 입힙니다.",
      "props": [
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "고통의 벽",
      "short": "카서스가 에너지를 빨아들이는 통행 가능한 벽을 생성합니다. 이 벽을 지나는 모든 적 유닛의 이동 속도와 마법 저항력이 일정 시간 감소합니다.",
      "props": [
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -3628,15 +3976,18 @@
      "props": [
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "진혼곡",
      "short": "카서스가 3초 동안 정신 집중을 마치면 모든 적 챔피언이 피해를 입습니다.",
      "props": [
+      "aoe",
       "global"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "죽음 극복: 카서스가 죽으면 영혼이 되어 스킬을 사용할 수 있습니다.",
@@ -3668,26 +4019,30 @@
      "short": "카사딘이 대상에게 공허 에너지로 구성된 구체를 발사하여 피해를 입히고 정신 집중을 끊습니다.",
      "props": [
       "projectile",
+      "targeted",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "황천의 검",
      "short": "기본 지속 효과: 카사딘의 기본 공격이 추가 마법 피해를 입힙니다.",
      "props": [
-      "heal",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "힘의 파동",
      "short": "카사딘이 자신의 영역 안에서 사용된 스킬에서 에너지를 뽑아냅니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -3696,16 +4051,17 @@
      "props": [
       "dash",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "공허석: 카사딘이 받는 마법 피해가 감소하며, 유닛과의 충돌을 무시합니다.",
    "abilityProps": [
     "projectile",
     "dash",
+    "targeted",
     "aoe",
     "shield",
-    "heal",
     "empoweredAttack",
     "durationEffect"
    ],
@@ -3732,8 +4088,10 @@
      "short": "카타리나가 대상에게 단검을 던집니다. 단검은 근처 적들에게 튕겼다가 땅에 떨어집니다.",
      "props": [
       "projectile",
+      "targeted",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -3741,7 +4099,8 @@
      "short": "카타리나가 단검을 머리 위로 던지며 이동 속도가 크게 빨라집니다.",
      "props": [
       "projectile"
-     ]
+     ],
+     "propsSource": "keywords"
     },
     {
      "key": "E",
@@ -3749,7 +4108,8 @@
      "short": "카타리나가 대상에게 도약합니다. 대상이 적일 경우 대상에게 피해를 입히고, 대상이 적이 아닐 경우 가장 가까이에 있는 적에게 피해를 입힙니다.",
      "props": [
       "dash"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -3758,13 +4118,15 @@
      "props": [
       "aoe",
       "spin"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "탐욕: 카타리나가 최근에 피해를 입힌 챔피언이 죽을 때마다 카타리나에게 적용 중인 스킬 재사용 대기시간이 크게 감…",
    "abilityProps": [
     "projectile",
     "dash",
+    "targeted",
     "aoe",
     "spin"
    ],
@@ -3792,7 +4154,8 @@
      "props": [
       "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -3801,7 +4164,8 @@
      "props": [
       "heal",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -3810,7 +4174,8 @@
      "props": [
       "aoe",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -3818,7 +4183,8 @@
      "short": "케일이 아군 한 명을 무적 상태로 만들고 예전 정의의 성위를 불러와 그 힘으로 신성한 검을 비처럼 쏟아부어 해당 챔피언 주변 지역을 정화합니다.",
      "props": [
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "거룩한 승천: 챔피언 레벨 및 스킬 레벨이 오를수록 케일의 공격이 천상의 힘을 받아 강화됩니다.",
@@ -3853,7 +4219,8 @@
      "props": [
       "dash",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -3861,8 +4228,9 @@
      "short": "케인이 직선상의 대상 모두에게 피해를 입히고 둔화시킵니다.",
      "props": [
       "knockback",
-      "immobilize"
-     ]
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -3871,15 +4239,18 @@
      "props": [
       "heal",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "그림자의 지배",
      "short": "케인이 적에게 파고들었다가 빠져나오면서 큰 피해를 입힙니다.",
      "props": [
+      "aoe",
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "다르킨의 낫: 케인은 다르킨 무기 라아스트를 휘두르는 한편 제압하려고 하고, 라아스트는 케인을 잠식하려 합니다.",
@@ -3888,7 +4259,6 @@
     "knockback",
     "aoe",
     "heal",
-    "immobilize",
     "durationEffect"
    ],
    "dmg": "ad"
@@ -3913,7 +4283,8 @@
      "short": "케넨이 빠르게 날아가는 수리검을 날려 맞은 대상에게 피해를 입히고 폭풍의 표식을 남깁니다.",
      "props": [
       "projectile"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -3922,15 +4293,18 @@
      "props": [
       "aoe",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "번개 질주",
      "short": "케넨이 번개로 변신하여 유닛을 뚫고 지나가며 폭풍의 표식을 남깁니다.",
      "props": [
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -3940,7 +4314,8 @@
       "projectile",
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "폭풍의 표식: 케넨의 스킬에 3번 적중당한 적은 기절합니다.",
@@ -3970,10 +4345,8 @@
      "key": "Q",
      "nameKo": "공포 감지",
      "short": "대상에게 물리 피해를 줍니다. 고립된 대상에게는 피해량이 늘어납니다.",
-     "props": [
-      "aoe",
-      "immobilize"
-     ]
+     "props": [],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -3981,16 +4354,20 @@
      "short": "카직스가 폭발하는 가시를 발사하여 적중한 적에게 물리 피해를 가합니다. 폭발 범위 안에 있으면 카직스의 체력이 회복됩니다.",
      "props": [
       "projectile",
+      "aoe",
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "도약",
      "short": "카직스가 도약하여, 착지할 때 물리 피해를 가합니다.",
      "props": [
-      "dash"
-     ]
+      "dash",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -4000,9 +4377,9 @@
       "projectile",
       "dash",
       "stealth",
-      "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "보이지 않는 위협: 동료로부터 고립된 근처 적에게 표식이 남습니다. 고립된 대상에게는 카직스의 스킬이 추가 효과를 발휘합니다.",
@@ -4012,7 +4389,6 @@
     "aoe",
     "heal",
     "stealth",
-    "immobilize",
     "durationEffect"
    ],
    "dmg": "ad"
@@ -4038,8 +4414,10 @@
      "props": [
       "projectile",
       "dash",
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -4047,9 +4425,10 @@
      "short": "늑대가 분노하여 주변의 적들을 공격합니다. 양이 기본 지속 효과로 움직이고 공격하여 중첩을 얻습니다.",
      "props": [
       "aoe",
-      "heal",
-      "empoweredAttack"
-     ]
+      "empoweredAttack",
+      "durationEffect"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -4057,15 +4436,19 @@
      "short": "양이 신중하게 화살을 발사해 대상의 속도를 늦춥니다.",
      "props": [
       "projectile"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "양의 안식처",
      "short": "양은 안식처 영역 안에 있는 모든 생명체를 죽음으로부터 지켜줍니다. 효과가 끝날 때까지는 아무도 죽지 않습니다.",
      "props": [
+      "projectile",
+      "aoe",
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "킨드레드의 표식: 킨드레드는 사냥감에게 표식을 남길 수 있습니다.",
@@ -4099,9 +4482,9 @@
      "short": "클레드가 밧줄에 묶인 덫을 던져 적 챔피언에게 피해를 입히고 붙잡습니다.",
      "props": [
       "projectile",
-      "heal",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -4110,7 +4493,8 @@
      "props": [
       "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -4120,17 +4504,22 @@
       "dash",
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "돌겨어어억!!!",
      "short": "클레드와 스칼이 보호막을 쓴 채 목표 지점으로 돌진합니다. 돌진 경로 위에 있는 아군은 이동 속도가 빨라집니다.",
      "props": [
+      "projectile",
       "dash",
       "knockback",
-      "shield"
-     ]
+      "aoe",
+      "shield",
+      "immobilize"
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "겁쟁이 도마뱀 스칼: 클레드는 듬직한 친구 스칼을 타고 다닙니다.",
@@ -4140,7 +4529,6 @@
     "knockback",
     "aoe",
     "shield",
-    "heal",
     "immobilize",
     "empoweredAttack",
     "durationEffect"
@@ -4168,15 +4556,18 @@
      "short": "코그모가 부식성 침을 발사하여 적에게 마법 피해를 입히고 잠깐 동안 대상의 방어력과 마법 방어력을 낮춥니다.",
      "props": [
       "projectile"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "생체마법 폭격",
      "short": "코그모의 공격 사거리가 증가하고 %i:OnHit% 적중 시 피격 대상의 최대 체력에 비례한 마법 피해를 입힙니다.",
      "props": [
+      "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -4184,8 +4575,10 @@
      "short": "코그모가 특유의 진액을 발사하여 진액에 맞는 모든 적에게 피해를 입히며, 진액이 남긴 흔적 위에 있는 적의 이동 속도를 늦춥니다.",
      "props": [
       "projectile",
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -4194,13 +4587,15 @@
      "props": [
       "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "이케시아식 마무리: 코그모가 죽으면 4초 후 폭발하여 주변 적에게 고정 피해를 입힙니다.",
    "abilityProps": [
     "projectile",
     "aoe",
+    "empoweredAttack",
     "durationEffect"
    ],
    "dmg": "ad"
@@ -4226,8 +4621,9 @@
      "short": "르블랑이 인장을 날려 대상에게 피해를 주고 3.5초 동안 표식을 남깁니다.",
      "props": [
       "projectile",
-      "aoe"
-     ]
+      "targeted"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -4236,7 +4632,8 @@
      "props": [
       "dash",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -4245,21 +4642,22 @@
      "props": [
       "projectile",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "모방",
      "short": "르블랑이 기본 스킬 중 하나를 모방해서 사용합니다.",
-     "props": [
-      "immobilize"
-     ]
+     "props": [],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "거울 환영: 르블랑의 체력이 40% 아래로 내려가면 1초 동안 투명 상태가 되며 거울 환영을 생성합니다.",
    "abilityProps": [
     "projectile",
     "dash",
+    "targeted",
     "aoe",
     "immobilize"
    ],
@@ -4287,7 +4685,8 @@
      "props": [
       "projectile",
       "dash"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -4296,18 +4695,18 @@
      "props": [
       "dash",
       "shield",
-      "heal",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "폭풍/무력화",
      "short": "폭풍: 리 신이 바닥을 내리쳐 마법 피해를 입히고 은신한 유닛을 드러내는 충격파를 발생시킵니다.",
      "props": [
-      "aoe",
-      "heal"
-     ]
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -4316,8 +4715,10 @@
      "props": [
       "projectile",
       "knockback",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "질풍격: 리 신이 스킬을 사용하면 다음 두 번의 기본 공격 속도가 증가하며 기력을 회복합니다.",
@@ -4327,7 +4728,6 @@
     "knockback",
     "aoe",
     "shield",
-    "heal",
     "immobilize",
     "durationEffect"
    ],
@@ -4355,7 +4755,8 @@
      "props": [
       "immobilize",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -4364,7 +4765,8 @@
      "props": [
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -4374,7 +4776,8 @@
       "projectile",
       "dash",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -4384,7 +4787,8 @@
       "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "햇빛: 공격 스킬은 대상에게 1.5초 동안 햇빛 효과를 부여합니다.",
@@ -4420,36 +4824,44 @@
      "props": [
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "이익! 쿵!",
      "short": "릴리아가 근처 적에게 피해를 입힙니다. 중심에 있는 적에게는 더 큰 피해를 입힙니다.",
      "props": [
+      "dash",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "데굴데굴 씨앗",
      "short": "릴리아가 씨앗을 던져 적중한 적에게 피해를 입히고 둔화시킵니다. 씨앗은 벽 또는 대상에 부딪힐 때까지 굴러갑니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "감미로운 자장가",
      "short": "릴리아가 꿈가루가 묻은 적을 전부 졸음 상태에 빠뜨린 뒤 잠들게 합니다. 피해를 입어 깨어난 적은 추가 피해를 입습니다.",
      "props": [
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "꿈나무 지팡이: 챔피언 또는 몬스터에게 스킬이 적중하면 지속시간 동안 최대 체력에 비례한 피해를 추가로 입힙니다.",
    "abilityProps": [
     "projectile",
+    "dash",
     "aoe",
     "immobilize",
     "durationEffect"
@@ -4477,7 +4889,8 @@
      "props": [
       "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -4487,7 +4900,8 @@
       "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -4495,8 +4909,10 @@
      "short": "리산드라가 마법 피해를 주는 얼음갈퀴를 생성합니다. 이 스킬을 다시 시전하면 리산드라가 얼음갈퀴의 현재 위치로 순간이동합니다.",
      "props": [
       "projectile",
-      "dash"
-     ]
+      "dash",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -4507,7 +4923,8 @@
       "heal",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "냉기의 지배: 리산드라 주변의 적 챔피언이 쓰러지면 얼음 노예가 됩니다.",
@@ -4541,8 +4958,10 @@
      "nameKo": "의식용 대못",
      "short": "로크가 영혼의 대못을 여러 개 준비하고 던져 적중한 적에게 피해를 입히고 표식을 남깁니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "empoweredAttack"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -4550,7 +4969,8 @@
      "short": "로크가 자신의 영혼을 불태워 공격 속도와 이동 속도를 얻고 자신에게 피해를 입힙니다.",
      "props": [
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -4560,7 +4980,8 @@
       "dash",
       "aoe",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -4568,18 +4989,19 @@
      "short": "로크가 적을 구속하는 유물을 던져 적중한 적에게 피해를 입히고 경우에 따라 처형합니다. 로크는 적 챔피언을 봉인해 추가 위력을 얻습니다.",
      "props": [
       "projectile",
-      "aoe",
-      "immobilize"
-     ]
+      "targeted",
+      "aoe"
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "은빛 말뚝: 기본 공격 적중 시 추가 마법 피해를 입힙니다. 피해량은 적이 잃은 체력에 비례해 증가합니다.",
    "abilityProps": [
     "projectile",
     "dash",
+    "targeted",
     "aoe",
     "heal",
-    "immobilize",
     "empoweredAttack"
    ],
    "dmg": "ad"
@@ -4604,8 +5026,10 @@
      "nameKo": "꿰뚫는 빛",
      "short": "루시안이 대상을 관통하는 빛 줄기를 발사합니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -4615,7 +5039,8 @@
       "projectile",
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -4623,13 +5048,17 @@
      "short": "루시안이 짧은 거리를 빠르게 돌진합니다. 빛의 사수 스킬로 공격하면 끈질긴 추격의 재사용 대기시간이 감소합니다.",
      "props": [
       "dash"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "빛의 심판",
      "short": "루시안의 무기에서 총알이 난사됩니다.",
-     "props": []
+     "props": [
+      "aoe"
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "빛의 사수: 루시안이 스킬을 사용할 때마다 다음 공격이 2연속으로 발사됩니다.",
@@ -4661,16 +5090,20 @@
      "nameKo": "반짝반짝 창",
      "short": "픽스와 룰루가 각각 마법 화살을 하나씩 발사하여 맞는 적에게 피해를 입히고 둔화시킵니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "변덕쟁이",
      "short": "아군에게 사용하면 잠깐 동안 대상의 공격 속도와 이동 속도가 상승합니다.",
      "props": [
+      "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -4679,7 +5112,8 @@
      "props": [
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -4690,7 +5124,8 @@
       "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "요정 친구 픽스: 픽스는 현재 따라다니는 챔피언이 적 유닛을 공격할 때마다 함께 마법 광선을 발사합니다.",
@@ -4725,8 +5160,10 @@
      "short": "럭스가 빛의 구를 발사하여 최대 2명의 적 유닛을 속박하며 피해를 입힙니다.",
      "props": [
       "projectile",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -4734,9 +5171,11 @@
      "short": "럭스가 마법봉을 던져 아군 주변의 빛을 구부리며 적의 공격으로부터 보호해줍니다.",
      "props": [
       "projectile",
+      "aoe",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -4744,15 +5183,18 @@
      "short": "지정한 지역에 뒤틀린 빛의 구체를 띄워 주변 적의 속도를 늦춥니다. 럭스는 이 빛을 폭발시켜 피해를 입힐 수 있습니다.",
      "props": [
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "최후의 섬광",
      "short": "럭스가 에너지를 모아 빛 기둥을 발사하며 목표 지역에 있는 모든 대상에게 피해를 입힙니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "광채: 럭스의 공격 스킬은 몇 초 동안 적을 빛의 에너지로 가득 채웁니다.",
@@ -4787,16 +5229,19 @@
      "props": [
       "projectile",
       "targeted"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "천둥소리",
      "short": "말파이트가 굉음을 내며 공격합니다. 이후 수 초 동안 말파이트의 공격이 전방에 여진을 일으킵니다.",
      "props": [
+      "aoe",
       "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -4804,7 +5249,8 @@
      "short": "말파이트가 땅을 내리쳐 충격파를 만들어 냅니다.",
      "props": [
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -4813,8 +5259,10 @@
      "props": [
       "dash",
       "knockback",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "화강암 방패: 말파이트는 여러 겹의 돌로 감싸여 있어 자신의 최대 체력 10%만큼의 피해를 흡수할 수 있습니다.",
@@ -4849,8 +5297,10 @@
      "nameKo": "공허의 부름",
      "short": "말자하가 공허로 이어지는 두 개의 문을 엽니다. 얼마 뒤 문에서 투사체가 발사되어 적에게 마법 피해를 입히고 침묵 효과를 부여합니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -4859,24 +5309,26 @@
      "props": [
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "재앙의 환상",
      "short": "말자하가 대상의 머릿속에 최후의 광경을 보여주며 지속적으로 피해를 입힙니다.",
-     "props": [
-      "aoe"
-     ]
+     "props": [],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "황천의 손아귀",
      "short": "말자하가 공허의 정수를 쏟아부어 적 챔피언을 제압하고 지대를 생성해 내부의 적에게 피해를 입힙니다.",
      "props": [
+      "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "공허 태세: 일정 시간 동안 군중 제어기에 적중당하거나 피해를 입지 않으면 받는 피해량이 큰 폭으로 감소하고 군중 제어…",
@@ -4909,8 +5361,11 @@
      "short": "마오카이가 충격파를 일으켜 근처의 적을 뒤로 날려버리고 마법 피해를 입히며 둔화시킵니다.",
      "props": [
       "projectile",
-      "aoe"
-     ]
+      "knockback",
+      "aoe",
+      "immobilize"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -4919,7 +5374,8 @@
      "props": [
       "dash",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -4929,21 +5385,25 @@
       "projectile",
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "대자연의 마수",
      "short": "마오카이가 나뭇가지와 가시로 된 거대 벽을 소환합니다. 벽은 천천히 전진하며 벽에 닿은 적에게 피해를 입히고 속박합니다.",
      "props": [
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "마법 흡수: 마오카이는 기본 지속 효과로 기본 공격 시 체력을 회복하고 추가 피해를 입힙니다.",
    "abilityProps": [
     "projectile",
     "dash",
+    "knockback",
     "aoe",
     "immobilize",
     "durationEffect"
@@ -4972,7 +5432,8 @@
      "props": [
       "dash",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -4980,13 +5441,18 @@
      "short": "마스터 이가 정신을 집중하며 체력을 회복해, 짧은 시간 동안 받는 피해량이 감소합니다.",
      "props": [
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "우주류 검술",
      "short": "기본 공격에 추가 고정 피해가 적용됩니다.",
-     "props": []
+     "props": [
+      "empoweredAttack",
+      "durationEffect"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -4994,7 +5460,8 @@
      "short": "마스터 이가 엄청난 속도로 이동하며 순간적으로 자신의 이동 속도와 공격 속도를 높이고 모든 둔화 효과에 대해 면역이 됩니다.",
      "props": [
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "2연속 공격: 마스터 이는 몇 차례 연속으로 기본 공격을 한 이후에 2번 연속 공격합니다.",
@@ -5002,6 +5469,7 @@
     "dash",
     "aoe",
     "heal",
+    "empoweredAttack",
     "durationEffect"
    ],
    "dmg": "ad"
@@ -5026,8 +5494,10 @@
      "nameKo": "빛의 세례",
      "short": "멜이 대상 지점 주위에 폭발하는 투사체를 퍼부어 해당 지역 안에 있는 적에게 반복해서 피해를 입힙니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -5037,7 +5507,8 @@
       "projectile",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -5045,8 +5516,11 @@
      "short": "멜이 전방으로 찬란한 구체를 발사하여 중심에 있는 적을 속박하는 한편 그 주변에 있는 적을 둔화시키며 지속 피해를 입힙니다.",
      "props": [
       "projectile",
+      "targeted",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -5054,13 +5528,17 @@
      "short": "멜이 압도 중첩이 적용된 모든 적을 거리와 상관없이 공격하여 압도 중첩당 추가 피해를 입힙니다.",
      "props": [
       "projectile",
+      "aoe",
       "global"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "이글거리는 광휘: 멜이 스킬을 사용할 때마다 다음 기본 공격 시 투사체가 3개 (최대 9개) 추가됩니다.",
    "abilityProps": [
     "projectile",
+    "targeted",
+    "aoe",
     "shield",
     "global",
     "immobilize",
@@ -5088,27 +5566,33 @@
      "nameKo": "초특급 불꽃 킥",
      "short": "적을 밀쳐내는 공을 걷어찹니다. 적중한 공은 위로 날아가 적을 향해 떨어지며 충돌한 영역 주변에 있는 적들에게 피해를 입히고 둔화시킵니다.",
      "props": [
+      "projectile",
       "knockback",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "아늑한 모닥불",
      "short": "아군을 회복시키고 공격 사거리를 증가시키는 구역을 만듭니다. 이 구역은 스킬을 사용한 지점에서 가장 가까운 아군을 따라다닙니다.",
      "props": [
+      "aoe",
       "heal",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "따스한 포옹",
      "short": "아군 한 명에게 보호막을 부여해 잠시 동안 이동 속도를 높여줍니다. 이 스킬은 2회까지 충전됩니다.",
      "props": [
+      "targeted",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -5117,12 +5601,15 @@
      "props": [
       "aoe",
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "타오르는 힘: 밀리오의 스킬에 닿은 아군은 다음 공격으로 큰 추가 피해를 입히고 대상을 불태웁니다.",
    "abilityProps": [
+    "projectile",
     "knockback",
+    "targeted",
     "aoe",
     "shield",
     "heal",
@@ -5150,8 +5637,11 @@
      "nameKo": "한 발에 두 놈",
      "short": "미스 포츈이 하나의 대상에게 총알을 쏘아 대상과 대상 뒤에 있는 적에게 피해를 입힙니다. 두 번 모두에 사랑의 한 방이 적용될 수 있습니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "targeted",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -5159,26 +5649,34 @@
      "short": "미스 포츈은 얼마 동안 피해를 입지 않으면 이동 속도가 점점 올라갑니다. 이 스킬을 활성화하면 잠깐 동안 미스 포츈의 공격 속도가 높아집니다.",
      "props": [
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "총알은 비를 타고",
      "short": "미스 포츈이 총알을 퍼부어 지정 지역의 시야를 밝힙니다. 해당 위치에 있는 적은 여러 차례 피해를 입고 이동 속도가 느려집니다.",
-     "props": []
+     "props": [
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "쌍권총 난사",
      "short": "미스 포츈이 정면에 원뿔 형태로 수백 발의 총알을 난사해 적에게 대량의 피해를 입힙니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "사랑의 한 방: 미스 포츈은 새로운 대상에게 기본 공격을 가할 때마다 추가 물리 피해를 입힙니다.",
    "abilityProps": [
     "projectile",
+    "targeted",
+    "aoe",
     "durationEffect"
    ],
    "dmg": "ad"
@@ -5205,7 +5703,8 @@
      "props": [
       "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -5213,10 +5712,10 @@
      "short": "오공이 잠깐 동안 투명 상태가 되고 지정한 방향으로 돌진하며 근처 적을 공격하는 분신을 남깁니다.",
      "props": [
       "dash",
-      "aoe",
       "stealth",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -5226,22 +5725,26 @@
       "dash",
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "회전격",
      "short": "오공이 여의봉을 늘린 후 빙빙 휘두르며 이동 속도가 증가합니다. 적중당한 적은 피해를 입고 공중에 떠오릅니다.",
      "props": [
+      "projectile",
       "knockback",
       "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "바위 피부: 오공이 챔피언 및 몬스터와 싸우는 동안 방어력이 점점 높아지며 최대 체력 재생 효과를 얻습니다.",
    "abilityProps": [
+    "projectile",
     "dash",
     "knockback",
     "aoe",
@@ -5271,7 +5774,10 @@
      "key": "Q",
      "nameKo": "말살",
      "short": "모데카이저가 땅에 철퇴를 내리쳐 적중시킨 적에게 각각 피해를 입힙니다. 단일 대상에게 적중 시 피해량이 증가합니다.",
-     "props": []
+     "props": [
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -5281,25 +5787,32 @@
       "shield",
       "heal",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "죽음의 손아귀",
      "short": "모데카이저가 일정 지역에 있는 모든 적을 끌어당깁니다.",
      "props": [
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "죽음의 세계",
      "short": "모데카이저가 대상을 다른 차원으로 끌고 가 능력치의 일부를 훔칩니다. 처치 시 적이 부활할 때까지 훔친 능력치가 유지됩니다.",
-     "props": []
+     "props": [
+      "heal"
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "암흑 탄생: 모데카이저가 적 챔피언이나 몬스터에게 공격 또는 스킬을 3회 적중시키면 강력한 피해를 입히는 오라를 얻고…",
    "abilityProps": [
+    "aoe",
     "shield",
     "heal",
     "immobilize",
@@ -5329,15 +5842,18 @@
      "props": [
       "projectile",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "고통의 그림자",
      "short": "모르가나가 대상 지역에 저주받은 그림자를 펼쳐 검은 원 안에 서 있는 적에게 피해를 입힙니다.",
      "props": [
-      "heal"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -5346,7 +5862,8 @@
      "props": [
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -5355,7 +5872,8 @@
      "props": [
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "영혼 흡수: 모르가나가 적의 영혼을 흡수하여 챔피언, 대형 미니언, 중형 및 대형 정글 몬스터에게 피해를 입힐 때 체력…",
@@ -5363,7 +5881,6 @@
     "projectile",
     "aoe",
     "shield",
-    "heal",
     "immobilize",
     "durationEffect"
    ],
@@ -5391,8 +5908,10 @@
      "props": [
       "projectile",
       "dash",
-      "heal"
-     ]
+      "targeted",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -5400,7 +5919,8 @@
      "short": "나피리가 대상으로 지정할 수 없는 상태가 되고 무리를 강화하며 추가로 무리를 소환하고 이동 속도와 공격력이 증가합니다.",
      "props": [
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -5408,9 +5928,9 @@
      "short": "나피리가 돌진해 주변 적에게 피해를 입히고 무리를 다시 불러 체력을 최대로 회복시킵니다.",
      "props": [
       "dash",
-      "aoe",
-      "heal"
-     ]
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -5418,19 +5938,19 @@
      "short": "나피리와 무리가 챔피언에게 돌진해 피해를 입힙니다. 나피리가 처치 관여를 달성하면 주위 적들을 드러내고 이 스킬을 한 번 재사용할 수 있습니다.",
      "props": [
       "dash",
-      "aoe",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "늘어나는 무리: 나피리가 자신이 공격하거나 스킬을 사용하는 대상을 함께 공격하는 무리를 소환합니다.",
    "abilityProps": [
     "projectile",
     "dash",
+    "targeted",
     "aoe",
     "shield",
-    "heal",
     "durationEffect"
    ],
    "dmg": "ad"
@@ -5456,8 +5976,10 @@
      "short": "거대한 물방울을 지정한 위치로 발사해 물방울이 닿은 적에게 피해를 입히고 닿는 순간 기절시킵니다.",
      "props": [
       "projectile",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -5466,7 +5988,8 @@
      "props": [
       "aoe",
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -5475,7 +5998,8 @@
      "props": [
       "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -5483,9 +6007,11 @@
      "short": "적들을 공중으로 띄우고 둔화를 걸면서 피해를 입히는 거대한 해일을 소환합니다. 여기에 맞은 아군은 밀려오는 파도의 효과를 두 배로 받습니다.",
      "props": [
       "knockback",
+      "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "밀려오는 파도: 나미의 스킬에 맞은 아군 챔피언은 짧은 시간 동안 이동 속도가 상승합니다.",
@@ -5521,7 +6047,8 @@
      "short": "나서스가 적을 공격하여 피해를 입힙니다. 흡수의 일격으로 대상을 처치할 경우 흡수의 일격 스킬이 강화됩니다.",
      "props": [
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -5529,13 +6056,18 @@
      "short": "나서스가 적 챔피언의 노화를 촉진시켜 이동 속도와 공격 속도를 점진적으로 늦춥니다.",
      "props": [
       "durationEffect"
-     ]
+     ],
+     "propsSource": "keywords"
     },
     {
      "key": "E",
      "nameKo": "영혼의 불길",
      "short": "나서스가 영혼의 불꽃을 일으켜 해당 지역에 서 있는 적에게 피해를 입히고 방어력을 낮춥니다.",
-     "props": []
+     "props": [
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -5544,11 +6076,13 @@
      "props": [
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "영혼의 포식자: 나서스는 적의 영혼을 흡수하여 추가 생명력 흡수 효과를 얻습니다.",
    "abilityProps": [
+    "projectile",
     "aoe",
     "empoweredAttack",
     "durationEffect"
@@ -5577,7 +6111,8 @@
      "props": [
       "projectile",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -5586,8 +6121,10 @@
      "props": [
       "aoe",
       "shield",
+      "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -5595,7 +6132,8 @@
      "short": "노틸러스가 주위에 세 번의 폭발을 일으킵니다. 폭발할 때마다 적에게 피해를 입히고 둔화시킵니다.",
      "props": [
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -5606,7 +6144,8 @@
       "knockback",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "강력한 일격: 노틸러스가 대상에 대한 첫 기본 공격 시 추가 물리 피해를 입히고 잠시 속박합니다.",
@@ -5616,6 +6155,7 @@
     "aoe",
     "shield",
     "immobilize",
+    "empoweredAttack",
     "durationEffect"
    ],
    "dmg": "mixed"
@@ -5640,9 +6180,9 @@
      "nameKo": "꽃망울 폭발",
      "short": "니코가 씨앗을 던져 마법 피해를 입힙니다. 씨앗이 적 챔피언에게 피해를 입히거나 유닛을 처치하면 한 번 더 폭발합니다.",
      "props": [
-      "projectile",
-      "aoe"
-     ]
+      "projectile"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -5651,7 +6191,8 @@
      "props": [
       "stealth",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -5661,7 +6202,8 @@
       "projectile",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -5670,9 +6212,9 @@
      "props": [
       "dash",
       "knockback",
-      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "태고의 마력: 니코가 아군 챔피언 또는 맵에 있는 다른 유닛 중 하나로 변신합니다.",
@@ -5680,7 +6222,6 @@
     "projectile",
     "dash",
     "knockback",
-    "aoe",
     "stealth",
     "immobilize",
     "durationEffect"
@@ -5709,40 +6250,40 @@
      "props": [
       "projectile",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "매복 덫 / 급습",
      "short": "인간 모습일 때 - 니달리가 적이 밟으면 피해를 입히며 모습을 드러내는 함정을 깝니다.",
      "props": [
-      "stealth",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "태고의 생명력 / 할퀴기",
      "short": "인간 모습일 때 - 니달리가 쿠거의 영혼과 교신하여 아군을 치료하고 짧은 시간 아군의 공격 속도를 높입니다.",
      "props": [
-      "aoe",
       "heal",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "쿠거의 상",
      "short": "니달리가 쿠거로 변신하여 새로운 스킬을 사용할 수 있게 됩니다.",
-     "props": []
+     "props": [],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "수풀 배회: 수풀을 통과하면 니달리의 이동 속도가 2초간 10% 상승하며, 1400 범위 안의 눈에 보이는 적 챔피언…",
    "abilityProps": [
     "projectile",
-    "aoe",
     "heal",
-    "stealth",
     "empoweredAttack",
     "durationEffect"
    ],
@@ -5768,45 +6309,59 @@
      "nameKo": "무형의 검",
      "short": "지정한 방향으로 칼날 채찍을 후려쳐 일직선상에 있는 모든 적에게 피해를 입힙니다. 공격 사거리가 잠깐 동안 증가합니다.",
      "props": [
+      "aoe",
       "shield",
       "heal",
+      "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "승리의 장막",
      "short": "자신을 안개로 감싸 이동 속도를 얻고 우아하게 모든 기본 공격을 회피합니다. 안개 지속시간 중 닐라에게 닿은 아군에게도 이 효과가 적용됩니다.",
      "props": [
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "급류",
      "short": "대상을 향해 맹렬히 돌진해 경로상의 모든 적에게 피해를 입힙니다.",
      "props": [
-      "dash"
-     ]
+      "projectile",
+      "dash",
+      "targeted"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "환희",
      "short": "신나게 칼날 채찍을 휘둘러 주변 모든 적에게 피해를 입히고 가까이 끌어당깁니다.",
      "props": [
+      "aoe",
       "shield",
       "heal",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "영원한 기쁨: 미니언에게 최후의 일격을 가하면 경험치를 추가로 획득하며, 주변 아군이 부여하는 체력 회복 및 보호막 효과…",
    "abilityProps": [
+    "projectile",
     "dash",
+    "targeted",
+    "aoe",
     "shield",
     "heal",
     "immobilize",
+    "empoweredAttack",
     "durationEffect"
    ],
    "dmg": "ad"
@@ -5831,17 +6386,19 @@
      "nameKo": "황혼의 인도자",
      "short": "녹턴이 그림자 칼날을 던져 피해를 입히고 황혼의 궤적을 남깁니다. 황혼의 칼날에 적중당한 적 챔피언들 또한 황혼의 궤적을 남깁니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "어둠의 장막",
      "short": "기본 지속 효과로 녹턴이 자신의 검을 강화하여 추가 공격 속도를 얻습니다.",
      "props": [
-      "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -5849,7 +6406,8 @@
      "short": "녹턴이 대상의 정신에 악몽을 심어 매초 피해를 가하며 지속시간이 끝날 때까지 스킬의 사거리 밖으로 벗어나지 않을 경우 공포 효과를 적용합니다.",
      "props": [
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -5858,14 +6416,15 @@
      "props": [
       "dash",
       "global"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "그림자 칼날: 몇 초마다 녹턴의 기본 공격이 주변 적에게 추가 물리 피해를 입히고 녹턴의 체력을 회복시킵니다.",
    "abilityProps": [
     "projectile",
     "dash",
-    "shield",
+    "aoe",
     "global",
     "immobilize",
     "durationEffect"
@@ -5891,19 +6450,21 @@
      "key": "Q",
      "nameKo": "잡아먹기",
      "short": "윌럼프가 미니언, 몬스터, 또는 적 챔피언을 물어뜯어 피해를 입히고 체력을 회복합니다.",
-     "props": [
-      "heal"
-     ]
+     "props": [],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "데굴데굴 눈덩이!",
      "short": "윌럼프가 굴릴수록 크기와 속도가 증가하는 눈덩이를 생성합니다. 눈덩이는 적에게 피해를 입히고 공중으로 띄워 올립니다.",
      "props": [
+      "projectile",
       "knockback",
+      "aoe",
       "spin",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -5913,7 +6474,8 @@
       "projectile",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -5923,7 +6485,8 @@
       "aoe",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "프렐요드의 부름: 누누가 윌럼프와 주변 아군 1명의 공격 속도와 이동 속도를 증가시키고, 윌럼프의 기본 공격이 대상 근처의…",
@@ -5932,7 +6495,6 @@
     "knockback",
     "aoe",
     "shield",
-    "heal",
     "spin",
     "immobilize",
     "durationEffect"
@@ -5959,8 +6521,10 @@
      "nameKo": "역류",
      "short": "올라프가 지정한 곳에 도끼를 던져 맞은 적에게 피해를 입히고 방어력과 이동 속도를 감소시킵니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -5968,16 +6532,17 @@
      "short": "올라프의 공격 속도가 증가하고 보호막을 얻습니다.",
      "props": [
       "shield",
+      "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "무모한 강타",
      "short": "올라프가 강력한 공격을 가하여 자신과 공격 대상에게 고정 피해를 입힙니다. 대상을 파괴한 경우 소모한 체력이 회복됩니다.",
-     "props": [
-      "heal"
-     ]
+     "props": [],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -5985,14 +6550,16 @@
      "short": "기본 지속 효과로 올라프의 방어력과 마법 저항력이 증가합니다. 올라프가 이 스킬을 사용하면 공격을 하는 동안 이동 방해 효과에 면역이 됩니다.",
      "props": [
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "광전사의 분노: 올라프가 잃은 체력에 비례해 공격 속도와 생명력 흡수를 얻습니다.",
    "abilityProps": [
     "projectile",
+    "aoe",
     "shield",
-    "heal",
+    "empoweredAttack",
     "durationEffect"
    ],
    "dmg": "ad"
@@ -6017,25 +6584,31 @@
      "nameKo": "명령: 공격",
      "short": "오리아나가 구체에게 목표 지점으로 돌진하라고 명령하여 구체가 대상 지점으로 가는 동안 마주치는 대상에게 마법 피해를 줍니다.",
      "props": [
+      "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "명령: 불협화음",
      "short": "오리아나가 구체에게 에너지파를 방출하도록 명령하여 근처에 있는 적에게 마법 피해를 입힙니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "명령: 보호",
      "short": "오리아나가 구체에게 아군을 따라다니며 이들을 보호하고 도중에 마주치는 적에게 마법 피해를 입히도록 명령합니다.",
      "props": [
+      "aoe",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -6045,7 +6618,8 @@
       "projectile",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "시계태엽 감기: 오리아나의 기본 공격은 추가 마법 피해를 입힙니다.",
@@ -6077,17 +6651,21 @@
      "nameKo": "용암 균열",
      "short": "오른이 지면을 내려쳐 적에게 물리 피해를 입히고 둔화시키는 균열을 만들어냅니다. 잠시 후 목표 지점에 용암 기둥이 생성됩니다.",
      "props": [
+      "aoe",
       "terrain",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "불꽃 풀무질",
      "short": "오른이 전진하며 불꽃을 뿜습니다. 마지막 불꽃에 맞은 적은 불안정 상태가 됩니다.",
      "props": [
-      "knockback"
-     ]
+      "knockback",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -6098,7 +6676,8 @@
       "knockback",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -6110,7 +6689,8 @@
       "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "간이 대장간: 오른이 추가 방어력과 마법 저항력을 얻습니다.",
@@ -6146,7 +6726,8 @@
      "props": [
       "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -6156,15 +6737,18 @@
       "dash",
       "immobilize",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "방패 돌격",
      "short": "판테온이 방패를 들어 정면의 공격으로부터 무적이 되고 창으로 빠르게 공격합니다.",
      "props": [
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -6175,7 +6759,8 @@
       "dash",
       "aoe",
       "global"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "필멸자의 의지: 스킬 사용 또는 공격을 몇 차례 하고 나면 다음 스킬이 강화됩니다.",
@@ -6211,16 +6796,19 @@
      "short": "뽀삐가 망치를 휘둘러 피해를 입히고 적의 움직임을 느리게 만드는 지대를 생성합니다. 지대는 잠시 후 폭발합니다.",
      "props": [
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "굳건한 태세",
      "short": "기본 지속 효과로 뽀삐가 추가 방어력과 마법 저항력을 얻습니다. 뽀삐의 체력이 낮아지면 이 효과가 더 커집니다.",
      "props": [
+      "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -6229,8 +6817,10 @@
      "props": [
       "dash",
       "knockback",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -6242,7 +6832,8 @@
       "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "강철의 외교관: 뽀삐가 던진 방패가 대상을 맞히고 튕겨나갑니다.",
@@ -6278,7 +6869,8 @@
      "props": [
       "projectile",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -6286,7 +6878,8 @@
      "short": "파이크가 위장 상태가 되며 이동 속도가 크게 증가합니다. 이동 속도는 시간이 지남에 따라 원래대로 감소합니다.",
      "props": [
       "stealth"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -6294,22 +6887,27 @@
      "short": "파이크가 돌진하며 원래 있던 자리에 유령을 남깁니다. 이 유령은 파이크에게 돌아오면서 경로상의 모든 적 챔피언을 기절시킵니다.",
      "props": [
       "dash",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "깊은 바다의 처형",
      "short": "파이크가 체력이 낮은 적에게 순간적으로 이동하여 처형하고 스킬을 다시 사용할 수 있게 됩니다. 또한 처치에 관여한 아군에게 추가 골드를 줍니다.",
      "props": [
-      "dash"
-     ]
+      "dash",
+      "aoe"
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "가라앉은 자들의 축복: 파이크가 적에게 보이지 않는 상태가 되면 최근 적 챔피언에게 잃었던 체력의 일부를 빠르게 회복합니다.",
    "abilityProps": [
     "projectile",
     "dash",
+    "aoe",
     "stealth",
     "immobilize"
    ],
@@ -6334,11 +6932,13 @@
      "nameKo": "원소의 분노 / 이쉬탈의 칼날",
      "short": "키아나가 무기를 휘둘러 원소에 따른 추가 효과와 함께 피해를 입힙니다.",
      "props": [
+      "projectile",
       "aoe",
       "stealth",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -6346,7 +6946,8 @@
      "short": "키아나가 지정한 위치로 돌진해 무기를 원소 마법으로 강화합니다. 무기가 강화됐을 때 기본 공격이나 스킬을 사용하면 추가 피해를 입힙니다.",
      "props": [
       "dash"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -6354,7 +6955,8 @@
      "short": "키아나가 적에게 돌진하여 피해를 입힙니다.",
      "props": [
       "dash"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -6365,7 +6967,8 @@
       "knockback",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "왕가의 특권: 키아나의 첫 기본 공격이나 스킬은 적에게 적중하면 추가 피해를 입힙니다.",
@@ -6399,15 +7002,21 @@
      "key": "Q",
      "nameKo": "실명 공격",
      "short": "퀸이 발러를 보내 하나의 적에게 표식을 남기고 대상의 시야를 크게 좁힙니다. 또한 근처의 모든 적에게 피해를 입힙니다.",
-     "props": []
+     "props": [
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "예리한 감각",
      "short": "기본 지속 효과로 퀸이 매사냥 대상을 공격한 이후 공격 속도와 이동 속도가 상승합니다. 사용하면 발러가 주변의 넓은 지역을 드러냅니다.",
      "props": [
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -6415,22 +7024,29 @@
      "short": "퀸이 적에게 돌진하여 물리 피해를 입히고 적의 이동 속도를 늦춥니다.",
      "props": [
       "dash",
-      "knockback"
-     ]
+      "knockback",
+      "immobilize"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "후방 지원",
      "short": "퀸과 발러가 뭉쳐 엄청난 속도로 날아다닙니다.",
      "props": [
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "매사냥: 데마시아 독수리 발러가 주기적으로 적에게 매사냥 표식을 남깁니다.",
    "abilityProps": [
+    "projectile",
     "dash",
     "knockback",
+    "aoe",
+    "immobilize",
     "durationEffect"
    ],
    "dmg": "ad"
@@ -6456,7 +7072,8 @@
      "props": [
       "projectile",
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -6465,9 +7082,11 @@
      "props": [
       "dash",
       "knockback",
+      "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -6477,16 +7096,19 @@
       "dash",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "매혹의 질주",
      "short": "이동 속도가 증가하며 닿은 적을 모두 매혹하고 마법 피해를 입힙니다.",
      "props": [
+      "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "요술 망토: 라칸에게 주기적으로 보호막이 생성됩니다.",
@@ -6494,6 +7116,7 @@
     "projectile",
     "dash",
     "knockback",
+    "aoe",
     "shield",
     "heal",
     "immobilize",
@@ -6523,16 +7146,20 @@
       "knockback",
       "aoe",
       "spin",
+      "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "몸 말아 웅크리기",
      "short": "람머스가 방어 자세로 들어가 방어력 및 마법 저항력이 증가하고, 적의 공격을 반사합니다.",
      "props": [
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -6540,20 +7167,25 @@
      "short": "람머스가 적 챔피언이나 몬스터를 도발하여 자신을 향해 무모하게 덤벼들도록 합니다.",
      "props": [
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "지진 폭격",
      "short": "람머스가 공중으로 뛰어오른 후 대상 지점에 착지하여 마법 피해를 입히고 적을 둔화시킵니다.",
      "props": [
+      "dash",
       "knockback",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "가시박힌 껍질: 람머스가 방어력 및 마법 저항력에 비례해 추가 공격력을 얻습니다.",
    "abilityProps": [
+    "dash",
     "knockback",
     "aoe",
     "spin",
@@ -6583,22 +7215,24 @@
      "short": "렉사이의 다음 3번의 기본 공격은 주변 적들에게 추가 물리 피해를 입힙니다.",
      "props": [
       "projectile",
-      "aoe"
-     ]
+      "aoe",
+      "empoweredAttack"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "매복 / 돌출",
      "short": "렉사이가 지면을 파고들어가 새로운 스킬을 사용하게 되며 이동 속도가 상승합니다. 시야 범위가 좁아지며 기본 공격을 할 수 없게 됩니다.",
-     "props": [
-      "aoe"
-     ]
+     "props": [],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "성난 이빨 / 땅굴 파기",
      "short": "렉사이가 대상을 물어뜯어 물리 피해를 입힙니다. 분노가 최대치일 때는 추가 고정 피해를 입힙니다.",
-     "props": []
+     "props": [],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -6606,14 +7240,16 @@
      "short": "기본 지속 효과로 렉사이가 피해를 입힌 대상에게 표식을 남깁니다.",
      "props": [
       "dash"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "제르사이의 분노: 렉사이의 기본 공격과 기본 스킬이 적중할 때마다 분노가 생성됩니다.",
    "abilityProps": [
     "projectile",
     "dash",
-    "aoe"
+    "aoe",
+    "empoweredAttack"
    ],
    "dmg": "ad"
   },
@@ -6637,20 +7273,24 @@
      "nameKo": "파열의 일격",
      "short": "렐이 일직선상의 유닛에게 마법 피해를 입히며 보호막을 파괴하고 대상을 기절시킵니다.",
      "props": [
-      "shield",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "철마술: 붕괴",
      "short": "탑승: 렐이 탈것에서 중갑 형태로 뛰어내리며 적들을 공중으로 띄우고 큰 피해를 흡수하는 보호막을 얻습니다.",
      "props": [
+      "dash",
       "knockback",
+      "aoe",
       "shield",
       "immobilize",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -6658,10 +7298,10 @@
      "short": "기본 지속 효과: 비전투 시 이동 속도가 증가합니다. 사용 시: 렐과 아군 하나의 이동 속도가 서서히 증가합니다.",
      "props": [
       "dash",
-      "aoe",
       "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -6670,7 +7310,8 @@
      "props": [
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "갑옷 파쇄: 렐의 기본 공격과 스킬이 적중 시 추가 마법 피해를 입히고 방어력과 마법 저항력을 훔칩니다.",
@@ -6706,16 +7347,17 @@
      "short": "레나타가 미사일을 발사해 처음 적중하는 적을 속박합니다. 스킬을 재사용해 대상을 지정한 방향으로 던질 수 있습니다.",
      "props": [
       "projectile",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "긴급 구제",
      "short": "레나타가 아군 챔피언을 강화하고 죽음을 늦춥니다. 해당 아군이 처치에 관여하면 목숨을 건질 수 있습니다.",
-     "props": [
-      "heal"
-     ]
+     "props": [],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -6726,15 +7368,19 @@
       "aoe",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "적대적 인수",
      "short": "레나타가 화학 물질의 파도를 방출해 적중하는 적을 광란 상태에 빠트립니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe",
+      "immobilize"
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "영향력: 레나타의 기본 공격이 추가 피해를 입히고 표식을 남깁니다.",
@@ -6742,7 +7388,6 @@
     "projectile",
     "aoe",
     "shield",
-    "heal",
     "immobilize",
     "durationEffect"
    ],
@@ -6768,26 +7413,30 @@
      "nameKo": "양떼 도륙",
      "short": "레넥톤이 검을 휘둘러 주변의 모든 적에게 어느 정도의 물리 피해를 입히고, 해당 피해 수치의 일부를 체력으로 회복합니다.",
      "props": [
+      "aoe",
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "무자비한 포식자",
      "short": "레넥톤이 적을 두 번 베어 어느 정도의 물리 피해를 입히며, 0.75초 동안 적을 기절시킵니다.",
      "props": [
-      "shield",
       "immobilize",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "자르고 토막내기",
      "short": "레넥톤이 돌격을 하며 여러 적 유닛에게 피해를 입힙니다. 강화시 레넥톤은 적에게 추가 피해를 입히고 방어력을 낮출 수 있습니다.",
      "props": [
-      "dash"
-     ]
+      "dash",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -6796,14 +7445,14 @@
      "props": [
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "분노의 지배: 레넥톤이 기본 공격 시 분노를 생성합니다. 레넥톤의 체력이 낮으면 생성되는 분노가 증가합니다.",
    "abilityProps": [
     "dash",
     "aoe",
-    "shield",
     "heal",
     "immobilize",
     "empoweredAttack",
@@ -6833,7 +7482,8 @@
      "props": [
       "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -6842,16 +7492,17 @@
      "props": [
       "aoe",
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "올가미 투척",
      "short": "렝가가 올가미를 투척하여, 처음 맞은 대상에게 짧은 시간 동안 둔화를 겁니다. 야성 효과: 대상을 제자리에 묶습니다.",
      "props": [
-      "projectile",
-      "immobilize"
-     ]
+      "projectile"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -6859,10 +7510,11 @@
      "short": "렝가가 맹수의 본능을 발동해 위장 상태가 되고 일정 범위 내에서 가장 가까이에 있는 적을 드러내 확인할 수 있습니다.",
      "props": [
       "dash",
-      "aoe",
       "stealth",
+      "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "보이지 않는 포식자: 수풀에서 기본 공격을 사용하면 대상에게 도약합니다. 스킬을 사용하면 야성 중첩을 얻습니다.",
@@ -6872,7 +7524,6 @@
     "aoe",
     "heal",
     "stealth",
-    "immobilize",
     "empoweredAttack",
     "durationEffect"
    ],
@@ -6902,7 +7553,8 @@
       "knockback",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -6910,8 +7562,10 @@
      "short": "리븐이 기를 폭발시켜 근처의 적에게 피해를 주며 기절시킵니다.",
      "props": [
       "projectile",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -6921,15 +7575,18 @@
       "dash",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "추방자의 검",
      "short": "리븐이 자신의 옛 검에 힘을 불어넣어 추가 공격력과 공격 사거리를 얻습니다.",
      "props": [
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "룬 검: 리븐이 스킬을 사용하면 검이 충전됩니다. 기본 공격을 가하면 충전 횟수를 소모해 추가 피해를 입힙니다.",
@@ -6963,7 +7620,10 @@
      "key": "Q",
      "nameKo": "화염방사기",
      "short": "럼블이 3초 동안 정면을 향해 원뿔 형태의 공격을 가하며 적에게 불을 붙이고 마법 피해를 입힙니다. 위험 상태일 경우 피해가 증가합니다.",
-     "props": []
+     "props": [
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -6972,7 +7632,8 @@
      "props": [
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -6980,7 +7641,8 @@
      "short": "럼블이 작살을 발사하여 대상을 감전시키고 마법 피해를 입히면서 이동 속도와 마법 저항력을 감소시킵니다.",
      "props": [
       "projectile"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -6988,13 +7650,16 @@
      "short": "럼블이 로켓을 한꺼번에 발사하여 화염의 벽을 만들면, 해당 지점을 지나는 적은 피해를 입고 속도가 느려집니다.",
      "props": [
       "projectile",
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "고철장 거인: 럼블은 스킬을 사용할 때마다 열기를 얻습니다. 열기가 50%에 달하면 럼블은 위험 상태에 들어갑니다.",
    "abilityProps": [
     "projectile",
+    "aoe",
     "shield",
     "durationEffect"
    ],
@@ -7020,9 +7685,9 @@
      "short": "기본 지속 효과로 라이즈가 다른 스킬을 사용하면 과부하의 재사용 대기시간이 초기화되고 룬 하나를 충전합니다.",
      "props": [
       "projectile",
-      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -7030,7 +7695,8 @@
      "short": "라이즈가 대상을 룬 감옥에 가두고 피해를 입히며 이동 속도를 늦춥니다. 대상에게 전이 표식이 있으면 이동 속도를 늦추는 대신 속박합니다.",
      "props": [
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -7038,8 +7704,10 @@
      "short": "라이즈가 순수한 마법의 구체를 던져 적에게 피해를 입히고 주변 모든 적에게 표식을 남깁니다.",
      "props": [
       "projectile",
+      "targeted",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -7047,13 +7715,15 @@
      "short": "기본 지속 효과로 과부하가 전이 표식이 있는 적에게 더 큰 피해를 입힙니다. 사용 시 라이즈가 근처에 차원문을 생성합니다.",
      "props": [
       "dash"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "비전 연마: 라이즈의 스킬이 추가 마나에 따라 추가 피해를 입히고, 최대 마나가 주문력에 비례해 증가합니다.",
    "abilityProps": [
     "projectile",
     "dash",
+    "targeted",
     "aoe",
     "immobilize",
     "durationEffect"
@@ -7080,16 +7750,20 @@
      "nameKo": "천부적 재능",
      "short": "사미라가 총을 쏘거나 검을 휘둘러 피해를 입힙니다. 거침없는 질주 도중 사용하면 돌진이 끝난 후 경로 내에 있는 모든 적을 공격합니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "원형 검무",
      "short": "사미라가 주변에 검을 휘두르며 적에게 피해를 입히고 적의 투사체를 파괴합니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -7098,22 +7772,24 @@
      "props": [
       "dash",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "지옥불 난사",
      "short": "사미라가 무기를 난사해 주변의 모든 적에게 공격을 퍼붓습니다.",
      "props": [
-      "heal"
-     ]
+      "aoe"
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "무모한 충동: 사미라가 마지막으로 맞힌 공격과 다른 기본 공격 또는 스킬을 적중시키면 콤보를 1회 쌓습니다.",
    "abilityProps": [
     "projectile",
     "dash",
-    "heal",
+    "aoe",
     "durationEffect"
    ],
    "dmg": "ad"
@@ -7141,21 +7817,28 @@
       "knockback",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "혹한의 서릿발",
      "short": "세주아니가 철퇴를 두 번 휘둘러 피해를 입히고 적을 둔화시키며 서리 중첩을 적용시킵니다.",
-     "props": []
+     "props": [
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "만년 서리",
      "short": "세주아니가 서리가 최대로 중첩된 대상을 얼리고 기절시킵니다.",
      "props": [
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -7165,7 +7848,8 @@
       "projectile",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "혹한의 분노: 세주아니는 일정 시간 동안 피해를 입지 않으면 서리 갑옷이 생겨 추가 방어력과 마법 저항력을 얻고 둔화 효…",
@@ -7199,8 +7883,10 @@
      "short": "세나가 유물포의 두 총열에서 대상을 관통하는 빛과 그림자를 발사하여 아군의 체력을 회복시키고 적에게는 피해를 줍니다.",
      "props": [
       "projectile",
+      "aoe",
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -7208,16 +7894,20 @@
      "short": "세나가 검은 안개의 파동을 방출합니다. 검은 안개가 적에게 적중하면 맹렬히 달라붙어 잠시 후 해당 적과 주변의 모든 적을 속박합니다.",
      "props": [
       "projectile",
+      "aoe",
+      "stealth",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "검은 안개의 저주",
      "short": "세나가 어둠을 받아들이고 망령이 되어 무기에 흡수된 검은 안개를 폭풍으로 만듭니다.",
      "props": [
-      "stealth"
-     ]
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -7225,14 +7915,17 @@
      "short": "세나가 쓰러진 감시자들의 유물석으로부터 힘을 빌려 유물포를 해체한 후 신성한 빛과 그림자로 변형시킵니다.",
      "props": [
       "projectile",
+      "aoe",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "면죄: 세나 근처에서 유닛이 쓰러지면 그 영혼이 주기적으로 검은 안개에 갇히게 됩니다.",
    "abilityProps": [
     "projectile",
+    "aoe",
     "shield",
     "heal",
     "stealth",
@@ -7260,17 +7953,22 @@
      "key": "Q",
      "nameKo": "고음",
      "short": "세라핀이 대상 지역에 피해를 입힙니다.",
-     "props": []
+     "props": [
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "소리 장막",
      "short": "세라핀이 주변 아군에게 보호막과 이동 속도를 부여합니다. 세라핀에게 이미 보호막이 있으면 주변 아군의 체력을 회복시킵니다.",
      "props": [
+      "aoe",
       "shield",
       "heal",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -7278,9 +7976,11 @@
      "short": "세라핀이 일직선상에 있는 적들에게 피해를 입히고 이동을 방해합니다.",
      "props": [
       "projectile",
+      "targeted",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -7288,13 +7988,16 @@
      "short": "세라핀이 적중한 적에게 피해를 입히고 매혹합니다. 아군 또는 적 챔피언에게 적중하면 사거리가 초기화됩니다.",
      "props": [
       "projectile",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "무대 장악: 세라핀이 세 번째 기본 스킬을 사용할 때마다 두 번 사용됩니다.",
    "abilityProps": [
     "projectile",
+    "targeted",
     "aoe",
     "shield",
     "heal",
@@ -7324,7 +8027,8 @@
      "short": "세트의 다음 두 번의 공격이 대상 최대 체력에 비례해 추가 피해를 입힙니다. 또한 세트는 적 챔피언을 향해 이동할 때 이동 속도가 올라갑니다.",
      "props": [
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -7334,15 +8038,18 @@
       "projectile",
       "aoe",
       "shield"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "안면 강타",
      "short": "세트가 양옆에 있는 모든 적을 끌어당겨 피해를 입히고 기절시킵니다. 한쪽에만 적이 있는 경우 기절시키는 대신 둔화시킵니다.",
      "props": [
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -7350,8 +8057,10 @@
      "short": "세트가 적 하나를 붙잡아 공중으로 도약한 후 바닥에 내리꽂아 피해를 입히고 착지 지점 근처에 있는 모든 적을 둔화시킵니다.",
      "props": [
       "dash",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "투기장의 투지: 세트는 기본 공격 시 양 주먹을 번갈아 사용합니다. 오른쪽 주먹이 약간 더 강하고 빠릅니다.",
@@ -7387,25 +8096,30 @@
       "dash",
       "stealth",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "깜짝 상자",
      "short": "샤코가 깜짝 상자를 숨깁니다. 상자가 발동되면 주변의 적들을 공포 상태에 빠뜨린 다음 공격합니다.",
      "props": [
+      "projectile",
       "aoe",
       "immobilize",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "양날 독",
      "short": "샤코의 단검은 공격에 맞은 대상을 중독시켜 이동 속도를 늦춥니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "targeted"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -7415,13 +8129,15 @@
       "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "암습: 샤코의 기본 공격과 양날 독을 뒤에서 사용하면 추가 피해를 입힙니다.",
    "abilityProps": [
     "projectile",
     "dash",
+    "targeted",
     "aoe",
     "stealth",
     "immobilize",
@@ -7449,8 +8165,10 @@
      "nameKo": "황혼 강습",
      "short": "쉔이 기의 검을 불러들여 공격해 대상의 최대 체력에 비례한 피해를 입힙니다.",
      "props": [
+      "aoe",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -7458,7 +8176,8 @@
      "short": "쉔이나 기의 검 근처 아군에 대한 공격이 차단됩니다.",
      "props": [
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -7466,8 +8185,10 @@
      "short": "쉔이 지정한 방향으로 돌진해, 경로상의 적들을 도발합니다.",
      "props": [
       "dash",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -7478,12 +8199,14 @@
       "shield",
       "global",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "기 보호막: 스킬을 사용하면 쉔이 보호막을 얻습니다.",
    "abilityProps": [
     "dash",
+    "aoe",
     "shield",
     "global",
     "immobilize",
@@ -7512,8 +8235,10 @@
      "nameKo": "잉걸불 일격",
      "short": "쉬바나의 다음 기본 공격이 대상과 주변 지역을 모두 타격합니다. 이 스킬은 재사용할 수 있습니다.",
      "props": [
+      "aoe",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -7524,7 +8249,8 @@
       "shield",
       "heal",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -7532,8 +8258,10 @@
      "short": "쉬바나가 화염구를 날리고 대형 대상에게 적중 시 폭발하며 둔화를 적용합니다.",
      "props": [
       "projectile",
+      "targeted",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -7543,13 +8271,15 @@
       "projectile",
       "dash",
       "aoe"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "미늘갑옷: 적 챔피언, 대형 미니언, 대형 몬스터 처치 관여 시 쉬바나가 미늘갑옷 중첩을 얻어 방어력 및 마법 저항력…",
    "abilityProps": [
     "projectile",
     "dash",
+    "targeted",
     "aoe",
     "shield",
     "heal",
@@ -7578,8 +8308,10 @@
      "nameKo": "맹독의 자취",
      "short": "신지드 뒤로 독구름을 남겨 구름에 들어가는 적에게 피해를 입힙니다.",
      "props": [
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -7587,8 +8319,9 @@
      "short": "초강력 접착제가 든 시험관을 바닥에 던져 그 위를 지나가는 적을 둔화시키고 이동 스킬을 사용할 수 없게 합니다.",
      "props": [
       "projectile",
-      "immobilize"
-     ]
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -7596,21 +8329,28 @@
      "short": "적을 신지드 뒤편으로 높이 던지며 피해를 줍니다. 신지드가 뒤로 던진 대상이 초강력 접착제 위에 착지하면 속박 효과가 적용됩니다.",
      "props": [
       "projectile",
+      "knockback",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "광기의 물약",
      "short": "신지드가 조합된 화학 물질을 마시고 향상된 전투 능력을 얻으며 맹독의 자취로 고통스러운 상처를 남깁니다.",
      "props": [
+      "heal",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "독성 급류: 신지드가 근처 챔피언을 회피하며 일시적으로 이동 속도가 증가합니다.",
    "abilityProps": [
     "projectile",
+    "knockback",
+    "aoe",
+    "heal",
     "immobilize",
     "durationEffect"
    ],
@@ -7641,7 +8381,8 @@
       "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -7651,7 +8392,8 @@
       "aoe",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -7660,7 +8402,8 @@
      "props": [
       "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -7669,8 +8412,10 @@
      "props": [
       "dash",
       "knockback",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "영광스러운 죽음: 사이온은 사망한 이후 잠시 되살아나지만 체력이 급속히 떨어집니다.",
@@ -7704,8 +8449,10 @@
      "nameKo": "부메랑 검",
      "short": "시비르가 십자날 검을 부메랑처럼 던져서 두 번 피해를 입힙니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -7715,32 +8462,31 @@
       "aoe",
       "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "주문 방어막",
      "short": "시비르가 마법 보호막을 만들어 자신을 대상으로 한 적 스킬 1개를 막아냅니다.",
-     "props": [
-      "shield",
-      "heal"
-     ]
+     "props": [],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "사냥 개시",
      "short": "시비르가 전장에서 아군을 이끌며 잠시 동안 이동 속도를 대폭 상승시킵니다. 또한 공격 시 시비르의 스킬 재사용 대기시간이 감소합니다.",
      "props": [
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "재빠른 발놀림: 시비르가 적 챔피언을 공격할 때 짧은 시간 동안 이동 속도가 대폭 상승합니다.",
    "abilityProps": [
     "projectile",
     "aoe",
-    "shield",
-    "heal",
     "empoweredAttack",
     "durationEffect"
    ],
@@ -7769,7 +8515,8 @@
       "projectile",
       "aoe",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -7779,25 +8526,28 @@
       "aoe",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "이쉬탈의 격돌",
      "short": "스카너가 앞으로 돌진하며 지형을 통과합니다. 챔피언이나 대형 몬스터와 충돌하면 다음에 부딪치는 벽에 내동댕이쳐 피해를 입히고 기절시킵니다.",
      "props": [
-      "dash",
-      "immobilize"
-     ]
+      "dash"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "꿰뚫기",
      "short": "스카너가 꼬리를 앞으로 후려쳐 적 챔피언을 제압합니다. 제압한 적 챔피언은 스카너를 따라 끌려다닙니다.",
      "props": [
+      "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "진동의 가닥: 스카너의 기본 공격, 부서진 대지, 지반 돌출, 꿰뚫기가 전율을 적용합니다.",
@@ -7832,24 +8582,31 @@
      "nameKo": "초강력 화염 숨결",
      "short": "스몰더가 적에게 불을 내뿜습니다. 이 스킬은 스몰더가 중첩을 쌓을수록 더 강력해집니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "targeted",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "에취!",
      "short": "스몰더가 적 챔피언에게 적중 시 폭발하는 앙증맞은 불꽃 재채기를 내뿜습니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "펄럭펄럭",
      "short": "스몰더가 지형을 무시하고 날며 체력이 가장 낮은 적을 폭격합니다.",
      "props": [
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -7857,13 +8614,17 @@
      "short": "스몰더의 울음에 어미가 나타나 위에서 불을 내뿜어 추가 피해를 입히고 화염 중심에 있는 적을 둔화시킵니다.",
      "props": [
       "projectile",
+      "aoe",
       "heal"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "용 훈련: 스킬로 챔피언을 맞히고 초강력 화염 숨결 스킬로 적을 처치하면 용 훈련 중첩을 1회 얻습니다.",
    "abilityProps": [
     "projectile",
+    "targeted",
+    "aoe",
     "heal",
     "durationEffect"
    ],
@@ -7890,40 +8651,48 @@
      "short": "소나가 용맹의 찬가를 연주하여 강렬한 선율을 발사하여 주변에 있는 두 명의 적에게 마법 피해를 입힙니다.",
      "props": [
       "projectile",
+      "aoe",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "인내의 아리아",
      "short": "소나가 인내의 아리아를 연주하여 보호의 음률을 내보내 근처 부상 당한 아군 1명과 자신의 체력을 회복합니다.",
      "props": [
-      "shield",
+      "aoe",
       "heal",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "기민함의 노래",
      "short": "소나가 기민함의 노래를 연주하여 주변 아군의 이동 속도를 증가시키고 잠시 동안 오라를 생성합니다.",
      "props": [
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "크레센도",
      "short": "소나가 궁극의 선율을 연주하여 적 챔피언들을 기절시키며 춤을 추게 만들고, 마법 피해를 입힙니다.",
      "props": [
+      "projectile",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "파워 코드: 아첼레란도: 소나가 기본 스킬을 잘 사용하면 최대치가 될 때까지 영구적으로 궁극기를 제외한 스킬 가속 효과…",
    "abilityProps": [
     "projectile",
-    "shield",
+    "aoe",
     "heal",
     "immobilize",
     "empoweredAttack",
@@ -7951,8 +8720,10 @@
      "nameKo": "별부름",
      "short": "지정한 위치에 하늘에서 별이 떨어져 적에게 마법 피해를 입히고 이동 속도를 느려지게 합니다.",
      "props": [
+      "aoe",
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -7961,30 +8732,38 @@
      "props": [
       "targeted",
       "heal"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "별의 균형",
      "short": "영역 내의 모든 적을 침묵시키는 구역을 생성합니다. 영역이 해제될 때 아직 안에 남아있는 모든 적은 제자리에 묶입니다.",
      "props": [
+      "projectile",
+      "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "기원",
      "short": "소라카가 아군에게 희망을 불어넣어 자신과 아군 챔피언들의 체력을 즉시 회복합니다.",
      "props": [
+      "aoe",
       "heal",
       "global"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "구원: 소라카는 체력이 낮은 아군 쪽으로 이동할 때 속도가 더 빨라집니다.",
    "abilityProps": [
+    "projectile",
     "targeted",
+    "aoe",
     "heal",
     "global",
     "immobilize",
@@ -8012,16 +8791,21 @@
      "nameKo": "죽음의 손길",
      "short": "스웨인이 섬뜩한 힘을 지닌 번개를 여러 갈래 방출합니다. 적중당한 적이 죽으면 번개가 해당 유닛을 관통합니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "제국의 눈",
      "short": "스웨인이 악마의 눈을 소환해 적에게 피해를 입히고 둔화시킵니다. 챔피언이 적중당하면 모습이 드러나고 스웨인은 영혼 조각을 얻습니다.",
      "props": [
+      "projectile",
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -8029,22 +8813,27 @@
      "short": "스웨인이 전방으로 악마의 파동을 방출합니다. 파동은 다시 스웨인에게 돌아오며 부딪힌 적을 모두 속박합니다.",
      "props": [
       "projectile",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "악의 승천",
      "short": "스웨인이 악마로 변신해 근처 적 챔피언, 미니언, 중립 몬스터에게서 생명력을 흡수합니다. 악의 불길을 사용하면 주변 적을 학살하고 둔화시킵니다.",
      "props": [
-      "aoe"
-     ]
+      "aoe",
+      "heal"
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "굶주린 새떼: 까마귀가 스웨인의 체력을 회복시키고 최대 체력을 영구적으로 증가시키는 '영혼 조각'을 모읍니다.",
    "abilityProps": [
     "projectile",
     "aoe",
+    "heal",
     "immobilize",
     "durationEffect"
    ],
@@ -8069,16 +8858,19 @@
      "key": "Q",
      "nameKo": "사슬 후려치기",
      "short": "사일러스가 사슬을 후려쳐 교차시키며 대상 지점에 있는 적에게 피해를 입히고 이동 속도를 늦춥니다.",
-     "props": []
+     "props": [
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "국왕시해자",
      "short": "사일러스가 마법의 힘으로 적에게 돌진해 피해를 입히며 적 챔피언을 공격하면 체력을 회복합니다.",
      "props": [
-      "dash",
-      "heal"
-     ]
+      "dash"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -8089,13 +8881,18 @@
       "dash",
       "knockback",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "강탈",
      "short": "사일러스가 적의 궁극기를 강탈해 자유롭게 사용합니다.",
-     "props": []
+     "props": [
+      "projectile",
+      "targeted"
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "페트리사이트 폭발: 스킬 사용 후 사일러스가 페트리사이트 폭발을 1회 충전합니다.",
@@ -8103,7 +8900,8 @@
     "projectile",
     "dash",
     "knockback",
-    "heal",
+    "targeted",
+    "aoe",
     "immobilize"
    ],
    "dmg": "ap"
@@ -8127,16 +8925,20 @@
      "nameKo": "어둠 구체",
      "short": "신드라가 어둠 구체를 만들어내 마법 피해를 가합니다. 구체는 제자리에 유지되며, 신드라의 다른 스킬로 조종할 수도 있습니다.",
      "props": [
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "의지의 힘",
      "short": "신드라가 적 미니언 혹은 어둠 구체를 잡아서 던져 마법 피해를 입히고, 적의 이동 속도를 감소시킵니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -8145,9 +8947,11 @@
      "props": [
       "projectile",
       "knockback",
+      "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -8155,13 +8959,15 @@
      "short": "신드라가 적 챔피언 하나에게 어둠 구체를 모두 날려 집중 포격을 가합니다.",
      "props": [
       "projectile"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "초월: 신드라가 레벨을 올리고 적에게 피해를 입혀서 분노의 조각을 획득합니다. 분노의 조각은 스킬을 강화합니다.",
    "abilityProps": [
     "projectile",
     "knockback",
+    "aoe",
     "immobilize",
     "durationEffect"
    ],
@@ -8189,16 +8995,20 @@
      "props": [
       "heal",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "심연 잠수",
      "short": "아래로 잠수한 후 지정한 장소에서 다시 나타나며 피해를 입히고 일정 지역에 있는 모든 적을 공중으로 띄웁니다.",
      "props": [
+      "projectile",
+      "dash",
       "knockback",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -8206,9 +9016,9 @@
      "short": "기본 지속 효과: 탐 켄치가 입은 피해량의 일부를 비축하고 전투에서 벗어났을 때 비축량에 비례하여 체력을 회복합니다.",
      "props": [
       "shield",
-      "heal",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -8216,12 +9026,16 @@
      "short": "탐 켄치가 몇 초 동안 챔피언을 집어삼키며 대상이 적이면 마법 피해를 입히고 아군이면 보호막을 부여합니다.",
      "props": [
       "shield",
+      "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "절대 미각: 탐 켄치가 어마어마한 체구를 이용해 기본 공격 시 총 체력에 기반해 추가 피해를 입힙니다.",
    "abilityProps": [
+    "projectile",
+    "dash",
     "knockback",
     "shield",
     "heal",
@@ -8251,8 +9065,9 @@
      "short": "탈리야가 지정한 방향으로 바위 조각을 던집니다. 이 때 탈리야는 자유롭게 이동할 수 있으며 탈리야 아래의 땅이 다져집니다.",
      "props": [
       "projectile",
-      "immobilize"
-     ]
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -8260,25 +9075,31 @@
      "short": "탈리야가 특정 지점을 솟구치게 만들어 탈리야가 선택한 방향으로 적을 띄워 올립니다.",
      "props": [
       "knockback",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "대지의 파동",
      "short": "적을 둔화시키는 바위밭을 만듭니다. 적이 그 위로 돌진하거나 밀려나면 바위가 폭발해 대상을 기절시킵니다.",
      "props": [
+      "projectile",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "바위술사의 벽",
      "short": "아주 긴 벽을 세웁니다. 탈리야는 이 벽을 타고 이동할 수 있습니다.",
      "props": [
+      "immobilize",
       "terrain"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "바위타기: 벽 근처에서 이동 속도가 상승합니다.",
@@ -8310,17 +9131,22 @@
      "nameKo": "녹서스식 외교",
      "short": "탈론이 대상 유닛을 찌릅니다. 근접 공격이 가능한 거리에서 사용하면 치명타가 적용됩니다.",
      "props": [
+      "projectile",
       "dash",
+      "targeted",
       "heal"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "갈퀴손",
      "short": "탈론이 부메랑 단검을 여러 개 던져 명중하는 적에게 물리 피해를 줍니다. 단검이 다시 돌아올 때 맞은 적은 추가 피해를 입고 둔화됩니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -8328,7 +9154,8 @@
      "short": "탈론이 구조물이나 지형 위로 일정 거리를 도약해 넘습니다.",
      "props": [
       "dash"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -8336,15 +9163,19 @@
      "short": "탈론이 사방에 검을 던지면서 투명 상태가 되며 추가 이동 속도를 얻습니다. 투명 상태가 풀리면 검이 다시 탈론이 있는 곳으로 모여듭니다.",
      "props": [
       "projectile",
+      "aoe",
       "stealth",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "검의 최후: 탈론이 챔피언이나 대형 몬스터에게 스킬을 사용하면 최대 3회까지 중첩되는 상처가 남습니다.",
    "abilityProps": [
     "projectile",
     "dash",
+    "targeted",
+    "aoe",
     "heal",
     "stealth",
     "durationEffect"
@@ -8373,7 +9204,8 @@
      "props": [
       "heal",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -8381,7 +9213,8 @@
      "short": "수호의 고리로 연결된 아군 챔피언과 타릭의 방어력이 상승합니다.",
      "props": [
       "shield"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -8389,19 +9222,25 @@
      "short": "타릭이 천상의 별빛을 준비해 잠시 후 적에게 마법 피해를 입히고 기절시킵니다.",
      "props": [
       "projectile",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "우주의 광휘",
      "short": "잠시 후 근처의 아군 챔피언을 모두 우주의 에너지로 감싸 잠깐 동안 무적 상태로 만듭니다.",
-     "props": []
+     "props": [
+      "aoe"
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "담대함: 타릭이 스킬을 사용하면 다음 2회의 기본 공격에 추가 마법 피해가 적용되고 공격 속도가 빨라지며 스킬의 재…",
    "abilityProps": [
     "projectile",
+    "aoe",
     "shield",
     "heal",
     "immobilize",
@@ -8429,8 +9268,10 @@
      "nameKo": "실명 다트",
      "short": "강력한 독으로 적의 시야를 가리고 피해를 입힙니다. 지속시간 동안 대상을 실명시킵니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "targeted"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -8438,13 +9279,18 @@
      "short": "티모의 이동 속도가 증가합니다. 포탑이나 적 챔피언에게 공격받으면 효과가 중단됩니다.",
      "props": [
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "맹독 다트",
      "short": "티모의 기본 공격 %i:OnHit% 적중 시 적은 중독되어 4초 동안 매초 피해를 입습니다.",
-     "props": []
+     "props": [
+      "projectile",
+      "targeted"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -8452,15 +9298,17 @@
      "short": "티모가 가방에 있던 버섯을 사용하여 폭발성 독 함정을 던집니다.",
      "props": [
       "projectile",
-      "stealth",
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "유격 전투: 티모가 아무 행동도 하지 않고 잠시 서 있으면 무기한 투명 상태가 됩니다.",
    "abilityProps": [
     "projectile",
-    "stealth",
+    "targeted",
+    "aoe",
     "durationEffect"
    ],
    "dmg": "mixed"
@@ -8488,7 +9336,8 @@
       "projectile",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -8497,9 +9346,11 @@
      "props": [
       "projectile",
       "dash",
+      "aoe",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -8507,14 +9358,20 @@
      "short": "쓰레쉬가 공격하기 위한 힘을 모아, 다음 공격까지 대기시간이 길수록 더 큰 피해를 가합니다.",
      "props": [
       "knockback",
+      "aoe",
+      "immobilize",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "영혼 감옥",
      "short": "벽으로 된 감옥이 부서지면 둔화를 일으키며 피해를 입힙니다.",
-     "props": []
+     "props": [
+      "aoe"
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "지옥살이: 쓰레쉬는 근처에서 처치된 적의 영혼을 포획해 방어력과 주문력을 영구적으로 올릴 수 있습니다.",
@@ -8522,6 +9379,7 @@
     "projectile",
     "dash",
     "knockback",
+    "aoe",
     "shield",
     "immobilize",
     "empoweredAttack",
@@ -8551,23 +9409,30 @@
      "props": [
       "projectile",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "로켓 점프",
      "short": "트리스타나가 땅에 대포를 쏴 추진력을 얻어 먼 곳으로 이동합니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "dash",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "폭발 화약",
      "short": "트리스타나가 적을 처치할 때마다 대포알이 조각 조각 터지면서 주변 적에게 피해를 입힙니다.",
      "props": [
+      "projectile",
+      "targeted",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -8576,15 +9441,18 @@
      "props": [
       "projectile",
       "knockback",
-      "aoe",
+      "targeted",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "정조준: 레벨이 올라갈수록 공격 사거리도 올라갑니다.",
    "abilityProps": [
     "projectile",
+    "dash",
     "knockback",
+    "targeted",
     "aoe",
     "immobilize",
     "durationEffect"
@@ -8613,39 +9481,46 @@
      "props": [
       "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "얼음 왕국",
      "short": "트런들이 목표 지점을 자기 왕국으로 바꿔, 해당 지역에 있는 동안 공격 속도와 이동 속도가 증가하고 모든 시전자로부터 오는 치유 효과가 증가합…",
      "props": [
-      "heal",
-      "immobilize"
-     ]
+      "heal"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "얼음 기둥",
      "short": "트런들이 목표 지점에 지나갈 수 없는 얼음 돌기둥을 생성합니다. 얼음 기둥 주변을 지나가는 모든 적 유닛의 이동 속도가 낮아집니다.",
      "props": [
+      "projectile",
       "knockback",
       "aoe",
+      "immobilize",
       "terrain",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "진압",
      "short": "트런들이 대상에게서 일정 비율의 체력과 방어력 및 마법 저항력을 즉시 훔칩니다.",
      "props": [
+      "heal",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "헌납: 트런들은 근처에서 적 유닛이 쓰러질 때마다 죽은 유닛의 최대 체력의 일정 비율만큼 체력이 회복됩니다.",
    "abilityProps": [
+    "projectile",
     "knockback",
     "aoe",
     "heal",
@@ -8677,21 +9552,26 @@
      "short": "트린다미어는 전투의 스릴에 희열을 느낍니다. 트린다미어의 체력이 낮으면 낮을수록 공격력이 상승합니다.",
      "props": [
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "조롱의 외침",
      "short": "트린다미어가 모욕적인 외침으로 주변 챔피언들의 공격력을 낮춥니다. 트린다미어에게서 등을 돌린 챔피언들은 이동 속도 역시 느려집니다.",
-     "props": []
+     "props": [],
+     "propsSource": "keywords"
     },
     {
      "key": "E",
      "nameKo": "회전 베기",
      "short": "트린다미어가 공격 경로에 있는 적 유닛을 칼로 베어 피해를 입힙니다.",
      "props": [
+      "dash",
+      "aoe",
       "spin"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -8699,11 +9579,14 @@
      "short": "전투를 향한 트린다미어의 욕망이 너무나도 강해 죽을 수 없는 몸이 됩니다.",
      "props": [
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "격노: 트린다미어가 일반 공격, 치명타 공격 그리고 마지막 일격을 날릴 때마다 분노를 획득합니다.",
    "abilityProps": [
+    "dash",
+    "aoe",
     "heal",
     "spin",
     "durationEffect"
@@ -8730,8 +9613,10 @@
      "nameKo": "와일드 카드",
      "short": "트위스티드 페이트는 카드 세 장을 던져 지나가는 카드에 맞은 각 적 유닛에게 피해를 입힙니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -8741,13 +9626,17 @@
       "aoe",
       "immobilize",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "속임수 덱",
      "short": "4번째 공격마다 트위스티드 페이트가 추가 피해를 입힙니다. 또한 공격 속도가 증가합니다.",
-     "props": []
+     "props": [
+      "empoweredAttack"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -8757,7 +9646,8 @@
       "dash",
       "global",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "사기 주사위: 트위스티드 페이트는 유닛을 하나 처치할 때마다 '행운'의 주사위를 굴려 1에서 6까지의 골드를 추가로 얻습…",
@@ -8794,7 +9684,8 @@
      "props": [
       "stealth",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -8804,7 +9695,8 @@
       "projectile",
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -8812,7 +9704,8 @@
      "short": "트위치가 역병을 퍼뜨려 중독된 적들에게 더 큰 피해를 줍니다.",
      "props": [
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -8820,8 +9713,10 @@
      "short": "트위치가 석궁의 위력을 최대한으로 끌어올려 멀리로 관통 화살들을 발사하며, 경로상의 모든 적을 꿰뚫습니다.",
      "props": [
       "projectile",
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "맹독: 트위치의 기본 공격 %i:OnHit% 적중 시 대상을 중독시켜 초당 고정 피해를 입힙니다.",
@@ -8853,8 +9748,10 @@
      "nameKo": "야생 발톱",
      "short": "공격 속도가 증가하고 다음 두 차례 기본 공격으로 추가 물리 피해를 입힙니다.",
      "props": [
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -8864,7 +9761,8 @@
       "shield",
       "heal",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -8874,19 +9772,23 @@
       "dash",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "날개 돋친 폭풍",
      "short": "얼음 폭풍으로 자신을 감싸 주변 적들에게 피해를 입히고 둔화시킵니다. 재사용 시: 적을 쫓아가며 추가 피해를 입히는 폭풍을 풀어놓습니다.",
      "props": [
+      "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "가교: 네 가지 기본 스킬로 여러 태세를 오갈 수 있습니다.",
    "abilityProps": [
+    "projectile",
     "dash",
     "aoe",
     "shield",
@@ -8916,8 +9818,10 @@
      "nameKo": "부식성 폭약",
      "short": "부식성 폭약을 지정한 위치에 발사하여 물리 피해를 입히고 적중당한 적을 둔화시킵니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -8926,7 +9830,8 @@
      "props": [
       "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -8939,7 +9844,8 @@
       "shield",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -8949,7 +9855,8 @@
       "projectile",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "화염의 메아리: 우르곳은 기본 공격과 심판의 원으로 다리에서 불꽃을 발사해 물리 피해를 입힙니다.",
@@ -8984,8 +9891,10 @@
      "nameKo": "꿰뚫는 화살",
      "short": "바루스가 조준한 다음 강화된 화살을 발사하면, 조준한 시간에 비례하여 사거리와 피해량이 늘어납니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -8993,15 +9902,17 @@
      "short": "기본 지속 효과: 바루스의 기본 공격이 추가 마법 피해를 입히고 역병을 붙입니다.",
      "props": [
       "aoe"
-     ]
+     ],
+     "propsSource": "keywords"
     },
     {
      "key": "E",
      "nameKo": "퍼붓는 화살",
      "short": "바루스가 화살을 비처럼 쏟아부어 물리 피해를 주고 지면을 오염시킵니다.",
      "props": [
-      "heal"
-     ]
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -9009,15 +9920,16 @@
      "short": "바루스가 부패의 촉수를 발사하여 처음 맞은 적 챔피언의 이동을 차단합니다.",
      "props": [
       "projectile",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "죽지 않는 복수심: 적을 처치하거나 어시스트를 올리면 잠시 바루스의 공격력과 주문력이 상승합니다.",
    "abilityProps": [
     "projectile",
     "aoe",
-    "heal",
     "immobilize"
    ],
    "dmg": "ad"
@@ -9042,14 +9954,18 @@
      "nameKo": "구르기",
      "short": "베인이 구르기를 하며 다음 공격 대상을 신중하게 선택합니다. 베인의 다음 공격은 추가 피해를 입힙니다.",
      "props": [
+      "dash",
+      "stealth",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "은화살",
      "short": "베인이 사악한 존재에게만 피해를 주는 특수 금속이 달린 볼트를 사용합니다.",
-     "props": []
+     "props": [],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -9057,22 +9973,26 @@
      "short": "베인이 등에서 커다란 석궁을 뽑아 거대한 볼트를 발사하여 대상을 뒤로 날려보내고 대상에게 피해를 줍니다.",
      "props": [
       "projectile",
+      "knockback",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "결전의 시간",
      "short": "격렬한 전투에 대비한 베인이 공격력을 높이고 구르기 시 투명 상태가 되며 구르기의 재사용 대기시간이 줄어듭니다.",
      "props": [
-      "stealth",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "어둠 사냥꾼: 베인이 악당을 무자비하게 사냥합니다. 근처 적 챔피언에게 접근할 때 이동 속도가 증가합니다.",
    "abilityProps": [
     "projectile",
+    "dash",
+    "knockback",
     "stealth",
     "immobilize",
     "empoweredAttack",
@@ -9099,36 +10019,48 @@
      "nameKo": "사악한 일격",
      "short": "베이가가 어둠의 에너지를 발사하여 처음 맞은 적 둘에게 마법 피해를 입힙니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "암흑 물질",
      "short": "베이가가 하늘에서 거대한 암흑 물질을 떨어뜨려 마법 피해를 입힙니다. 극악 중첩이 쌓이면 암흑 물질의 재사용 대기시간이 감소합니다.",
-     "props": []
+     "props": [
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "사건의 지평선",
      "short": "베이가가 공간의 가장자리를 왜곡해 지나가는 적을 기절시키는 감옥을 생성합니다.",
      "props": [
+      "projectile",
+      "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "태초의 폭발",
      "short": "적 챔피언을 맞춰 매우 큰 마법 피해를 입힙니다. 피해량은 대상의 잃은 체력에 비례해 증가합니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "targeted"
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "극악무도: 룬테라에서 가장 강력한 악의 원천인 베이가는 점점 더 강해지고 있습니다.",
    "abilityProps": [
     "projectile",
+    "targeted",
+    "aoe",
     "immobilize",
     "durationEffect"
    ],
@@ -9154,33 +10086,42 @@
      "nameKo": "플라즈마 분열",
      "short": "벨코즈가 플라즈마 광선을 발사하고 나서 스킬을 재사용하거나 적에게 맞으면 광선이 둘로 갈라집니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "공허 균열",
      "short": "벨코즈가 공허로 통하는 균열을 열어 최초 피해를 입힌 다음, 잠시 시간이 지난 후 두 번째 폭발로 피해를 가합니다.",
      "props": [
+      "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "지각 붕괴",
      "short": "벨코즈가 일정 범위를 폭발시켜 적을 띄우고, 가까이 있는 적들은 약간 멀리 밀어냅니다.",
      "props": [
+      "projectile",
       "knockback",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "생물 분해 광선",
      "short": "벨코즈가 정신을 집중하고 광선을 발사하면, 광선이 2.5초 동안 커서 위치를 따라가며 마법 피해를 입히고 적을 둔화시킵니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "유기물 분해: 벨코즈가 스킬을 적중시키면 대상에게 유기물 분해 중첩이 쌓입니다.",
@@ -9211,8 +10152,10 @@
      "nameKo": "안개 화살",
      "short": "피해를 입히는 화살을 발사합니다. 화살은 날아가는 동안 속도가 빨라집니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -9223,13 +10166,17 @@
       "aoe",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "커지는 어둠",
      "short": "피해를 입히고 둔화시키는 영역을 소환하며 적에게 우울을 적용합니다.",
-     "props": []
+     "props": [
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -9238,7 +10185,8 @@
      "props": [
       "projectile",
       "dash"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "파멸과 우울: 벡스가 주기적으로 강화 상태가 되어 다음 기본 스킬로 적 챔피언을 공포에 빠뜨리고 돌진을 방해합니다.",
@@ -9272,17 +10220,19 @@
      "short": "바이가 건틀릿을 충전하여, 두꺼운 금고도 뚫을 위력의 타격을 가하며 전방으로 돌진합니다.",
      "props": [
       "dash",
-      "knockback"
-     ]
+      "knockback",
+      "immobilize"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "찌그러뜨리기",
      "short": "바이의 주먹이 적의 방어구를 찌그러뜨려 추가 피해를 가하며 공격 속도가 상승합니다.",
      "props": [
-      "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -9291,7 +10241,8 @@
      "props": [
       "aoe",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -9299,8 +10250,10 @@
      "short": "바이가 적을 추격하며 중간에 걸리는 유닛들을 옆으로 밀어냅니다. 대상에 다다르면 공중으로 띄워올리고 뒤따라 점프하여, 바닥으로 쿵 찍어누릅니다.",
      "props": [
       "knockback",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "폭발 보호막: 바이는 시간이 흐르면 보호막이 1회 충전됩니다. 이 보호막은 적을 스킬로 적중시키면 활성화됩니다.",
@@ -9308,7 +10261,6 @@
     "dash",
     "knockback",
     "aoe",
-    "shield",
     "immobilize",
     "empoweredAttack",
     "durationEffect"
@@ -9335,8 +10287,10 @@
      "nameKo": "몰락한 왕의 검",
      "short": "비에고의 유령 칼날이 적중 시 현재 체력에 비례한 추가 피해를 입히고 최근 비에고의 스킬에 적중당한 적들을 두 번 공격하여 체력을 훔칩니다.",
      "props": [
+      "aoe",
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -9345,9 +10299,11 @@
      "props": [
       "projectile",
       "dash",
+      "stealth",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -9355,7 +10311,8 @@
      "short": "비에고가 명령을 내려 검은 안개가 지형을 맴돕니다. 비에고가 망령이 되어 안개 속에 숨고 위장 효과, 이동 속도, 공격 속도를 얻습니다.",
      "props": [
       "stealth"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -9364,8 +10321,10 @@
      "props": [
       "dash",
       "knockback",
-      "aoe"
-     ]
+      "aoe",
+      "immobilize"
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "군주의 지배: 비에고 앞에서 쓰러지는 적은 망령이 됩니다.",
@@ -9400,26 +10359,33 @@
      "nameKo": "힘의 흡수",
      "short": "빅토르가 적 유닛에 폭발을 일으켜 마법 피해를 입히며 보호막을 얻고 다음번 기본 공격이 강화됩니다.",
      "props": [
+      "projectile",
+      "targeted",
       "shield",
       "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "중력장",
      "short": "빅토르가 강력한 중력장을 생성해 해당 지역 안에 들어온 적들을 느리게 만듭니다. 중력장에 오래 머무르는 적은 기절합니다.",
      "props": [
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "마법공학 광선",
      "short": "빅토르가 생체기계 팔을 사용해 땅을 일직선으로 가르는 마법공학 광선을 쏘아 경로상의 적 모두에게 피해를 입힙니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -9427,12 +10393,14 @@
      "short": "빅토르가 목표 위치에 아케인 폭풍을 일으켜 대상 지역에 있는 적에게 마법 피해를 입히며 적의 정신 집중을 끊습니다.",
      "props": [
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "영광스러운 진화: 빅토르가 적을 처치할 때마다 마공학 파편을 얻습니다.",
    "abilityProps": [
     "projectile",
+    "targeted",
     "aoe",
     "shield",
     "immobilize",
@@ -9463,16 +10431,20 @@
      "props": [
       "heal",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "피의 웅덩이",
      "short": "블라디미르가 피의 웅덩이로 변해 2초 동안 공격 대상이 되지 않습니다.",
      "props": [
+      "projectile",
+      "aoe",
       "heal",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -9482,16 +10454,19 @@
       "projectile",
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "혈사병",
      "short": "블라디미르가 혈사병으로 목표 지역을 오염시킵니다. 질병에 감염된 적은 일정 시간 동안 더 큰 피해를 입습니다.",
      "props": [
+      "aoe",
       "heal",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "핏빛 계약: 블라디미르는 추가 체력 30당 1의 주문력을 얻으며, 주문력 1당 1.6의 체력을 얻습니다.",
@@ -9526,7 +10501,8 @@
       "immobilize",
       "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -9534,16 +10510,19 @@
      "short": "볼리베어가 적에게 피해를 입혀 적중 시 효과를 적용하고 표식을 남깁니다.",
      "props": [
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "천공 분열",
      "short": "볼리베어가 지정한 위치에 번개를 소환해 적에게 피해를 입히고 둔화시킵니다. 볼리베어가 폭발 반경 안에 있으면 보호막을 얻습니다.",
      "props": [
+      "aoe",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -9553,7 +10532,8 @@
       "dash",
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "무자비한 폭풍: 볼리베어가 기본 공격을 하거나 스킬을 사용하면 공격 속도가 증가하며 최대 중첩 상태에서 공격 시 주변 적들…",
@@ -9588,23 +10568,31 @@
      "nameKo": "야수의 송곳니",
      "short": "워윅이 앞으로 도약해 대상을 물고 대상 최대 체력에 비례한 피해를 입힙니다. 이때 워윅은 입힌 피해량만큼 체력을 회복합니다.",
      "props": [
-      "dash",
-      "heal"
-     ]
+      "dash"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "피의 사냥",
      "short": "체력이 50% 미만인 적을 감지합니다. 이 대상에게 이동할 때는 워윅의 이동 속도가 증가하고 대상에 대한 공격 속도도 증가합니다.",
-     "props": []
+     "props": [
+      "durationEffect"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "원시의 포효",
      "short": "2.5초 동안 워윅이 입는 피해가 감소합니다.",
      "props": [
-      "immobilize"
-     ]
+      "projectile",
+      "targeted",
+      "aoe",
+      "immobilize",
+      "durationEffect"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -9614,14 +10602,19 @@
       "dash",
       "heal",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "끝없는 허기: 워윅이 기본 공격 시 추가 마법 피해를 입힙니다.",
    "abilityProps": [
+    "projectile",
     "dash",
+    "targeted",
+    "aoe",
     "heal",
-    "immobilize"
+    "immobilize",
+    "durationEffect"
    ],
    "dmg": "ad"
   },
@@ -9644,8 +10637,10 @@
      "nameKo": "깃털 연타",
      "short": "자야가 일렬로 두 개의 깃털을 던집니다. 깃털은 마지막에 땅에 떨어지며 나중에 다시 불러들일 수 있습니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -9654,15 +10649,18 @@
      "props": [
       "projectile",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "깃부르미",
      "short": "모든 깃털을 자신에게로 불러들여 경로에 있는 적에게 피해를 입히고 속박시킵니다.",
      "props": [
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -9670,14 +10668,17 @@
      "short": "자야가 공중으로 도약해 잠시 동안 대상으로 지정할 수 없게 되고, 잠시 후 원뿔 모양으로 깃털을 발사합니다.",
      "props": [
       "projectile",
-      "dash"
-     ]
+      "dash",
+      "aoe"
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "관통상: 스킬 사용 후 다음 기본 공격이 경로에 있는 적을 모두 관통하고 깃털을 남깁니다.",
    "abilityProps": [
     "projectile",
     "dash",
+    "aoe",
     "immobilize",
     "durationEffect"
    ],
@@ -9703,16 +10704,20 @@
      "nameKo": "비전 파동",
      "short": "긴 사거리를 지닌 에너지 포를 쏘아 적중한 모든 적에게 마법 피해를 줍니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "파멸의 눈",
      "short": "비전 에너지 폭격을 가하여 목표 지역에 있는 모든 적의 속도를 늦추고 마법 피해를 가합니다.",
      "props": [
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -9721,20 +10726,24 @@
      "props": [
       "projectile",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "비전 의식",
      "short": "제라스가 이동 불가 상태가 되며, 원거리 공격을 여러 발 발사할 수 있게 됩니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "마나 쇄도: 제라스의 기본 공격이 주기적으로 마나를 회복해 줍니다.",
    "abilityProps": [
     "projectile",
+    "aoe",
     "immobilize",
     "durationEffect"
    ],
@@ -9762,13 +10771,19 @@
      "props": [
       "knockback",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "풍전참뢰",
      "short": "신 짜오가 창으로 앞을 가른 뒤 그대로 찌릅니다. 적중당한 적은 둔화되며 도전 받은 상태가 됩니다.",
-     "props": []
+     "props": [
+      "projectile",
+      "aoe",
+      "heal"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -9776,9 +10791,9 @@
      "short": "신 짜오가 적에게 돌격하여 공격 속도를 얻고 그 지점에 있던 모든 적에게 피해를 입히며 잠시 둔화시킵니다.",
      "props": [
       "dash",
-      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -9787,15 +10802,20 @@
      "props": [
       "dash",
       "knockback",
-      "aoe"
-     ]
+      "aoe",
+      "immobilize",
+      "durationEffect"
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "결심: 세 번째 기본 공격 시마다 추가 피해를 입히고 자신의 체력을 회복합니다.",
    "abilityProps": [
+    "projectile",
     "dash",
     "knockback",
     "aoe",
+    "heal",
     "immobilize",
     "durationEffect"
    ],
@@ -9824,8 +10844,10 @@
       "projectile",
       "dash",
       "knockback",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -9833,7 +10855,8 @@
      "short": "4초간 모든 적의 투사체를 막아주는 움직이는 벽을 생성합니다.",
      "props": [
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -9842,7 +10865,8 @@
      "props": [
       "dash",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -9851,8 +10875,10 @@
      "props": [
       "dash",
       "knockback",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "낭인의 길: 야스오의 치명타 확률이 증가합니다.",
@@ -9860,6 +10886,7 @@
     "projectile",
     "dash",
     "knockback",
+    "aoe",
     "immobilize",
     "durationEffect"
    ],
@@ -9888,8 +10915,10 @@
       "projectile",
       "dash",
       "knockback",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -9899,15 +10928,18 @@
       "aoe",
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "영혼해방",
      "short": "요네의 영혼이 육신을 떠나 이동 속도가 증가합니다.",
      "props": [
+      "dash",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -9916,8 +10948,10 @@
      "props": [
       "dash",
       "knockback",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "사냥꾼의 길: 요네가 두 번째 공격을 할 때마다 마법 피해를 입힙니다. 또한 요네의 치명타 확률이 증가합니다.",
@@ -9954,36 +10988,41 @@
      "props": [
       "heal",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "망자의 진",
      "short": "요릭이 대상 지점에 벽을 세워 적의 이동을 막습니다. 벽은 공격을 받으면 파괴됩니다.",
      "props": [
-      "terrain"
-     ]
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "애도의 안개",
      "short": "요릭이 대상에게 방어력을 감소시키고, 피해를 입히고, 이동 속도를 늦추며 표식을 남기는 안개의 구를 던집니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "군도의 장송곡",
      "short": "요릭이 안개 마녀를 소환합니다. 요릭이 안개 마녀의 표적을 공격하면 추가 피해를 입힙니다.",
-     "props": []
+     "props": [],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "영혼의 길잡이: 저주받은 무리: 요릭이 안개 망령 무리를 소환해 주변 적을 공격합니다.",
    "abilityProps": [
     "projectile",
+    "aoe",
     "heal",
-    "terrain",
     "empoweredAttack"
    ],
    "dmg": "mixed"
@@ -10009,8 +11048,10 @@
      "props": [
       "projectile",
       "aoe",
+      "empoweredAttack",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -10018,8 +11059,10 @@
      "short": "유나라가 회전하는 기도의 구슬을 날려 적에게 피해를 입히고 둔화시킵니다.",
      "props": [
       "projectile",
+      "aoe",
       "spin"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -10028,7 +11071,8 @@
      "props": [
       "dash",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -10036,7 +11080,8 @@
      "short": "유나라가 초월 상태에 돌입해 기본 스킬을 강화합니다.",
      "props": [
       "durationEffect"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "최초의 땅의 맹세: 유나라의 치명타가 추가 마법 피해를 입힙니다.",
@@ -10045,6 +11090,7 @@
     "dash",
     "aoe",
     "spin",
+    "empoweredAttack",
     "durationEffect"
    ],
    "dmg": "ad"
@@ -10071,17 +11117,17 @@
      "props": [
       "projectile",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "너랑 유미랑!",
      "short": "유미가 대상 아군에게 돌진하여 포탑을 제외한 유닛이 대상으로 지정할 수 없는 상태가 됩니다.",
      "props": [
-      "dash",
-      "shield",
-      "heal"
-     ]
+      "dash"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -10090,7 +11136,8 @@
      "props": [
       "shield",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -10098,15 +11145,18 @@
      "short": "유미가 정신을 집중해 파동을 다섯 번 발사합니다. 파동은 적에게 피해를 입히고 아군의 체력을 회복시킵니다.",
      "props": [
       "projectile",
+      "aoe",
       "shield",
       "heal"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "야옹이 친구: 기본 공격이나 스킬로 챔피언을 맞히면 주기적으로 유미가 체력을 회복하고 다음으로 밀착하는 아군의 체력을 회…",
    "abilityProps": [
     "projectile",
     "dash",
+    "aoe",
     "shield",
     "heal",
     "durationEffect"
@@ -10134,17 +11184,21 @@
      "props": [
       "knockback",
       "heal",
-      "immobilize",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "공포의 귀환",
      "short": "자헨이 지정한 방향으로 내질러 적중한 적에게 피해를 입히고 끌어당깁니다.",
      "props": [
+      "projectile",
+      "targeted",
+      "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -10153,21 +11207,27 @@
      "props": [
       "dash",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
      "nameKo": "단호한 판결",
      "short": "자헨이 날아오른 후 아래로 내려찍으며 적에게 피해를 입히고 입힌 피해량의 일부만큼 체력을 회복합니다.",
      "props": [
+      "dash",
+      "aoe",
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "전쟁 단련: 적 챔피언에게 기본 공격 및 스킬 적중 시 결심 중첩이 쌓이며, 자헨이 중첩당 추가 공격력을 얻습니다.",
    "abilityProps": [
+    "projectile",
     "dash",
     "knockback",
+    "targeted",
     "aoe",
     "heal",
     "immobilize",
@@ -10200,7 +11260,8 @@
       "aoe",
       "immobilize",
       "empoweredAttack"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
@@ -10208,7 +11269,8 @@
      "short": "자크의 몸이 폭발하며 주위 적들에게 대상 최대 체력의 일정 비율에 해당하는 마법 피해를 입힙니다.",
      "props": [
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
@@ -10218,15 +11280,22 @@
       "projectile",
       "dash",
       "knockback",
+      "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "바운스!",
      "short": "자크가 4회 튀어 올라 적중당한 적을 공중에 띄우고 둔화시킵니다.",
-     "props": []
+     "props": [
+      "knockback",
+      "aoe",
+      "immobilize"
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "세포 분열: 자크는 스킬로 적을 맞힐 때마다 몸에서 조각이 떨어져 나갑니다.",
@@ -10260,8 +11329,10 @@
      "nameKo": "예리한 표창",
      "short": "제드와 그림자가 표창을 던집니다. 각 표창은 적에게 명중하면 피해를 입힙니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -10270,7 +11341,8 @@
      "props": [
       "dash",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -10279,7 +11351,8 @@
      "props": [
       "aoe",
       "spin"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
@@ -10288,7 +11361,8 @@
      "props": [
       "dash",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "약자 멸시: 제드가 체력이 낮은 적을 기본 공격하면 마법 피해를 추가로 입힙니다.",
@@ -10321,7 +11395,8 @@
      "short": "처음 적중한 적에게 물리 피해를 입히는 공격 7발을 발사합니다. 이 스킬은 기본 공격으로 간주됩니다.",
      "props": [
       "projectile"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -10330,15 +11405,18 @@
      "props": [
       "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "스파크 돌진",
      "short": "제리가 짧은 거리를 돌진하며 집중 사격을 충전합니다. 충전된 집중 사격은 적을 꿰뚫습니다. 돌진 시 맞닥트리는 지형을 모두 뛰어넘습니다.",
      "props": [
-      "dash"
-     ]
+      "dash",
+      "durationEffect"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -10347,9 +11425,9 @@
      "props": [
       "projectile",
       "aoe",
-      "heal",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "살아있는 배터리: 제리의 기본 공격은 마법 피해를 입히며 스킬로 간주됩니다.",
@@ -10357,7 +11435,6 @@
     "projectile",
     "dash",
     "aoe",
-    "heal",
     "durationEffect"
    ],
    "dmg": "ad"
@@ -10381,8 +11458,10 @@
      "nameKo": "반동 폭탄",
      "short": "직스가 반동 폭탄을 던져 마법 피해를 입힙니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -10390,30 +11469,39 @@
      "short": "직스가 폭약을 던지면 잠시 후, 혹은 스킬을 다시 사용할 때 폭발합니다. 폭발하면 적에게 마법 피해를 입히며 뒤로 밀어냅니다.",
      "props": [
       "projectile",
-      "knockback"
-     ]
+      "knockback",
+      "aoe",
+      "immobilize"
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
      "nameKo": "마법공학 지뢰밭",
      "short": "직스가 밟으면 폭발하는 지뢰를 뿌려, 지뢰에 닿은 적은 마법 피해를 입고 둔화됩니다.",
      "props": [
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "지옥 화염 폭탄",
      "short": "직스가 궁극의 무기 지옥 화염 폭탄을 조립하여 아주 멀리 날립니다. 폭발의 중심부에 있는 적들은 외곽에 있는 적들보다 더 큰 피해를 입습니다.",
      "props": [
-      "projectile"
-     ]
+      "projectile",
+      "aoe"
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "짧은 도화선: 주기적으로 직스의 다음 기본 공격이 추가 마법 피해를 입힙니다.",
    "abilityProps": [
     "projectile",
     "knockback",
+    "aoe",
+    "immobilize",
     "durationEffect"
    ],
    "dmg": "ap"
@@ -10441,19 +11529,22 @@
       "projectile",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
      "nameKo": "되감기",
      "short": "질리언이 기본 스킬 재사용 대기시간을 줄여 이후 시작될 전투를 준비할 수 있습니다.",
-     "props": []
+     "props": [],
+     "propsSource": "traits"
     },
     {
      "key": "E",
      "nameKo": "시간 왜곡",
      "short": "질리언이 유닛 주변의 시간을 왜곡시켜 짧은 시간 동안 적의 이동 속도를 줄이거나 아군의 이동 속도를 높입니다.",
-     "props": []
+     "props": [],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -10461,7 +11552,8 @@
      "short": "질리언이 아군 챔피언에게 보호용 시간 룬을 주어 해당 챔피언이 치명적인 피해를 입으면 피해를 입기 전의 시간으로 되돌립니다.",
      "props": [
       "heal"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "시간의 유리병: 질리언은 시간을 경험치의 형태로 보존하여 아군에게 줄 수 있습니다.",
@@ -10494,7 +11586,8 @@
      "props": [
       "projectile",
       "aoe"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "W",
@@ -10502,8 +11595,10 @@
      "short": "적이 소환사 주문이나 사용 효과가 있는 아이템을 사용하면 주문 파편이 남고, 조이는 그 파편을 주워 해당 주문 및 효과를 사용할 수 있습니다.",
      "props": [
       "projectile",
+      "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -10512,7 +11607,8 @@
      "props": [
       "projectile",
       "immobilize"
-     ]
+     ],
+     "propsSource": "traits"
     },
     {
      "key": "R",
@@ -10520,7 +11616,8 @@
      "short": "1초 동안 근처 위치로 순간적으로 이동한 뒤 다시 되돌아옵니다.",
      "props": [
       "dash"
-     ]
+     ],
+     "propsSource": "traits"
     }
    ],
    "passiveKo": "반짝반짝!: 스킬 사용 후 기본 공격 시 추가 마법 피해를 입힙니다.",
@@ -10556,15 +11653,18 @@
       "projectile",
       "aoe",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "W",
      "nameKo": "맹렬한 성장",
      "short": "자이라가 60초간 지속되는 씨앗을 심습니다. 씨앗 근처에서 치명적인 가시나 휘감는 뿌리를 사용하면 식물이 자라나 자이라와 함께 싸웁니다.",
      "props": [
+      "projectile",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "E",
@@ -10572,19 +11672,23 @@
      "short": "자이라가 일직선상으로 지면을 뚫는 가시 덩굴을 발사하여, 덩굴이 마주치는 적에게 피해를 입히며 발을 묶습니다.",
      "props": [
       "projectile",
+      "aoe",
       "immobilize",
       "durationEffect"
-     ]
+     ],
+     "propsSource": "merged"
     },
     {
      "key": "R",
      "nameKo": "올가미 덩굴",
      "short": "자이라가 뒤틀린 덩굴손을 목표 위치에 소환합니다. 덩굴손은 뻗어 나가며 적들에게 피해를 입히고, 수축하면서 적들을 공중으로 띄웁니다.",
      "props": [
+      "projectile",
       "knockback",
       "aoe",
       "immobilize"
-     ]
+     ],
+     "propsSource": "merged"
     }
    ],
    "passiveKo": "가시 정원: 자이라 주변에 주기적으로 씨앗이 생성되며 생성 속도는 레벨에 따라 더 빨라집니다.",

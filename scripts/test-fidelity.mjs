@@ -20,6 +20,17 @@
  *  [10] 추가 — trackL9 on 시 스킬 증강 등장 빈도 유의 상승 (z > 4)
  *  [11] 추가 — confidence 규율 감사: augments.json의 모든 이진 필터를 eligibility-notes로 역추적
  *       (official/datamined/empirical만 이진 허용, community는 이진 금지 — STUDY §3-4 3단계)
+ *
+ * real-mapping 계약 [검증 기준] 1~5 실데이터 전수 감사 (research/ABILITY-AUGMENT-DATA.md,
+ * research/data/ability-augment-map.json 306건):
+ *  [12] 계약 기준1 — offered 287건 전수 champion-level 대조 (전 confidence, 풀에 실재해야 함)
+ *  [13] 계약 기준2 — excluded 19건 부재 (풀 부재/spellExclude 이식/지정 샘플링, 보류 2건은 사유 검증)
+ *  [14] 계약 기준3 — 지형 생성됨(Terraind) 적격 6명 전수: 173명 전원 풀 대조로 과잉/누락 0
+ *  [15] 계약 기준4 — spellPin 86건 정합 + 실지정 표본 29건(ability pin 증강 16종×각 2건, 시드 5개씩)
+ *  [16] 계약 기준5 — 제드×마나·대시 게이트 기존 패턴: 위 [1]·[2] 섹션이 담당 (중복 구현 없음)
+ *  [17] 추가 감사 — champions.json propsSource 분포가 생성기 보고와 일치
+ *       (enrich-champions.cjs 2026-09-03 실행 보고: traits 296 / merged 389 / keywords 7)
+ *  [18] 추가 감사 — community 근거의 하드 필터 유입 0 역추적 (map 61건 전수 + 이진 필터 역방향)
  */
 import { readFileSync } from 'fs';
 import { dirname, join } from 'path';
@@ -39,6 +50,7 @@ const loadJson = (p) => JSON.parse(readFileSync(join(__dirname, p), 'utf8'));
 const AUGMENTS = loadJson('../docs/data/augments.json').augments;
 const CHAMPIONS = loadJson('../docs/data/champions.json').champions;
 const NOTES = loadJson('../research/data/eligibility-notes.json');
+const MAP = loadJson('../research/data/ability-augment-map.json');
 
 /* ---------------- 테스트 하네스 ---------------- */
 let passCount = 0;
@@ -368,6 +380,14 @@ section('11. [추가] confidence 규율 — 이진 필터의 eligibility-notes �
   if (allowed.ARAM_OceanSoul) delete allowed.ARAM_OceanSoul.requiresMana;
   // 예외 규정: meleeCluster 중 StuckInHereWithMe는 신뢰도 '중간'(notes) → 이진 금지
   if (allowed.ARAM_StuckInHereWithMe) delete allowed.ARAM_StuckInHereWithMe.meleeOnly;
+  // 예외 규정(2026-09-03, ability-augment-map.json — 3차 실매핑의 offered 반례로 근사 해제):
+  //  - Quickstep: 원거리 켄넨 R offered(official, 26.12 패치노트) → meleeOnly 반증, 가중치 강등
+  //  - TitansPulse: 원거리 아리·리산드라·블라디미르 offered(empirical, mayhemmeta 16챔프) → meleeOnly 반증
+  //  - SkilledSniper: 근접 Locke Q offered(official, 26.15 패치노트) → rangedOnly 반증
+  // 계약 검증 기준 1("offered와 충돌하면 필터 완화")에 따른 완화 — enrich-augments.cjs 주석·로그 참조
+  if (allowed.ARAM_Quickstep) delete allowed.ARAM_Quickstep.meleeOnly;
+  if (allowed.TitansPulse) delete allowed.TitansPulse.meleeOnly;
+  if (allowed.ARAM_SkilledSniper) delete allowed.ARAM_SkilledSniper.rangedOnly;
   // 예외 규정: Phenomenal Evil은 개별 게이트가 계열과 다름(징크스 포함) → 이진 금지
   if (allowed.ARAM_PhenomenalEvil) delete allowed.ARAM_PhenomenalEvil.classRequired;
   // 예외 규정: Draw Your Sword는 adCrit 계열이지만 rangedOnly+클래스 좁힘으로 별도 처리(위 augmentApiName 항목)
@@ -440,6 +460,307 @@ section('11. [추가] confidence 규율 — 이진 필터의 eligibility-notes �
   // 상호배제쌍 Vampirism↔Perseverance는 현재 비활성 (notes otherRestrictions official)
   check('Vampirism·ARAM_Perseverance 비활성 상태 유지',
     byApi.Vampirism.enabled === false && byApi.ARAM_Perseverance.enabled === false);
+}
+
+/* ================================================================== */
+/* real-mapping 계약 [검증 기준] 1~5 실데이터 전수 감사                   */
+/* (research/ABILITY-AUGMENT-DATA.md + research/data/ability-augment-map.json) */
+/* ================================================================== */
+
+/** 공용: apiName → 증강, 챔피언 id → 풀 Set (전 173명 lazy) */
+const BY_API = {};
+AUGMENTS.forEach((a) => { BY_API[a.apiName] = a; });
+const POOL_CACHE = {};
+function poolSet(champId) {
+  if (!POOL_CACHE[champId]) {
+    POOL_CACHE[champId] = new Set(eligibleAugments(AUGMENTS, champ(champId)).map((a) => a.apiName));
+  }
+  return POOL_CACHE[champId];
+}
+/** 단일 증강 게임으로 enhancedSkill 지정 키를 1회 관측 (제시 불가면 null) */
+function designateOnce(augApi, champId, seed) {
+  const g = newGame({ augments: [BY_API[augApi]], champion: champ(champId), seed });
+  const round = nextRound(g);
+  const s = round.slots[0];
+  return (s && s.enhancedSkill) ? s.enhancedSkill.key : null;
+}
+
+/* ---------------- [12] 계약 기준1: offered 287건 전수 대조 ---------------- */
+section('12. [계약 기준1] offered 287건 전수 champion-level 대조 (풀 실재 증명)');
+{
+  const offered = MAP.mappings.filter((e) => e.polarity === 'offered');
+  check('ability-augment-map offered 287건 로드', offered.length === 287, String(offered.length));
+  const violations = [];
+  for (const e of offered) {
+    if (!CHAMPIONS.some((c) => c.id === e.champion)) {
+      violations.push(e.champion + '×' + e.augment + ' — 챔피언 id 미존재');
+      continue;
+    }
+    if (!BY_API[e.augment]) {
+      violations.push(e.champion + '×' + e.augment + ' — 증강 apiName 미존재');
+      continue;
+    }
+    if (!poolSet(e.champion).has(e.augment)) {
+      violations.push(e.champion + (e.skill ? ' ' + e.skill : '') + '×' + e.augment + ' (' + e.confidence + ') — 풀 부재');
+    }
+  }
+  check('offered 287건(전 confidence) 전부 해당 챔피언 풀에 실재 — 위반 0',
+    violations.length === 0, violations.slice(0, 10).join(' | '));
+}
+
+/* ---------------- [13] 계약 기준2: excluded 19건 부재 ---------------- */
+section('13. [계약 기준2] excluded 19건 부재 (풀/지정 양쪽에서 관측 불가)');
+{
+  const excluded = MAP.mappings.filter((e) => e.polarity === 'excluded');
+  check('ability-augment-map excluded 19건 로드', excluded.length === 19, String(excluded.length));
+
+  // 보류 2건(enrich-augments-log "하드 필터 보류" 사유 검증 — 풀 부재를 요구하면 안 되는 항목):
+  //  - Locke×SpecializedEmpowerment(official, skill=null): 패시브 효과 오적용 수정이지 풀 제외가
+  //    아님(동 챔피언 Locke E offered official와 모순 방지). 대신 지정이 항상 pin된 E인지 확인.
+  //  - Vladimir×MercysStrike(official): 별도 이진 미이식 — 기존 classRequired(Support)가 커버.
+  //    풀 부재로 검증(아래 일반 경로).
+  const DEFERRED_LOCKE = (e) => e.champion === 'Locke' && e.augment === 'SpecializedEmpowerment' && e.skill === null;
+  // Yorick×Terraind(community): 하드 필터 금지 — 부재는 terrain 게이트(datamined 6명 전수)로
+  //   창발해야 하며, 이진 필드로 이식되어 있으면 규율 위반([18]에서 재검).
+  const bad = [];
+  let checkedPool = 0;
+  let checkedSpell = 0;
+  for (const e of excluded) {
+    if (DEFERRED_LOCKE(e)) {
+      const pinE = BY_API.SpecializedEmpowerment.restrictions.spellPin.Locke === 'E';
+      let always = true;
+      for (let s = 0; s < 5; s++) if (designateOnce('SpecializedEmpowerment', 'Locke', 810000 + s) !== 'E') always = false;
+      check('보류 항목 Locke×SpecializedEmpowerment: 풀 유지 + 지정은 항상 E(pin, 5시드)',
+        poolSet('Locke').has('SpecializedEmpowerment') && pinE && always);
+      continue;
+    }
+    if (e.skill === null || e.augment === 'ARAM_BreadAndButter' || e.augment === 'Terraind') {
+      // 챔피언 단위 부재 (Smolder·Vladimir / Jinx는 slot=Q 고정형이라 championExclude 등가 /
+      // Yorick은 terrain 게이트 창발 부재)
+      checkedPool++;
+      if (poolSet(e.champion).has(e.augment)) bad.push(e.champion + '×' + e.augment + ' — 풀에 존재');
+      continue;
+    }
+    // 스킬 슬롯 단위 부재 (official/datamined 14건): spellExclude 이식 + 지정 샘플링(10시드)
+    checkedSpell++;
+    const r = BY_API[e.augment].restrictions || {};
+    const listed = r.spellExclude && Array.isArray(r.spellExclude[e.champion])
+      && r.spellExclude[e.champion].indexOf(e.skill) !== -1;
+    if (!listed) bad.push(e.champion + ' ' + e.skill + '×' + e.augment + ' — spellExclude 미이식');
+    let hit = false;
+    let seen = 0;
+    for (let s = 0; s < 10; s++) {
+      const key = designateOnce(e.augment, e.champion, 820000 + s * 17);
+      if (key !== null) seen++;
+      if (key === e.skill) hit = true;
+    }
+    if (seen === 0) bad.push(e.champion + '×' + e.augment + ' — 지정 표본 0(풀 부재?)');
+    if (hit) bad.push(e.champion + ' ' + e.skill + '×' + e.augment + ' — 제외 스킬이 지정됨');
+  }
+  check('excluded 챔피언 단위 ' + checkedPool + '건 전부 풀 부재', bad.filter((b) => b.indexOf('풀에 존재') !== -1).length === 0);
+  check('excluded 스킬 단위 ' + checkedSpell + '건 전부 spellExclude 이식 + 10시드 지정 회피',
+    bad.length === 0, bad.slice(0, 8).join(' | '));
+}
+
+/* ---------------- [14] 계약 기준3: 지형 생성됨 6명 전수 ---------------- */
+section('14. [계약 기준3] Terraind 적격 6명 전수 — 173명 전원 대조 (과잉 보유자 0)');
+{
+  // datamined 전수(raw/14 Trait_CreateTerrain = mayhemmeta 실측 6챔프와 정확 일치)
+  const TERRAIN6 = { Anivia: 'W', Azir: 'R', JarvanIV: 'R', Ornn: 'Q', Taliyah: 'R', Trundle: 'E' };
+  // (a) champions.json terrain prop 보유 슬롯이 정확히 이 6개인지 (데이터 층)
+  const holders = [];
+  for (const c of CHAMPIONS) {
+    for (const sp of c.spells || []) {
+      if (Array.isArray(sp.props) && sp.props.indexOf('terrain') !== -1) holders.push(c.id + '.' + sp.key);
+    }
+  }
+  const expectSlots = Object.keys(TERRAIN6).map((id) => id + '.' + TERRAIN6[id]).sort();
+  check('terrain prop 보유 슬롯 = 6개 정확 일치 (datamined 전수)',
+    JSON.stringify(holders.slice().sort()) === JSON.stringify(expectSlots), holders.sort().join(', '));
+  // (b) 풀 층: 173명 전원 대조 — Terraind는 6명에게만 제시
+  const wrongIn = [];
+  const wrongOut = [];
+  for (const c of CHAMPIONS) {
+    const has = poolSet(c.id).has('Terraind');
+    if (has && !TERRAIN6[c.id]) wrongIn.push(c.id);
+    if (!has && TERRAIN6[c.id]) wrongOut.push(c.id);
+  }
+  check('Terraind 풀 보유자 = 정확히 6명 (과잉 0)', wrongIn.length === 0, '과잉: ' + wrongIn.join(','));
+  check('Terraind 풀 누락 0 (6명 전원 제시)', wrongOut.length === 0, '누락: ' + wrongOut.join(','));
+  // (c) 6명 각각 spellPin이 datamined 슬롯과 일치 + 실지정(3시드)
+  const pin = (BY_API.Terraind.restrictions || {}).spellPin || {};
+  const pinBad = [];
+  for (const id of Object.keys(TERRAIN6)) {
+    if (pin[id] !== TERRAIN6[id]) pinBad.push(id + ': pin=' + pin[id] + ' 기대=' + TERRAIN6[id]);
+    for (let s = 0; s < 3; s++) {
+      if (designateOnce('Terraind', id, 830000 + s) !== TERRAIN6[id]) pinBad.push(id + ' 지정 불일치(seed ' + s + ')');
+    }
+  }
+  check('Terraind spellPin 6건 = datamined 슬롯 + 실지정 일치(각 3시드)', pinBad.length === 0, pinBad.join(' | '));
+}
+
+/* ---------------- [15] 계약 기준4: spellPin 정합 + 표본 실지정 ---------------- */
+section('15. [계약 기준4] spellPin 86건 정합 + 실지정 표본(ability pin 증강 전종×각 2건, 시드 5개)');
+{
+  // (a) 전수 정합: 총 86건(enrich-augments-log), 챔피언 실존·키 유효·map 근거 존재
+  const allPins = []; // {aug, champ, key}
+  for (const a of AUGMENTS) {
+    const p = a.restrictions && a.restrictions.spellPin;
+    if (!p) continue;
+    for (const cid of Object.keys(p)) allPins.push({ aug: a.apiName, champ: cid, key: p[cid] });
+  }
+  check('spellPin 총 86건 (enrich-augments-log 보고와 일치)', allPins.length === 86, String(allPins.length));
+  const integ = [];
+  const mapSkillOffered = new Set(MAP.mappings
+    .filter((e) => e.polarity === 'offered' && e.skill)
+    .map((e) => e.augment + '|' + e.champion + '|' + e.skill));
+  for (const p of allPins) {
+    const c = CHAMPIONS.find((x) => x.id === p.champ);
+    if (!c) { integ.push(p.aug + '.' + p.champ + ' — 챔피언 미존재'); continue; }
+    if (['Q', 'W', 'E', 'R'].indexOf(p.key) === -1) integ.push(p.aug + '.' + p.champ + ' — 키 이상 ' + p.key);
+    if (!(c.spells || []).some((s) => s.key === p.key)) integ.push(p.aug + '.' + p.champ + ' — 챔피언에 ' + p.key + ' 슬롯 없음');
+    if (!mapSkillOffered.has(p.aug + '|' + p.champ + '|' + p.key)) {
+      integ.push(p.aug + '.' + p.champ + '→' + p.key + ' — map offered(skill 명시) 근거 없음');
+    }
+  }
+  check('spellPin 전수(86건) 정합: 챔피언 실존·키 유효·map offered 근거 역추적', integ.length === 0,
+    integ.slice(0, 8).join(' | '));
+  // (b) 표본 실지정: enhancedSkill 지정은 category==='ability'에서만 일어난다(draft.js
+  //     presentAugment — 비ability 증강의 spellPin은 "어느 스킬에 적용되는가"의 확정 기록으로,
+  //     풀 필터도 지정도 아닌 메타데이터). 따라서 실지정 표본은 ability 증강의 pin에서 뽑는다:
+  //     ability pin 보유 증강 전종 × 각 최대 2건(정렬 기준) ≥ 20건, 시드 5개씩.
+  const byAug = {};
+  for (const p of allPins) {
+    if ((BY_API[p.aug].category || 'normal') !== 'ability') continue;
+    if (!byAug[p.aug]) byAug[p.aug] = [];
+    byAug[p.aug].push(p);
+  }
+  const augNames = Object.keys(byAug).sort();
+  const samples = [];
+  for (const n of augNames) {
+    const sorted = byAug[n].sort((x, y) => (x.champ < y.champ ? -1 : 1));
+    samples.push(sorted[0]);
+    if (sorted.length > 1) samples.push(sorted[1]);
+  }
+  check('표본 20건 이상 확보 (ability pin 증강 ' + augNames.length + '종 × 각 최대 2건)',
+    samples.length >= 20, String(samples.length));
+  const desBad = [];
+  for (const p of samples) {
+    for (let s = 0; s < 5; s++) {
+      const got = designateOnce(p.aug, p.champ, 840000 + s * 31);
+      if (got !== p.key) desBad.push(p.aug + '@' + p.champ + ': 기대 ' + p.key + ' 실측 ' + got + ' (seed ' + s + ')');
+    }
+  }
+  check('표본 ' + samples.length + '건 × 5시드 = ' + (samples.length * 5) + '회 전부 pin 스킬로 실지정',
+    desBad.length === 0, desBad.slice(0, 6).join(' | '));
+  // (c) 비ability pin 32건은 지정에 관여하지 않음을 표본으로 확인 (enhancedSkill 미부여)
+  const nonAbility = allPins.filter((p) => (BY_API[p.aug].category || 'normal') !== 'ability');
+  const inertBad = [];
+  for (const p of nonAbility.slice(0, 5)) {
+    const g = newGame({ augments: [BY_API[p.aug]], champion: champ(p.champ), seed: 850000 });
+    const slot = nextRound(g).slots[0];
+    if (!slot || slot.enhancedSkill !== undefined) inertBad.push(p.aug + '@' + p.champ);
+  }
+  check('비ability pin(' + nonAbility.length + '건)은 enhancedSkill 미부여 — 메타데이터로만 유지 (표본 5건)',
+    inertBad.length === 0, inertBad.join(','));
+}
+
+/* ---------------- [16] 계약 기준5: 제드×마나·대시 게이트 ---------------- */
+section('16. [계약 기준5] 제드×마나·대시 게이트 — 기존 패턴 (위 [1]·[2] 섹션이 전담)');
+{
+  // 기준5는 본 파일 [1](마나 게이트: 제드 미제시 + 200게임 풀스트레스)과 [2](대시 게이트
+  // 5종 001100 패턴)가 이미 전수 검증한다. 여기서는 회귀 가드로 핵심 2건만 재확인.
+  check('제드 풀에 마나 3종 부재 재확인 ([1] 연동)',
+    !inPool('Zed', 'ARAM_Overflow') && !inPool('Zed', 'ARAM_Juiced') && !inPool('Zed', 'ARAM_MindtoMatter'));
+  check('대시 5종 패턴 001100 재확인 ([2] 연동)',
+    ['ARAM_Dashing', 'ARAM_Earthwake', 'ARAM_OutlawsGrit', 'ARAM_ShadowRunner', 'SwiftAndSafe']
+      .every((api) => patternOf(api) === '001100'));
+}
+
+/* ---------------- [17] 추가 감사: propsSource 분포 ---------------- */
+section('17. [추가 감사] champions.json propsSource 분포 = 생성기 보고 일치');
+{
+  // 보고 기준: node scripts/enrich-champions.cjs (2026-09-03 실행 로그)
+  //   "propsSource 분포: {traits:296, merged:389, keywords:7}" — 총 692 스킬(173명×4).
+  // keywords 7 = 게임 데이터 자체에 mSpellTags가 없는 7슬롯 (스크립트 주석·raw/14 §8).
+  const dist = { traits: 0, merged: 0, keywords: 0 };
+  const unknown = [];
+  let total = 0;
+  for (const c of CHAMPIONS) {
+    for (const sp of c.spells || []) {
+      total++;
+      if (dist[sp.propsSource] !== undefined) dist[sp.propsSource]++;
+      else unknown.push(c.id + '.' + sp.key + '=' + sp.propsSource);
+    }
+  }
+  check('전 스킬 propsSource 표기 (traits|merged|keywords 외 값 0)', unknown.length === 0, unknown.slice(0, 5).join(','));
+  check('스킬 총수 692 (173명 × 4)', total === 692, String(total));
+  check('분포 = 보고값 traits 296 / merged 389 / keywords 7',
+    dist.traits === 296 && dist.merged === 389 && dist.keywords === 7, JSON.stringify(dist));
+}
+
+/* ---------------- [18] 추가 감사: community → 하드 필터 유입 0 역추적 ---------------- */
+section('18. [추가 감사] community 근거의 하드 필터 유입 0 (map 61건 전수 + 역방향)');
+{
+  // 순방향: map의 community 매핑(offered 60 + excluded 1) 전수 — championExclude/spellExclude
+  // 어느 쪽으로도 이식되어 있으면 규율 위반. (spellPin은 풀 필터가 아닌 지정이라 계약 예외 허용.
+  // ARAM_SpinToWin championWhitelist는 community 등급이지만 계약이 명시 유지 지시한 예외 —
+  // eligibility-notes otherRestrictions official kitRequired가 별도 근거, [11]에서 감사.)
+  const communities = MAP.mappings.filter((e) => e.confidence === 'community');
+  check('map community 매핑 61건 로드', communities.length === 61, String(communities.length));
+  const leak = [];
+  for (const e of communities) {
+    const a = BY_API[e.augment];
+    if (!a) continue;
+    const r = a.restrictions || {};
+    if (Array.isArray(r.championExclude) && r.championExclude.indexOf(e.champion) !== -1) {
+      leak.push(e.augment + '×' + e.champion + ' — championExclude 유입');
+    }
+    if (e.skill && r.spellExclude && Array.isArray(r.spellExclude[e.champion])
+      && r.spellExclude[e.champion].indexOf(e.skill) !== -1 && e.polarity === 'excluded') {
+      leak.push(e.augment + '×' + e.champion + ' ' + e.skill + ' — spellExclude 유입');
+    }
+  }
+  check('community 61건 중 하드 필터(championExclude/spellExclude) 유입 0', leak.length === 0, leak.join(' | '));
+  // 특별 확인: 유일한 excluded/community(Yorick W×Terraind)는 이진 미이식 + terrain 게이트로 창발 부재
+  const tr = BY_API.Terraind.restrictions || {};
+  check('Yorick W×Terraind(community excluded): 이진 미이식 + 풀 부재는 terrain 게이트 창발',
+    !tr.championExclude && !(tr.spellExclude && tr.spellExclude.Yorick) && !poolSet('Yorick').has('Terraind'));
+
+  // 역방향: augments.json의 spellExclude·championExclude 전 항목이 official/datamined
+  // (championExclude는 empirical까지 — Jinx×BreadAndButter) 근거로 역추적되는지
+  const mapExcl = {}; // 'aug|champ|skill' → confidence / 'aug|champ|' → confidence
+  for (const e of MAP.mappings) {
+    if (e.polarity !== 'excluded') continue;
+    mapExcl[e.augment + '|' + e.champion + '|' + (e.skill || '')] = e.confidence;
+  }
+  const HARD_OK = ['official', 'datamined'];
+  const rev = [];
+  for (const a of AUGMENTS) {
+    const r = a.restrictions;
+    if (!r) continue;
+    if (r.spellExclude) {
+      for (const cid of Object.keys(r.spellExclude)) {
+        for (const key of r.spellExclude[cid]) {
+          const conf = mapExcl[a.apiName + '|' + cid + '|' + key];
+          if (HARD_OK.indexOf(conf) === -1) rev.push(a.apiName + '.spellExclude.' + cid + '.' + key + ' — 근거 ' + conf);
+        }
+      }
+    }
+    if (Array.isArray(r.championExclude)) {
+      for (const cid of r.championExclude) {
+        // 챔피언 단위: map의 champion-level excluded (skill 무관 — Jinx는 Q 명시라 skill 키로도 조회)
+        const conf = mapExcl[a.apiName + '|' + cid + '|']
+          || mapExcl[a.apiName + '|' + cid + '|Q'] || mapExcl[a.apiName + '|' + cid + '|W']
+          || mapExcl[a.apiName + '|' + cid + '|E'] || mapExcl[a.apiName + '|' + cid + '|R'];
+        if (['official', 'datamined', 'empirical'].indexOf(conf) === -1) {
+          rev.push(a.apiName + '.championExclude.' + cid + ' — 근거 ' + conf);
+        }
+      }
+    }
+  }
+  check('역방향: 이진 spellExclude·championExclude 전 항목이 empirical 이상 근거로 역추적',
+    rev.length === 0, rev.join(' | '));
 }
 
 /* ---------------- 요약 ---------------- */

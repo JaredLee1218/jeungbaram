@@ -127,7 +127,7 @@ const SKILL_KEYS = new Set(['Q', 'W', 'E', 'R']);
 const RESTRICTION_KEYS = new Set([
   'rangedOnly', 'meleeOnly', 'requiresMana', 'abilityProps', 'abilityPropsAll',
   'classRequired', 'classExcluded', 'championWhitelist', 'championExclude',
-  'spellExclude', 'slot', 'note',
+  'spellExclude', 'spellPin', 'slot', 'note',
 ]);
 
 const champIdSet = new Set(champions.map(c => c.id));
@@ -181,6 +181,26 @@ for (const a of augments) {
   }
   if (r.slot !== undefined && !SKILL_KEYS.has(r.slot)) {
     issues.push(`augment ${a.apiName}: restrictions.slot 스킬 키 위반 "${r.slot}"`);
+  }
+  // spellPin: {챔피언id: 'Q'|'W'|'E'|'R'} — 챔피언 id 실존 + 값 어휘 + 내부 정합
+  // (근거: ability-augment-map.json 이식 — enrich-augments.cjs, real-mapping 계약)
+  if (r.spellPin !== undefined) {
+    if (typeof r.spellPin !== 'object' || r.spellPin === null || Array.isArray(r.spellPin)) {
+      issues.push(`augment ${a.apiName}: spellPin은 {챔피언id: 스킬키} 객체여야 함`);
+    } else {
+      for (const [id, k] of Object.entries(r.spellPin)) {
+        if (!champIdSet.has(id)) issues.push(`augment ${a.apiName}: spellPin 챔피언 id 미실존 "${id}"`);
+        if (!SKILL_KEYS.has(k)) issues.push(`augment ${a.apiName}: spellPin["${id}"] 스킬 키 위반 ${JSON.stringify(k)}`);
+        // 정합: 같은 증강에서 pin된 챔피언이 championExclude에 있으면 모순
+        if (Array.isArray(r.championExclude) && r.championExclude.includes(id)) {
+          issues.push(`augment ${a.apiName}: spellPin["${id}"]인데 championExclude에도 등재 (모순)`);
+        }
+        // 정합: pin된 스킬이 같은 챔피언의 spellExclude에 있으면 모순 (draft.js는 pin 무시 폴백하지만 데이터 오류)
+        if (r.spellExclude && Array.isArray(r.spellExclude[id]) && r.spellExclude[id].includes(k)) {
+          issues.push(`augment ${a.apiName}: spellPin["${id}"]=${k}가 spellExclude["${id}"]에도 등재 (모순)`);
+        }
+      }
+    }
   }
 }
 

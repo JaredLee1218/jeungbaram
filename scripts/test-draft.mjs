@@ -17,6 +17,9 @@
  *  [11] 가중 추출 분포 + 챔피언별 풀 비대칭 — 계약 검증 기준 6
  *  [12] 스킬 증강 enhancedSkill + trackL9 옵션
  *  [13] 신규 기능 포함 시드 재현성 — 계약 검증 기준 7
+ *
+ * real-mapping 계약 검증 (research/ABILITY-AUGMENT-DATA.md §4):
+ *  [14] spellPin 지정 순서 — ①pin(rng 미소비) ②slot ③무작위, exclude 충돌 시 pin 무시→③
  */
 import {
   createRng,
@@ -735,6 +738,228 @@ section('13. 신규 기능 포함 시드 재현성');
   const rA = nextRound(gA);
   const rB = nextRound(gB);
   check('직렬화 복원 후 동일 진행 (신규 상태 필드 포함)', JSON.stringify(rA) === JSON.stringify(rB));
+}
+
+/* ---------------- [14] spellPin 지정 순서 (real-mapping 계약: ①pin ②slot ③무작위) ---------------- */
+section('14. spellPin 지정 순서 (①pin ②slot ③무작위)');
+{
+  const PINCH = {
+    id: 'PinChamp', tags: [], ranged: false, usesMana: true,
+    abilityProps: ['projectile', 'knockback'],
+    spells: [
+      { key: 'Q', nameKo: '핀Q', props: ['projectile'] },
+      { key: 'W', nameKo: '핀W', props: ['knockback'] },
+      { key: 'E', nameKo: '핀E', props: [] },
+      { key: 'R', nameKo: '핀R', props: ['knockback'] },
+    ],
+  };
+  const fillers = [];
+  for (let i = 1; i <= 5; i++) fillers.push({ apiName: 'PFill_' + i, tier: 'silver', enabled: true });
+
+  // ① 기본: spellPin이 있으면 그 스킬로 고정 — requiredProps(knockback)를 못 채우는 E라도
+  //   확정 매핑(실측/공식 근거)이 근사 필터(requiredProps 무작위)보다 우선한다
+  const pinAug = { apiName: 'PinAug', tier: 'silver', enabled: true, category: 'ability',
+    restrictions: { abilityPropsAll: ['knockback'], spellPin: { PinChamp: 'E' } } };
+  let pinSeen = 0;
+  let pinOk = true;
+  let pinNameOk = true;
+  for (let s = 0; s < 120; s++) {
+    const g = newGame({ augments: [pinAug].concat(fillers), champion: PINCH, seed: 80000 + s });
+    const round = nextRound(g);
+    for (const slot of round.slots) {
+      if (slot.apiName === 'PinAug') {
+        pinSeen++;
+        if (!slot.enhancedSkill || slot.enhancedSkill.key !== 'E') pinOk = false;
+        if (!slot.enhancedSkill || slot.enhancedSkill.nameKo !== '핀E') pinNameOk = false;
+      }
+    }
+  }
+  check('① spellPin 케이스 확보(120시드)', pinSeen > 0, pinSeen + '회');
+  check('① spellPin이 있으면 항상 그 스킬(E)로 고정 (requiredProps보다 우선)', pinOk);
+  check('① 고정 스킬 nameKo를 champion.spells에서 조회', pinNameOk);
+
+  // ① > ②: slot과 pin이 같이 있으면 pin 우선
+  const pinOverSlot = { apiName: 'PinOverSlot', tier: 'silver', enabled: true, category: 'ability',
+    restrictions: { slot: 'Q', spellPin: { PinChamp: 'W' } } };
+  let posSeen = 0;
+  let posOk = true;
+  for (let s = 0; s < 120; s++) {
+    const g = newGame({ augments: [pinOverSlot].concat(fillers), champion: PINCH, seed: 150000 + s });
+    const round = nextRound(g);
+    for (const slot of round.slots) {
+      if (slot.apiName === 'PinOverSlot' && slot.enhancedSkill) {
+        posSeen++;
+        if (slot.enhancedSkill.key !== 'W') posOk = false;
+      }
+    }
+  }
+  check('①>②: slot(Q)과 pin(W)이 같이 있으면 pin(W) 우선', posSeen > 0 && posOk, posSeen + '회');
+
+  // 공용 트레이스: 드로우 시퀀스(apiName) + 증강별 최초 지정 스킬 키 + 최종 rng 상태
+  function playTrace(pool, seed) {
+    const g = newGame({ augments: pool, champion: PINCH, seed: seed });
+    const seq = [];
+    const keys = {};
+    const note = function (a) {
+      seq.push(a.apiName);
+      if (a.enhancedSkill && keys[a.apiName] === undefined) keys[a.apiName] = a.enhancedSkill.key;
+    };
+    for (let r = 0; r < 4; r++) {
+      const round = nextRound(g);
+      for (const a of round.slots) note(a);
+      rerollSlot(g, r % 3);
+      note(round.slots[r % 3]);
+      if (r === 1) { goldenReroll(g, 0); note(round.slots[0]); }
+      pickAugment(g, (r + 1) % 3);
+    }
+    return { seq: seq.join('|'), keys: keys, rngState: g.rngState };
+  }
+  const mkNames = [];
+  for (let i = 1; i <= 10; i++) mkNames.push(['NX_silver_' + i, 'silver']);
+  for (let i = 1; i <= 8; i++) mkNames.push(['NX_gold_' + i, 'gold']);
+  const plainPool = mkNames.map(function (nt) { return { apiName: nt[0], tier: nt[1], enabled: true }; });
+  const pinnedPool = mkNames.map(function (nt) {
+    return { apiName: nt[0], tier: nt[1], enabled: true, category: 'ability',
+      restrictions: { spellPin: { PinChamp: 'W' } } };
+  });
+
+  // rng 미소비(a): 전 증강이 pin인 풀은 "일반 증강(지정 자체가 없는)" 풀과 rng 소비량이 같아야 함
+  //   → 같은 시드에서 드로우 시퀀스와 최종 rngState가 완전히 일치 (pin 지정이 rng를 안 쓴다는 직접 증거)
+  let rngFreeOk = true;
+  let pinnedAllW = true;
+  for (const s of [1, 2, 77, 12345, 'seedstr']) {
+    const tp = playTrace(plainPool, s);
+    const tq = playTrace(pinnedPool, s);
+    if (tp.seq !== tq.seq || tp.rngState !== tq.rngState) rngFreeOk = false;
+    for (const n in tq.keys) if (tq.keys[n] !== 'W') pinnedAllW = false;
+  }
+  check('rng 미소비(a): 전원 pin 풀 = 일반 증강 풀과 드로우 시퀀스·최종 rng 상태 동일', rngFreeOk);
+  check('rng 미소비(a): pin 풀의 지정 키는 전부 W', pinnedAllW);
+
+  // rng 미소비(b): 같은 시드에서 spellPin 유무가 이후 드로우를 바꾸지 않음.
+  //   비교 기준은 rng-free인 ②(slot) — pin이 있으면 ①(W), 없으면 ②(Q)로 지정만 달라지고
+  //   드로우 시퀀스·rngState는 동일해야 한다. (③ 무작위 경로는 rng를 1회 소비하므로
+  //   pin↔③ 비교는 정의상 rng 스트림이 달라짐 — 계약이 pin을 "rng 미소비"로 규정한 결과)
+  const baseSlotAug = { apiName: 'XSlot', tier: 'silver', enabled: true, category: 'ability',
+    restrictions: { slot: 'Q' } };
+  const pinSlotAug = { apiName: 'XSlot', tier: 'silver', enabled: true, category: 'ability',
+    restrictions: { slot: 'Q', spellPin: { PinChamp: 'W' } } };
+  const rest = [];
+  for (let i = 1; i <= 9; i++) rest.push({ apiName: 'Y_silver_' + i, tier: 'silver', enabled: true });
+  for (let i = 1; i <= 8; i++) rest.push({ apiName: 'Y_gold_' + i, tier: 'gold', enabled: true });
+  let pinPresenceOk = true;
+  let xSeen = 0;
+  let xKeysOk = true;
+  for (let s = 0; s < 60; s++) {
+    const tc = playTrace([baseSlotAug].concat(rest), 90000 + s);
+    const td = playTrace([pinSlotAug].concat(rest), 90000 + s);
+    if (tc.seq !== td.seq || tc.rngState !== td.rngState) pinPresenceOk = false;
+    if (tc.keys.XSlot !== undefined) {
+      xSeen++;
+      if (tc.keys.XSlot !== 'Q' || td.keys.XSlot !== 'W') xKeysOk = false;
+    }
+  }
+  check('rng 미소비(b): spellPin 유무가 이후 드로우를 바꾸지 않음(시퀀스·rng 상태 동일)', pinPresenceOk);
+  check('rng 미소비(b): 대상 증강 노출 케이스 확보(60시드)', xSeen > 0, xSeen + '회');
+  check('rng 미소비(b): 같은 시드에서 pin 없으면 slot(Q), 있으면 pin(W)', xKeysOk);
+
+  // 충돌 정책: pin된 스킬이 같은 챔피언의 spellExclude에도 있으면 데이터 오류 —
+  //   exclude(공식 버그픽스 근거)를 우선해 pin을 무시하고 ③ 무작위로 (draft.js 주석 명시)
+  const conflictAug = { apiName: 'ConflictAug', tier: 'silver', enabled: true, category: 'ability',
+    restrictions: { abilityPropsAll: ['knockback'], spellPin: { PinChamp: 'W' }, spellExclude: { PinChamp: ['W'] } } };
+  let confSeen = 0;
+  let confOk = true;
+  for (let s = 0; s < 120; s++) {
+    const g = newGame({ augments: [conflictAug].concat(fillers), champion: PINCH, seed: 100000 + s });
+    const round = nextRound(g);
+    for (const slot of round.slots) {
+      if (slot.apiName === 'ConflictAug') {
+        confSeen++;
+        // 적격(knockback) 스킬 W·R 중 W가 제외 → ③에서 항상 R
+        if (!slot.enhancedSkill || slot.enhancedSkill.key !== 'R') confOk = false;
+      }
+    }
+  }
+  check('충돌: pin(W)∈exclude(W)면 pin 무시 → ③ 무작위(적격은 R만 남아 항상 R)',
+    confSeen > 0 && confOk, confSeen + '회');
+
+  // 충돌 시 ②(slot)도 건너뛰고 ③으로 간다 (계약 정책: "pin 무시하고 ③으로")
+  const conflictSlotAug = { apiName: 'ConflictSlotAug', tier: 'silver', enabled: true, category: 'ability',
+    restrictions: { slot: 'Q', spellPin: { PinChamp: 'W' }, spellExclude: { PinChamp: ['W'] } } };
+  const keySeen = {};
+  let confSlotSeen = 0;
+  let neverW = true;
+  for (let s = 0; s < 200; s++) {
+    const g = newGame({ augments: [conflictSlotAug].concat(fillers), champion: PINCH, seed: 110000 + s });
+    const round = nextRound(g);
+    for (const slot of round.slots) {
+      if (slot.apiName === 'ConflictSlotAug' && slot.enhancedSkill) {
+        confSlotSeen++;
+        keySeen[slot.enhancedSkill.key] = true;
+        if (slot.enhancedSkill.key === 'W') neverW = false;
+      }
+    }
+  }
+  check('충돌: slot(Q)이 있어도 ②를 건너뛰고 ③ 무작위 (Q 고정이 아님 — 복수 키 관측)',
+    confSlotSeen > 0 && Object.keys(keySeen).length >= 2, JSON.stringify(Object.keys(keySeen)));
+  check('충돌: 제외된 스킬(W)은 끝까지 지정되지 않음', neverW);
+
+  // 방어: 다른 챔피언 id 키의 pin은 미적용 → ③ (적격 W/R 중 무작위)
+  const otherPin = { apiName: 'OtherPin', tier: 'silver', enabled: true, category: 'ability',
+    restrictions: { abilityPropsAll: ['knockback'], spellPin: { SomeoneElse: 'E' } } };
+  let otherSeen = 0;
+  let otherOk = true;
+  for (let s = 0; s < 120; s++) {
+    const g = newGame({ augments: [otherPin].concat(fillers), champion: PINCH, seed: 120000 + s });
+    const round = nextRound(g);
+    for (const slot of round.slots) {
+      if (slot.apiName === 'OtherPin' && slot.enhancedSkill) {
+        otherSeen++;
+        if (['W', 'R'].indexOf(slot.enhancedSkill.key) === -1) otherOk = false;
+      }
+    }
+  }
+  check('방어: 다른 챔피언 id의 pin은 미적용 (③ 적격 W/R 중 지정)', otherSeen > 0 && otherOk, otherSeen + '회');
+
+  // 방어: 스킬 키 범위(Q/W/E/R) 밖 pin 값은 무시 → ②(slot Q) 적용
+  const badPin = { apiName: 'BadPin', tier: 'silver', enabled: true, category: 'ability',
+    restrictions: { slot: 'Q', spellPin: { PinChamp: 'X' } } };
+  let badSeen = 0;
+  let badOk = true;
+  for (let s = 0; s < 120; s++) {
+    const g = newGame({ augments: [badPin].concat(fillers), champion: PINCH, seed: 130000 + s });
+    const round = nextRound(g);
+    for (const slot of round.slots) {
+      if (slot.apiName === 'BadPin' && slot.enhancedSkill) {
+        badSeen++;
+        if (slot.enhancedSkill.key !== 'Q') badOk = false;
+      }
+    }
+  }
+  check('방어: 키 범위 밖 pin(X)은 무시하고 ② slot(Q) 적용', badSeen > 0 && badOk, badSeen + '회');
+
+  // 방어: 챔피언 미지정 게임에서는 pin이 적용될 수 없음 (champion.id 매칭 불가) — 예외 없이 Q/W/E/R 지정
+  let nullSeen = 0;
+  let nullOk = true;
+  for (let s = 0; s < 40; s++) {
+    const g = newGame({ augments: [pinAug].concat(fillers), seed: 140000 + s });
+    const round = nextRound(g);
+    for (const slot of round.slots) {
+      if (slot.apiName === 'PinAug') {
+        nullSeen++;
+        if (!slot.enhancedSkill || ['Q', 'W', 'E', 'R'].indexOf(slot.enhancedSkill.key) === -1) nullOk = false;
+      }
+    }
+  }
+  check('방어: 챔피언 미지정이면 pin 미적용·예외 없이 Q/W/E/R 지정', nullSeen > 0 && nullOk, nullSeen + '회');
+
+  // 풀 원본 불변 + pin 포함 시드 재현성
+  check('풀 원본 불변: pin 증강 원본에 enhancedSkill 미오염',
+    pinAug.enhancedSkill === undefined && pinOverSlot.enhancedSkill === undefined
+    && conflictAug.enhancedSkill === undefined && pinnedPool[0].enhancedSkill === undefined);
+  check('pin 포함 시드 재현성 (같은 시드 = 같은 전개)',
+    playTrace(pinnedPool, 4242).seq === playTrace(pinnedPool, 4242).seq
+    && playTrace(pinnedPool, 4242).rngState === playTrace(pinnedPool, 4242).rngState);
 }
 
 /* ---------------- 결과 ---------------- */

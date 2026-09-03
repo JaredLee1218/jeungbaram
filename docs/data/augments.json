@@ -35,6 +35,11 @@
     "Mage",
     "Support"
    ],
+   "disfavoredClasses": [
+    "Marksman",
+    "Assassin",
+    "Fighter"
+   ],
    "restrictions": {
     "classRequired": [
      "Mage",
@@ -83,6 +88,11 @@
     "Fighter",
     "Assassin"
    ],
+   "disfavoredClasses": [
+    "Mage",
+    "Support",
+    "Tank"
+   ],
    "restrictions": {
     "classRequired": [
      "Marksman",
@@ -109,6 +119,9 @@
     "abilityPropsAll": [
      "shield"
     ],
+    "spellPin": {
+     "Lux": "W"
+    },
     "note": "보호막 효과가 있는 스킬 필요 (스킬 단위 AND). 근거: eligibility-notes.json abilityAugments"
    }
   },
@@ -244,6 +257,11 @@
     "Marksman",
     "Fighter",
     "Assassin"
+   ],
+   "disfavoredClasses": [
+    "Mage",
+    "Support",
+    "Tank"
    ],
    "restrictions": {
     "classRequired": [
@@ -476,6 +494,11 @@
     "abilityPropsAll": [
      "durationEffect"
     ],
+    "spellPin": {
+     "Ashe": "Q",
+     "MasterYi": "E",
+     "Twitch": "Q"
+    },
     "note": "지속시간형 효과가 있는 스킬 필요 (스킬 단위 AND). 근거: eligibility-notes.json abilityAugments(requiredProps)"
    }
   },
@@ -753,11 +776,11 @@
     "classRequired": [
      "Support"
     ],
-    "note": "아군 힐/실드 계열 — Support 클래스 + 킷에 힐/실드 보유(OR) 이중 게이트. ⚠ 근사: classRequired [Support]만으로는 DDragon 태그상 Support인 브랜드가 통과 — 실측(11 §3-4, empirical)은 킷에 힐/실드 있는 소라카만 등재라 abilityProps [heal,shield]를 추가. 근거: STUDY §3-1, eligibility-notes.json classBias.allyHealShield",
     "abilityProps": [
      "heal",
      "shield"
-    ]
+    ],
+    "note": "근사: 아군 힐/실드 계열 — 실측에서 소라카 전용 관측 → DDragon tags의 Support 필요로 근사. 근거: STUDY §3-1, eligibility-notes.json classBias(allyHealShield)"
    }
   },
   {
@@ -805,8 +828,8 @@
      "MonkeyKing",
      "Nocturne",
      "Rammus",
-     "Renekton",
      "RekSai",
+     "Renekton",
      "Riven",
      "Samira",
      "Sylas",
@@ -814,7 +837,24 @@
      "XinZhao",
      "Zed"
     ],
-    "note": "위키 명시 적격 스킬 목록의 챔피언 화이트리스트 (공식 — 아리 W·R, 다리우스 Q, 가렌 E, 제드 E 등 22명). 검증 대기분(아크샨·뽀삐 R 등)은 미포함. 근거: STUDY §3-1, research/raw/03-champion-augment-pools.md §1"
+    "spellPin": {
+     "Ambessa": "Q",
+     "Amumu": "E",
+     "Darius": "Q",
+     "Garen": "E",
+     "Hecarim": "Q",
+     "Jax": "E",
+     "Katarina": "R",
+     "Kayn": "Q",
+     "MonkeyKing": "R",
+     "Rammus": "Q",
+     "RekSai": "Q",
+     "Riven": "Q",
+     "Tryndamere": "E",
+     "XinZhao": "R",
+     "Zed": "E"
+    },
+    "note": "위키 \"Eligible Abilities\" 실측 목록의 챔피언 화이트리스트 (community — 위키 편집자 실측, 검증 수정본 22챔피언·28스킬: 아리 W·R, 다리우스 Q, 가렌 E, 제드 E 등). 검증 대기분(아크샨·뽀삐 R 등)은 미포함. 하드 필터 규율의 예외 — 계약이 화이트리스트 유지·갱신 명시. 근거: research/raw/15-wiki-patch-mining.md §2-1, ability-augment-map.json ‖ spellPin 중 community 실측분(위키·커뮤니티 — 전사 오차 가능): Ambessa=Q, Amumu=E, Darius=Q, Garen=E, Hecarim=Q, Jax=E, Katarina=R, Kayn=Q, MonkeyKing=R, Rammus=Q, RekSai=Q, Riven=Q, Tryndamere=E, XinZhao=R, Zed=E"
    }
   },
   {
@@ -856,9 +896,12 @@
    "tags": [
     "tank"
    ],
+   "favoredClasses": [
+    "Fighter",
+    "Tank"
+   ],
    "restrictions": {
-    "meleeOnly": true,
-    "note": "근사: 실측에서 근접 3인(말파이트·제드·다리우스)에게만 등재 — 근접 클래스 게이트로 추정해 meleeOnly로 이식. 근거: eligibility-notes.json classBias(meleeCluster), research/raw/11-empirical-pools.md §3-8"
+    "note": "근사 해제: 종전 meleeOnly(raw/11 근접 3인 표본)를 26.17 확대 실측이 반증 — 원거리 아리·리산드라·블라디미르 포함 16챔프 offered(mayhemmeta ≥100판). 게이트 제거, 근접 브루저 편중은 가중치(favoredClasses)로만. 근거: ability-augment-map.json offered(empirical), research/raw/16 §4~5"
    }
   },
   {
@@ -969,6 +1012,11 @@
     "Fighter",
     "Assassin"
    ],
+   "disfavoredClasses": [
+    "Mage",
+    "Support",
+    "Tank"
+   ],
    "restrictions": {
     "classRequired": [
      "Marksman",
@@ -1013,6 +1061,11 @@
     "Fighter",
     "Assassin"
    ],
+   "disfavoredClasses": [
+    "Mage",
+    "Support",
+    "Tank"
+   ],
    "restrictions": {
     "classRequired": [
      "Marksman",
@@ -1041,6 +1094,11 @@
     "Marksman",
     "Fighter",
     "Assassin"
+   ],
+   "disfavoredClasses": [
+    "Mage",
+    "Support",
+    "Tank"
    ],
    "restrictions": {
     "classRequired": [
@@ -1089,6 +1147,11 @@
     "Mage",
     "Support"
    ],
+   "disfavoredClasses": [
+    "Marksman",
+    "Assassin",
+    "Fighter"
+   ],
    "restrictions": {
     "classRequired": [
      "Mage",
@@ -1129,6 +1192,11 @@
    "favoredClasses": [
     "Mage",
     "Support"
+   ],
+   "disfavoredClasses": [
+    "Marksman",
+    "Assassin",
+    "Fighter"
    ],
    "restrictions": {
     "classRequired": [
@@ -1174,11 +1242,11 @@
     "classRequired": [
      "Support"
     ],
-    "note": "아군 힐/실드 계열 — Support 클래스 + 킷에 힐/실드 보유(OR) 이중 게이트. ⚠ 근사: classRequired [Support]만으로는 DDragon 태그상 Support인 브랜드가 통과 — 실측(11 §3-4, empirical)은 킷에 힐/실드 있는 소라카만 등재라 abilityProps [heal,shield]를 추가. 근거: STUDY §3-1, eligibility-notes.json classBias.allyHealShield",
     "abilityProps": [
      "heal",
      "shield"
-    ]
+    ],
+    "note": "근사: 아군 힐/실드 계열 — 실측에서 소라카 전용 관측 → DDragon tags의 Support 필요로 근사. 근거: STUDY §3-1, eligibility-notes.json classBias(allyHealShield)"
    }
   },
   {
@@ -1212,6 +1280,11 @@
     "Mage",
     "Support"
    ],
+   "disfavoredClasses": [
+    "Marksman",
+    "Assassin",
+    "Fighter"
+   ],
    "restrictions": {
     "classRequired": [
      "Mage",
@@ -1238,6 +1311,21 @@
     "abilityPropsAll": [
      "empoweredAttack"
     ],
+    "spellPin": {
+     "Blitzcrank": "E",
+     "Briar": "W",
+     "Darius": "W",
+     "DrMundo": "E",
+     "Garen": "Q",
+     "Illaoi": "W",
+     "Jax": "W",
+     "MonkeyKing": "Q",
+     "Nasus": "Q",
+     "Renekton": "W",
+     "Shyvana": "Q",
+     "Trundle": "Q",
+     "Vayne": "Q"
+    },
     "note": "강화 기본 공격 효과가 있는 스킬 필요 (스킬 단위 AND). 실측: 6명 중 다리우스(강화 평타 W)만 등재. 근거: eligibility-notes.json abilityAugments"
    }
   },
@@ -1325,6 +1413,12 @@
     "abilityPropsAll": [
      "knockback"
     ],
+    "spellPin": {
+     "Gragas": "R",
+     "Hecarim": "E",
+     "Syndra": "E",
+     "Thresh": "E"
+    },
     "note": "밀쳐내기(넉백) 효과가 있는 스킬 필요 (스킬 단위 AND). 궁극기 대상이면 피해 250%. 근거: eligibility-notes.json abilityAugments"
    }
   },
@@ -1384,6 +1478,11 @@
     "Fighter",
     "Assassin"
    ],
+   "disfavoredClasses": [
+    "Mage",
+    "Support",
+    "Tank"
+   ],
    "restrictions": {
     "classRequired": [
      "Marksman",
@@ -1411,6 +1510,11 @@
     "Marksman",
     "Fighter",
     "Assassin"
+   ],
+   "disfavoredClasses": [
+    "Mage",
+    "Support",
+    "Tank"
    ],
    "restrictions": {
     "classRequired": [
@@ -1702,6 +1806,9 @@
      "empoweredAttack",
      "durationEffect"
     ],
+    "spellPin": {
+     "Ashe": "Q"
+    },
     "note": "일정 시간 기본 공격을 강화하는 스킬 필요 (empoweredAttack+durationEffect 스킬 단위 AND). 근거: eligibility-notes.json abilityAugments"
    }
   },
@@ -1735,7 +1842,13 @@
     "onhit",
     "ap"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "spellPin": {
+     "Blitzcrank": "E",
+     "Nasus": "Q",
+     "Trundle": "Q"
+    }
+   }
   },
   {
    "apiName": "MercysStrike",
@@ -1755,11 +1868,11 @@
     "classRequired": [
      "Support"
     ],
-    "note": "서포트 전용 (26.15 공식 버그픽스로 게이트 실존 확인) + 아군 힐/실드 계열 — Support 클래스 + 킷에 힐/실드 보유(OR) 이중 게이트. ⚠ 근사: classRequired [Support]만으로는 DDragon 태그상 Support인 브랜드가 통과 — 실측(11 §3-4, empirical)은 킷에 힐/실드 있는 소라카만 등재라 abilityProps [heal,shield]를 추가. 근거: STUDY §3-1, eligibility-notes.json classBias.allyHealShield",
     "abilityProps": [
      "heal",
      "shield"
-    ]
+    ],
+    "note": "서포트 전용 클래스 게이트 (공식 26.15 버그픽스로 실존 확인). 근사: DDragon tags의 Support 보유로 판정. 근거: research/AUGMENT-POOLS-STUDY.md §3-1, eligibility-notes.json classBias"
    }
   },
   {
@@ -2012,14 +2125,26 @@
    ],
    "restrictions": {
     "spellExclude": {
-     "Yasuo": [
-      "E"
-     ],
      "Akshan": [
       "E"
+     ],
+     "Yasuo": [
+      "Q",
+      "E"
+     ],
+     "Yone": [
+      "Q",
+      "W"
+     ],
+     "Zeri": [
+      "Q"
      ]
     },
-    "note": "스킬 슬롯 단위 게이트: 야스오 E(26.14)·아크샨 E(26.15) 부적격 (공식 버그픽스). 근거: eligibility-notes.json championSpecific"
+    "spellPin": {
+     "Blitzcrank": "Q",
+     "Locke": "E"
+    },
+    "note": "스킬 슬롯 단위 게이트: 야스오 E(26.14)·아크샨 E(26.15) 부적격 (공식 버그픽스) + 야스오 Q·요네 Q/W·제리 Q 부적격 (datamined — Trait_NotBenefitFromHaste, 26.14 야스오 버그픽스가 태그 편집으로 실증). 근거: eligibility-notes.json championSpecific, ability-augment-map.json excluded ‖ spellPin 중 community 실측분(위키·커뮤니티 — 전사 오차 가능): Blitzcrank=Q"
    }
   },
   {
@@ -2049,6 +2174,9 @@
      "Malphite": [
       "W"
      ]
+    },
+    "spellPin": {
+     "Locke": "E"
     },
     "note": "스킬 슬롯 단위 게이트: 아크샨 E·드레이븐 Q·일라오이 E·말파이트 W 부적격 (공식 26.15 버그픽스). 근거: eligibility-notes.json championSpecific"
    }
@@ -2082,9 +2210,18 @@
    "tags": [
     "dash"
    ],
+   "favoredClasses": [
+    "Fighter",
+    "Tank"
+   ],
    "restrictions": {
-    "meleeOnly": true,
-    "note": "근사: 실측에서 근접 3인에게만 등재 → meleeOnly로 이식. 26.12 발표 조건(자가 대상 AoE)은 현행 여부 미확인이라 미이식. 근거: eligibility-notes.json classBias(meleeCluster)·abilityAugments"
+    "spellPin": {
+     "Blitzcrank": "E",
+     "Garen": "E",
+     "Kennen": "R",
+     "Zac": "W"
+    },
+    "note": "근사 해제: 종전 meleeOnly(raw/11 근접 3인 표본)를 공식 기록이 반증 — 원거리 켄넨 R offered(26.12 패치노트 \"Garen E and Kennen R are very happy\"). 게이트 제거, 근접 편중은 가중치로만. 26.12 발표 조건(자가 대상 AoE)은 현행 여부 미확인이라 미이식. 근거: ability-augment-map.json offered(official), eligibility-notes.json abilityAugments ‖ spellPin 중 community 실측분(위키·커뮤니티 — 전사 오차 가능): Blitzcrank=E, Zac=W"
    }
   },
   {
@@ -2105,6 +2242,11 @@
     "abilityPropsAll": [
      "immobilize"
     ],
+    "spellPin": {
+     "Brand": "Q",
+     "Lux": "Q",
+     "Soraka": "E"
+    },
     "note": "속박/그라운딩(immobilize) 스킬 필요 (스킬 단위 AND). 챔피언마다 다른 스킬에 바인딩(빅토르 W·레넥톤 W 실측). 근거: eligibility-notes.json abilityAugments"
    }
   },
@@ -2265,9 +2407,17 @@
    "tags": [
     "poke"
    ],
+   "favoredClasses": [
+    "Mage",
+    "Marksman"
+   ],
    "restrictions": {
-    "rangedOnly": true,
-    "note": "근사: 장거리(600+) 스킬샷 계열 — 실측에서 원거리 3인만 등재·근접 3인 부재 → rangedOnly로 근사. 근거: eligibility-notes.json classBias(sniper), research/raw/11-empirical-pools.md §3-7"
+    "spellPin": {
+     "Anivia": "Q",
+     "Locke": "Q",
+     "Velkoz": "Q"
+    },
+    "note": "근사 해제: 종전 rangedOnly(raw/11 원거리 3인 표본)를 공식 기록이 반증 — 근접 Locke Q offered(26.15 패치노트). 실제 조건은 장거리(600+) 스킬샷 보유로 추정되나 킷 속성 어휘 밖이라 게이트 없이 가중치로만. 근거: ability-augment-map.json offered(official), eligibility-notes.json classBias(sniper)"
    }
   },
   {
@@ -2438,6 +2588,14 @@
     "abilityPropsAll": [
      "terrain"
     ],
+    "spellPin": {
+     "Anivia": "W",
+     "Azir": "R",
+     "JarvanIV": "R",
+     "Ornn": "Q",
+     "Taliyah": "R",
+     "Trundle": "E"
+    },
     "note": "지형을 생성하는 스킬 필요 (스킬 단위 AND — 아니비아·탈리야·트런들 등). 궁극기면 피해 3배. 근거: eligibility-notes.json abilityAugments"
    }
   },
@@ -2522,6 +2680,11 @@
     "Fighter",
     "Assassin"
    ],
+   "disfavoredClasses": [
+    "Mage",
+    "Support",
+    "Tank"
+   ],
    "restrictions": {
     "classRequired": [
      "Marksman",
@@ -2551,6 +2714,11 @@
     "Marksman",
     "Fighter",
     "Assassin"
+   ],
+   "disfavoredClasses": [
+    "Mage",
+    "Support",
+    "Tank"
    ],
    "restrictions": {
     "classRequired": [
@@ -2596,6 +2764,11 @@
     "Marksman",
     "Fighter",
     "Assassin"
+   ],
+   "disfavoredClasses": [
+    "Mage",
+    "Support",
+    "Tank"
    ],
    "restrictions": {
     "classRequired": [
@@ -2698,11 +2871,11 @@
     "classRequired": [
      "Support"
     ],
-    "note": "아군 힐/실드 계열 — Support 클래스 + 킷에 힐/실드 보유(OR) 이중 게이트. ⚠ 근사: classRequired [Support]만으로는 DDragon 태그상 Support인 브랜드가 통과 — 실측(11 §3-4, empirical)은 킷에 힐/실드 있는 소라카만 등재라 abilityProps [heal,shield]를 추가. 근거: STUDY §3-1, eligibility-notes.json classBias.allyHealShield",
     "abilityProps": [
      "heal",
      "shield"
-    ]
+    ],
+    "note": "근사: 아군 힐/실드 계열 — 실측에서 소라카 전용 관측 → DDragon tags의 Support 필요로 근사. 근거: STUDY §3-1, eligibility-notes.json classBias(allyHealShield)"
    }
   },
   {
@@ -2747,7 +2920,12 @@
    "enabled": true,
    "arenaOrigin": false,
    "tags": [],
-   "restrictions": {}
+   "restrictions": {
+    "spellPin": {
+     "Azir": "W",
+     "Veigar": "W"
+    }
+   }
   },
   {
    "apiName": "ARAM_BacktoBasics",
@@ -2909,6 +3087,13 @@
     "abilityProps": [
      "dash"
     ],
+    "spellPin": {
+     "Kled": "Q",
+     "LeeSin": "Q",
+     "MasterYi": "Q",
+     "RekSai": "E",
+     "Viego": "R"
+    },
     "note": "돌진/점멸 스킬 보유 챔피언에게만 (실측 5종 완전 동일 패턴·kiwi.bin mAugmentTags=32 합치). 칼리스타는 대신 공격 속도 125%를 얻음 (효과 치환 — community, note로만). 근거: STUDY §3-1, eligibility-notes.json classBias(dash)·championSpecific"
    }
   },
@@ -2981,14 +3166,18 @@
    "favoredClasses": [
     "Marksman"
    ],
+   "disfavoredClasses": [
+    "Mage",
+    "Support"
+   ],
    "restrictions": {
     "rangedOnly": true,
-    "note": "원거리 챔피언 전용 (공식). 루난의 허리케인 보유 시 미제시 (아이템 조건부 — note로만 기록). ⚠ 근사: 실측상 원거리 브랜드·소라카에도 부재(11 §4-1, empirical) — 명문 조건보다 좁은 클래스 필터를 classRequired [Marksman,Fighter,Assassin] 이진 제외로 이식(STUDY §3-4 3단계). 근거: eligibility-notes.json classBias.ARAM_DrawYourSword",
     "classRequired": [
      "Marksman",
      "Fighter",
      "Assassin"
-    ]
+    ],
+    "note": "원거리 챔피언 전용 (공식). 루난의 허리케인 보유 시 미제시 (아이템 조건부 — note로만 기록). 근사: 실측상 원거리 브랜드·소라카에도 부재 — 명문 조건보다 좁은 클래스 필터를 가중치(favored/disfavored)로 근사. 근거: STUDY §3-1, eligibility-notes.json classBias"
    }
   },
   {
@@ -3023,7 +3212,11 @@
     "aoe",
     "heal"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "spellPin": {
+     "Belveth": "E"
+    }
+   }
   },
   {
    "apiName": "Dropybara_Active",
@@ -3092,7 +3285,12 @@
    "arenaOrigin": false,
    "tags": [],
    "restrictions": {
-    "note": "실측: 징크스·브랜드 제외 관측 (큐레이션 게이트 추정) — 근거 불충분으로 이진 미이식, 기록만. 근거: eligibility-notes.json abilityAugments (11 §3-9)"
+    "spellPin": {
+     "Morgana": "R",
+     "Sivir": "R",
+     "Volibear": "R"
+    },
+    "note": "실측: 징크스·브랜드 제외 관측 (큐레이션 게이트 추정) — 근거 불충분으로 이진 미이식, 기록만. 근거: eligibility-notes.json abilityAugments (11 §3-9) ‖ spellPin 중 community 실측분(위키·커뮤니티 — 전사 오차 가능): Sivir=R"
    }
   },
   {
@@ -3116,11 +3314,11 @@
     "classRequired": [
      "Support"
     ],
-    "note": "아군 힐/실드 계열 — Support 클래스 + 킷에 힐/실드 보유(OR) 이중 게이트. ⚠ 근사: classRequired [Support]만으로는 DDragon 태그상 Support인 브랜드가 통과 — 실측(11 §3-4, empirical)은 킷에 힐/실드 있는 소라카만 등재라 abilityProps [heal,shield]를 추가. 근거: STUDY §3-1, eligibility-notes.json classBias.allyHealShield",
     "abilityProps": [
      "heal",
      "shield"
-    ]
+    ],
+    "note": "근사: 아군 힐/실드 계열 — 실측에서 소라카 전용 관측 → DDragon tags의 Support 필요로 근사. 근거: STUDY §3-1, eligibility-notes.json classBias(allyHealShield)"
    }
   },
   {
@@ -3143,11 +3341,11 @@
     "classRequired": [
      "Support"
     ],
-    "note": "아군 힐/실드 계열 — Support 클래스 + 킷에 힐/실드 보유(OR) 이중 게이트. ⚠ 근사: classRequired [Support]만으로는 DDragon 태그상 Support인 브랜드가 통과 — 실측(11 §3-4, empirical)은 킷에 힐/실드 있는 소라카만 등재라 abilityProps [heal,shield]를 추가. 근거: STUDY §3-1, eligibility-notes.json classBias.allyHealShield",
     "abilityProps": [
      "heal",
      "shield"
-    ]
+    ],
+    "note": "근사: 아군 힐/실드 계열 — 실측에서 소라카 전용 관측 → DDragon tags의 Support 필요로 근사. 근거: STUDY §3-1, eligibility-notes.json classBias(allyHealShield)"
    }
   },
   {
@@ -3183,6 +3381,11 @@
    "favoredClasses": [
     "Mage",
     "Support"
+   ],
+   "disfavoredClasses": [
+    "Marksman",
+    "Assassin",
+    "Fighter"
    ],
    "restrictions": {
     "classRequired": [
@@ -3462,6 +3665,11 @@
     "Mage",
     "Support"
    ],
+   "disfavoredClasses": [
+    "Marksman",
+    "Assassin",
+    "Fighter"
+   ],
    "restrictions": {
     "classRequired": [
      "Mage",
@@ -3488,7 +3696,12 @@
     "abilityPropsAll": [
      "projectile"
     ],
-    "note": "투사체(미사일) 스킬 필요 (스킬 단위 AND). 벨코즈는 전용 예외 스펠 존재 (datamined — kiwi.bin AdditionalSpells). 실측: 6명 중 브랜드·제드만. 근거: eligibility-notes.json abilityAugments·championSpecific"
+    "spellPin": {
+     "Blitzcrank": "Q",
+     "Sivir": "Q",
+     "Velkoz": "Q"
+    },
+    "note": "투사체(미사일) 스킬 필요 (스킬 단위 AND). 벨코즈는 전용 예외 스펠 존재 (datamined — kiwi.bin AdditionalSpells). 실측: 6명 중 브랜드·제드만. 근거: eligibility-notes.json abilityAugments·championSpecific ‖ spellPin 중 community 실측분(위키·커뮤니티 — 전사 오차 가능): Sivir=Q"
    }
   },
   {
@@ -3524,6 +3737,11 @@
    "favoredClasses": [
     "Mage",
     "Support"
+   ],
+   "disfavoredClasses": [
+    "Marksman",
+    "Assassin",
+    "Fighter"
    ],
    "restrictions": {
     "classRequired": [
@@ -3566,7 +3784,12 @@
       "E"
      ]
     },
-    "note": "스킬 슬롯 단위 게이트: 카타리나 E·샤코 E 부적격 (공식 26.15 버그픽스). 근거: eligibility-notes.json championSpecific"
+    "spellPin": {
+     "Evelynn": "E",
+     "Ryze": "E",
+     "Zilean": "W"
+    },
+    "note": "스킬 슬롯 단위 게이트: 카타리나 E·샤코 E 부적격 (공식 26.15 버그픽스). 근거: eligibility-notes.json championSpecific ‖ spellPin 중 community 실측분(위키·커뮤니티 — 전사 오차 가능): Evelynn=E, Ryze=E, Zilean=W"
    }
   },
   {
@@ -3599,7 +3822,12 @@
     "abilityPropsAll": [
      "durationEffect"
     ],
-    "note": "지속시간형 효과가 있는 스킬 필요 (스킬 단위 AND). 근거: eligibility-notes.json abilityAugments"
+    "spellPin": {
+     "Ashe": "Q",
+     "Leona": "W",
+     "Nasus": "R"
+    },
+    "note": "지속시간형 효과가 있는 스킬 필요 (스킬 단위 AND). 근거: eligibility-notes.json abilityAugments ‖ spellPin 중 community 실측분(위키·커뮤니티 — 전사 오차 가능): Leona=W, Nasus=R"
    }
   },
   {
@@ -3734,6 +3962,11 @@
     "Mage",
     "Support"
    ],
+   "disfavoredClasses": [
+    "Marksman",
+    "Assassin",
+    "Fighter"
+   ],
    "restrictions": {
     "classRequired": [
      "Mage",
@@ -3791,6 +4024,10 @@
     "abilityPropsAll": [
      "projectile"
     ],
+    "spellPin": {
+     "Ekko": "Q",
+     "Nidalee": "Q"
+    },
     "note": "투사체(미사일) 스킬 필요 (스킬 단위 AND). 실측: 6명 중 브랜드·제드만 등재. 근거: eligibility-notes.json abilityAugments"
    }
   },
@@ -3813,11 +4050,11 @@
     "classRequired": [
      "Support"
     ],
-    "note": "아군 힐/실드 계열 — Support 클래스 + 킷에 힐/실드 보유(OR) 이중 게이트. ⚠ 근사: classRequired [Support]만으로는 DDragon 태그상 Support인 브랜드가 통과 — 실측(11 §3-4, empirical)은 킷에 힐/실드 있는 소라카만 등재라 abilityProps [heal,shield]를 추가. 근거: STUDY §3-1, eligibility-notes.json classBias.allyHealShield",
     "abilityProps": [
      "heal",
      "shield"
-    ]
+    ],
+    "note": "근사: 아군 힐/실드 계열 — 실측에서 소라카 전용 관측 → DDragon tags의 Support 필요로 근사. 근거: STUDY §3-1, eligibility-notes.json classBias(allyHealShield)"
    }
   },
   {
@@ -3870,7 +4107,13 @@
     "Tank",
     "Assassin"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "spellPin": {
+     "Katarina": "R",
+     "Mordekaiser": "R"
+    },
+    "note": "스킬 지정 확정 매핑(spellPin) — 근거: ability-augment-map.json ‖ spellPin 중 community 실측분(위키·커뮤니티 — 전사 오차 가능): Katarina=R"
+   }
   },
   {
    "apiName": "SurgeField",
@@ -3989,7 +4232,11 @@
      "targeted",
      "projectile"
     ],
-    "note": "대상 지정이면서 투사체인 같은 스킬 하나 필요 (스킬 단위 AND — spells[i].props 기반 판정, 구스키마면 합집합 폴백). 실측: 브랜드 R·말파이트 Q만(위키 적격 목록과 일치). 근거: eligibility-notes.json abilityAugments"
+    "spellPin": {
+     "Brand": "R",
+     "Veigar": "R"
+    },
+    "note": "대상 지정이면서 투사체인 같은 스킬 하나 필요 (스킬 단위 AND — spells[i].props 기반 판정, 구스키마면 합집합 폴백). props는 bin mCastType=1+mMissileSpec(게임 데이터)과 키워드 병합 — 26.17 실측 offered 16챔피언(브랜드 R·베이가 R·애니비아 E 등, ability-augment-map empirical) 전부 커버. 근거: eligibility-notes.json abilityAugments, research/raw/16"
    }
   },
   {
@@ -4035,7 +4282,11 @@
    "tags": [
     "ult"
    ],
-   "restrictions": {}
+   "restrictions": {
+    "spellPin": {
+     "Annie": "R"
+    }
+   }
   },
   {
    "apiName": "Quest_UltraHydra",
@@ -4056,6 +4307,11 @@
     "Marksman",
     "Fighter",
     "Assassin"
+   ],
+   "disfavoredClasses": [
+    "Mage",
+    "Support",
+    "Tank"
    ],
    "restrictions": {
     "classRequired": [

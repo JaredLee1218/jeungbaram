@@ -29,7 +29,9 @@
  *   공식 확인 + 실측 통계 기반 근사다. 정확한 챔피언×증강 풀·가중치는 100% 서버 전용이라
  *   재현 불가 (research/AUGMENT-POOLS-STUDY.md §3, research/data/eligibility-notes.json).
  *   스킬 증강(category==='ability')은 제시 시 enhancedSkill(강화 대상 스킬)을 지정하는데,
- *   실제 지정 규칙이 비공개라 "적격 스킬 중 무작위"로 근사한다 (STUDY §3-3).
+ *   지정 순서는 ①spellPin(확정 매핑, rng 미소비) ②slot(고정 슬롯, rng 미소비)
+ *   ③적격 스킬 중 무작위 — ③은 실제 지정 규칙이 비공개라서의 근사다 (STUDY §3-3,
+ *   확정 매핑 근거: research/ABILITY-AUGMENT-DATA.md §4).
  *
  * 결정론: 같은 seed + 같은 순서의 함수 호출 = 항상 같은 결과 (공유 URL 재현용).
  * 게임 상태는 JSON 직렬화 가능한 plain object. 증강 객체는 불변으로 취급하며
@@ -395,19 +397,30 @@ const DEFAULT_SKILL_KEYS = ['Q', 'W', 'E', 'R'];
  * 증강을 슬롯에 "제시"할 항목으로 변환.
  * category==='ability'(스킬 증강)면 강화 대상 스킬을 지정해 enhancedSkill: {key, nameKo}를
  * 부여한 얕은 복사본을 반환한다 (풀의 원본 증강 객체는 불변 유지).
- * 대상 스킬은 restrictions.abilityPropsAll(requiredProps)을 충족하는 스킬 중 rng로 무작위 선택,
+ * 대상 스킬 지정은 아래 우선순위 ①→②→③을 따른다. ③(무작위)에서는
+ * restrictions.abilityPropsAll(requiredProps)을 충족하는 스킬 중 rng로 선택하고,
  * requiredProps가 비어 있으면 전 스킬(Q/W/E/R) 중 무작위.
  * spells[i].props가 없는 구스키마 데이터면 전 스킬을 후보로 폴백.
- * rng(nextFloat)를 사용하므로 시드 결정론이 유지된다.
+ * ③은 rng(nextFloat)를 사용하고 ①·②는 rng를 소비하지 않는다 — 어느 쪽이든 시드 결정론 유지.
  *
- * 추가 restrictions 연동 (augments.json F2 스키마와의 계약):
- *  - restrictions.slot ('Q'|'W'|'E'|'R'): 슬롯 고정형 증강(예: Bread 3종) —
+ * 추가 restrictions 연동 (augments.json F2 스키마와의 계약) — 지정 우선순위 ①→②→③:
+ *  ① restrictions.spellPin ({챔피언id: 'Q'|'W'|'E'|'R'}): 챔피언×증강 확정 매핑
+ *    (research/data/ability-augment-map.json의 skill 명시분) — rng를 쓰지 않고
+ *    그 스킬로 고정한다. slot보다 우선.
+ *  ② restrictions.slot ('Q'|'W'|'E'|'R'): 슬롯 고정형 증강(예: Bread 3종) —
  *    rng를 쓰지 않고 해당 스킬을 그대로 지정한다 (공식 — 스킬 지정이 없는 고정 슬롯 전신).
+ *  ③ requiredProps(abilityPropsAll) 충족 스킬 중 rng 무작위 (spellExclude 제외).
  *  - restrictions.spellExclude ({챔피언id: [스킬키...]}): 해당 챔피언의 그 스킬은
  *    강화 대상 후보에서 제외한다 (공식 버그픽스 기반 — 예: 야스오 E×Specialized Recursion).
  *
+ * 방어(데이터 오류 대비): spellPin이 없거나(구스키마) 값이 Q/W/E/R 밖이면 무시하고
+ * 종전 동작(②→③). pin된 스킬이 같은 챔피언의 spellExclude에도 들어 있으면 데이터
+ * 모순인데, exclude(공식 버그픽스 근거)를 우선해 pin을 무시하고 ②를 건너뛰어 ③ 무작위
+ * 지정으로 내려간다 (③은 excludedKeys를 이미 제외하므로 exclude가 항상 지켜짐).
+ *
  * 근사: 실제 게임의 증강×스킬 지정 규칙은 비공개(시스템이 조합을 사전 생성) —
- * "적격 스킬 중 무작위"로 근사한다. 근거: research/AUGMENT-POOLS-STUDY.md §3-3,
+ * 확정 매핑(spellPin) 밖에서는 "적격 스킬 중 무작위"로 근사한다.
+ * 근거: research/AUGMENT-POOLS-STUDY.md §3-3, research/ABILITY-AUGMENT-DATA.md §4,
  * research/data/eligibility-notes.json abilityAugments.tierSystem.
  */
 function presentAugment(game, aug) {
@@ -416,24 +429,43 @@ function presentAugment(game, aug) {
   const champ = game.champion;
   const spells = (champ && Array.isArray(champ.spells)) ? champ.spells : null;
 
-  // 슬롯 고정형 (예: Bread And Butter = Q): rng 소비 없이 결정적으로 지정
-  if (typeof r.slot === 'string' && DEFAULT_SKILL_KEYS.indexOf(r.slot) !== -1) {
-    let fixed = null;
-    if (spells) {
-      for (let i = 0; i < spells.length; i++) {
-        if (spells[i] && spells[i].key === r.slot) { fixed = spells[i]; break; }
-      }
-    }
-    return Object.assign({}, aug, {
-      enhancedSkill: { key: r.slot, nameKo: (fixed && fixed.nameKo !== undefined) ? fixed.nameKo : null },
-    });
-  }
-
-  const required = Array.isArray(r.abilityPropsAll) ? r.abilityPropsAll : [];
-  // 스킬 슬롯 단위 제외 목록 (이 챔피언에 해당하는 키만)
+  // 스킬 슬롯 단위 제외 목록 (이 챔피언에 해당하는 키만) — ①·③에서 공용
   const excludedKeys = (champ && r.spellExclude && Array.isArray(r.spellExclude[champ.id]))
     ? r.spellExclude[champ.id]
     : [];
+
+  /** 스킬 키를 rng 소비 없이 결정적으로 지정 (①·② 공용 — nameKo는 champion.spells에서 조회) */
+  function fixSkill(key) {
+    let fixed = null;
+    if (spells) {
+      for (let i = 0; i < spells.length; i++) {
+        if (spells[i] && spells[i].key === key) { fixed = spells[i]; break; }
+      }
+    }
+    return Object.assign({}, aug, {
+      enhancedSkill: { key: key, nameKo: (fixed && fixed.nameKo !== undefined) ? fixed.nameKo : null },
+    });
+  }
+
+  // ① 챔피언×증강 확정 매핑 (spellPin): rng 소비 없이 그 스킬로 고정 — slot보다 우선.
+  //    방어: 필드 부재/키 이상은 무시(구스키마 하위 호환). pin이 spellExclude와 충돌하면
+  //    데이터 오류 — exclude를 우선해 pin을 무시하고 ②도 건너뛰어 ③으로 간다(계약 정책).
+  const pinnedKey = (champ && r.spellPin && typeof r.spellPin[champ.id] === 'string')
+    ? r.spellPin[champ.id]
+    : null;
+  const pinConflicts = pinnedKey !== null && excludedKeys.indexOf(pinnedKey) !== -1;
+  if (pinnedKey !== null && !pinConflicts && DEFAULT_SKILL_KEYS.indexOf(pinnedKey) !== -1) {
+    return fixSkill(pinnedKey);
+  }
+
+  // ② 슬롯 고정형 (예: Bread And Butter = Q): rng 소비 없이 결정적으로 지정
+  //    (pin·exclude 충돌로 pin이 무효화된 경우에는 ②를 건너뛰고 ③으로 — 위 주석 참조)
+  if (!pinConflicts && typeof r.slot === 'string' && DEFAULT_SKILL_KEYS.indexOf(r.slot) !== -1) {
+    return fixSkill(r.slot);
+  }
+
+  // ③ 적격 스킬 중 rng 무작위 (spellExclude 제외)
+  const required = Array.isArray(r.abilityPropsAll) ? r.abilityPropsAll : [];
   const notExcluded = function (s) { return !s || excludedKeys.indexOf(s.key) === -1; };
   let cands;
   if (spells && spells.length > 0) {

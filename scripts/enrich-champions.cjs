@@ -1,22 +1,32 @@
 // Node 14 CommonJS — docs/data/champions.json 스킬별 props 부여 + abilityProps 재계산
 //
-// 근사: spells[i].props는 DDragon championFull ko_KR의 스킬 설명(description+tooltip)
-//       한국어 키워드 매칭으로 판정한 근사치다. 실제 게임의 챔피언×스킬 적격 태그는
-//       100% 서버 전용이라 재현 불가(research/raw/10-eligibility-datamine.md §1.2).
-//       설계 근거: research/AUGMENT-POOLS-STUDY.md §3, research/data/eligibility-notes.json
+// v2 (real-mapping 계약): 1차 소스가 게임 원본 태그로 바뀜.
+//   1차: CommunityDragon 챔피언 bin의 mSpellTags (scripts/_tmp/spelltags.json —
+//        scripts/fetch-spelltags.cjs 산출물. research/raw/14-champion-bins.md)
+//        → TRAIT_MAP 번역표로 props 어휘 14종에 사상.
+//        + bin의 mCastType=1(유닛 대상 지정)을 targeted의 게임 데이터 근거로 병합.
+//   2차: 태그가 침묵하는 속성(global/spin 전부, targeted/projectile/dash 등 일부)은
+//        종전의 DDragon ko_KR 스킬 설명 키워드 매칭을 폴백으로 병합.
+//   출처는 spells[i].propsSource로 표기: "traits"(태그만) | "merged"(태그+키워드 병합)
+//        | "keywords"(태그 없는 슬롯 — 게임 데이터 자체에 mSpellTags 부재 7슬롯 등).
+//
+// 근사: 태그→props 번역과 병합 정책은 어휘 일치에 근거한 재구성이다. "증강 X가 태그 Y를
+//       요구한다"는 명시 데이터는 클라이언트에 없음(research/raw/14 §4 주의). 키워드 층은
+//       종전과 같이 한국어 설명 기반 근사치(과잉/과소 태깅 가능).
 //
 // 실행:
 //   node scripts/enrich-champions.cjs           # docs/data/champions.json 갱신
 //   node scripts/enrich-champions.cjs --audit   # prop별 매칭 스킬 전수 출력(파일 미변경)
 //   node scripts/enrich-champions.cjs --dry     # 파일 미변경, 통계만
 //
-// 입력: scripts/_tmp/championFull_ko.json (없으면 refresh-champions.md 절차로 재다운로드:
-//   https://ddragon.leagueoflegends.com/cdn/16.17.1/data/ko_KR/championFull.json)
+// 입력: scripts/_tmp/championFull_ko.json (refresh-champions.md 절차로 재다운로드 가능)
+//       scripts/_tmp/spelltags.json (node scripts/fetch-spelltags.cjs 로 생성)
 'use strict';
 const fs = require('fs');
 const path = require('path');
 
 const TMP = path.join(__dirname, '_tmp', 'championFull_ko.json');
+const TAGS = path.join(__dirname, '_tmp', 'spelltags.json');
 const OUT = path.join(__dirname, '..', 'docs', 'data', 'champions.json');
 const AUDIT = process.argv.indexOf('--audit') !== -1;
 const DRY = process.argv.indexOf('--dry') !== -1;
@@ -42,12 +52,55 @@ const VOCAB = [
   'stealth', 'global', 'spin', 'immobilize', 'terrain', 'empoweredAttack', 'durationEffect',
 ];
 
+// ---------- Trait_* → props 번역표 (research/raw/14-champion-bins.md §2.2·§4) ----------
+// 번역표에 없는 태그는 무시하되 실행 로그에 남긴다 (예: Trait_Ultimate·Trait_DamageAbility
+// 같은 메타 태그, Trait_NotBenefitFromHaste처럼 어휘 14종 밖의 판정용 태그).
+const TRAIT_MAP = {
+  Trait_ImmobilizingCCSpell: 'immobilize',   // 속박·기절·에어본 계열 하드 CC (14 §4: 굶주린 속박 게이트)
+  Trait_ImmobilizingCCAbility: 'immobilize',
+  Trait_KnockBack: 'knockback',              // 연쇄 반응 게이트 (14 §3 예시3)
+  Trait_CreateTerrain: 'terrain',            // 보유자 전수 6명 = 지형 생성됨 적격 목록 (14 §3 예시3)
+  Trait_Shield: 'shield',                    // 보강(Bolstered) 게이트
+  // Trait_PassiveShield(갈리오 W 1건)는 미사상 — 라이엇이 Trait_Shield와 구분해 둔 것을 존중
+  Trait_ActiveHeal: 'heal',
+  Trait_SelfHeal: 'heal',
+  PositiveEffect_EmpowerAttack: 'empoweredAttack', // 꽁!·2연속 공격 게이트
+  Trait_AttackBuff_Duration: 'durationEffect',     // 지속형 공격 강화 (출발할 시간류 게이트의 일부)
+  Trait_PlayerSelectedDashDirection: 'dash', // 방향 지정 대시 (근사: 대상 지정 대시는 이 태그가 없어
+                                             // 키워드 병합으로 보완 — 잭스 Q·리 신 Q 등)
+  PositiveEffect_Teleport: 'dash',           // 근사: 블링크류(에코 R·카타리나 E) — 키워드 dash가
+                                             // 순간이동·점멸을 포함해 온 관행과 일치시킴
+  Trait_Ranged_StopsFirstHit: 'projectile',  // 첫 적중 소멸 투사체
+  Trait_Ranged_Piercing: 'projectile',       // 관통 투사체
+  Trait_Ranged_Zone: 'projectile',           // 근사: 장판형 원거리 — 14 §4가 투사체 증강 행에 포함
+  Trait_AoE: 'aoe',
+  Trait_Invisibility: 'stealth',
+  Trait_Camouflage: 'stealth',
+};
+
+// 태그가 신뢰 가능한 속성 — 슬롯에 태그 데이터가 있으면 이 속성들의 키워드 판정은 버린다
+// ("데이터가 스스로 말하게"). 실측 대조 결과 키워드 오탐 제거 효과가 큼:
+//   terrain: 요릭 W(파괴 가능 벽) 탈락·아지르 R 추가 → 보유 6명 정확 일치 (계약 표본 기준)
+//   immobilize: 애니 R(패시브 의존 기절)·둔화/그라운딩류 오탐 21건 탈락, 알리스타 W 등 25건 발굴
+//   aoe: 실제 게임 태그가 키워드보다 압도적으로 완전(주 슬롯 413건)
+const TRAIT_AUTHORITATIVE = ['immobilize', 'terrain', 'shield', 'heal', 'aoe', 'stealth'];
+// 병합 속성 — 태그만으로는 과소(대상 지정 대시, 에어본 넉백, 지속 효과 일반)라 키워드와 합집합:
+//   dash: Trait는 방향 지정형만 표기(잭스 Q 등 대상 지정 대시 누락 75건 확인)
+//   knockback: Trait_KnockBack는 에어본(넉업)을 안 찍음 — 말파이트 R 실측 기준 키워드 유지
+//   projectile/empoweredAttack/durationEffect: 태그 어휘가 부분 집합
+//   targeted: 태그 어휘엔 없으나 bin의 mCastType=1(대상 지정 — fetch-spelltags.cjs 캘리브레이션
+//     주석 참조)이 게임 데이터 근거. 근사: mCastType 미보유 스펠이 다수(라이즈 W 등)라
+//     키워드·수동 보정과 병합 (SpellVolley 26.17 empirical 16챔피언이 전부 커버됨을 확인)
+// global/spin: 태그·castType 어휘에 대응 없음 — 키워드 전담
+const TRAIT_SILENT = VOCAB.filter(function (p) { return TRAIT_AUTHORITATIVE.indexOf(p) === -1; });
+
 // ---------- 키워드 패턴 (한국어 원문 기준. 전부 "근사:" — 과잉/과소 태깅 가능) ----------
 // 판정 원칙:
 //  - immobilize = 하드 CC만(기절/속박/제압/매혹/공포/도발/수면/석화/끌기/에어본). 둔화·침묵은 제외
 //    (근거: Ravenous Bind 등 immobilize 게이트 = 속박/그라운딩 계열 — eligibility-notes classBias.immobilize)
 //  - 띄움(에어본)은 knockback + immobilize 둘 다로 판정 (말파이트 R 기준. 근사: 순수 밀치기는 knockback만)
 //  - 조건부 CC(진 W 속박 등)도 포함 — 실제 게임도 진 W를 속박 게이트에 포함하는 것으로 근사
+//  ※ v2: 태그 있는 슬롯에서는 TRAIT_AUTHORITATIVE 속성의 키워드 판정이 무시됨 (위 주석)
 const PATTERNS = {
   // 투사체: "투사체를 막/파괴"(야스오 W·브라움 E 등 차단기)는 제외, "공중으로 날려"는 넉업 문구
   projectile: /투사체(?!를 ?(막|파괴|없애))|발사|쏘아|쏩니다|쏴|(?<!공중으로 )(?<!공중에 )날려|날린|내뿜|던지|던져|던집|던진|방출/,
@@ -74,8 +127,8 @@ const PATTERNS = {
   // 하드 CC. "미니언…공포"(아트록스 R — 미니언 한정 공포)는 제외
   // 에어본(띄움)은 하드 CC로 포함. 미니언/몬스터 한정 CC(아트록스 R 공포, 클레드 E 끌기)는 제외
   immobilize: /기절|속박|구속|제압|매혹|도발|(?<!미니언[^.]{0,8})공포|수면|잠들|잠재|재웁|석화|(?<!(미니언|몬스터)[^.]{0,12})끌어당|끌려가|(제자리에 |못하도록 )?묶[입어는]|얼립|띄워 ?올|공중(으로|에) ?(띄워|띄웁|띄운|날려|던져|떠오)|이동 스킬을 사용할 수 없/,
-  // 통과 가능한 벽(카서스 W·마오카이 R·럼블 R)과 스킬 장벽(녹턴 W "장벽")은 지형이 아님 — 제외/OVERRIDES.
-  // 기둥은 색·재질 명시형만(트런들 E 얼음 기둥, 오른 Q 용암 기둥). 브랜드 W "화염 기둥"은 지형 아님
+  // 통과 가능한 벽(카서스 W·마오카이 R·럼블 R)과 스킬 장벽(녹턴 W "장벽")은 지형이 아님 —
+  // v2: 태그 있는 슬롯은 Trait_CreateTerrain이 전담하므로 이 패턴은 태그 없는 슬롯 폴백 전용
   terrain: /(?<![장방])벽[을이] (만들|생성|세우|세워|세웁|소환)|벽으로 둘러|지나갈 수 없는 (벽|얼음)|얼음 벽|(용암|얼음|돌|바위) ?돌?기둥|지형을 (생성|만들)/,
   empoweredAttack: /다음 기본 공격|다음 공격|기본 공격[을이] 강화|강화된 기본 공격/,
   // durationEffect는 문장 단위 판정 (아래 hasDurationEffect) — "기본 지속 효과"(패시브 표기)와 구분
@@ -117,6 +170,12 @@ const DMG_OVERRIDES = {
 
 // ---------- 수동 보정 (표본 대조로 확정한 항목만. add/remove 모두 근거 주석 필수) ----------
 // key: "챔피언id.스킬키" → { add: [...], remove: [...] }
+// v2 정리: 실제 태그가 같은 결론을 내는 항목은 제거했다 ("데이터가 스스로 말하게"):
+//  - Zed.W add dash → 삭제 (실태그 Trait_PlayerSelectedDashDirection 보유 — 실측과 일치)
+//  - Yasuo.W/Karthus.W/Maokai.R/Rumble.R/Ornn.E remove terrain → 삭제 (terrain은
+//    태그 전담이 됐고 다섯 슬롯 모두 Trait_CreateTerrain 없음)
+//  - Jhin.E remove stealth → 삭제 (stealth 태그 전담, 진 E에 Invisibility/Camouflage 없음)
+// 남은 dash remove는 dash가 병합 속성(키워드 오탐 재유입)이라 여전히 필요하다.
 const OVERRIDES = {
   // 애쉬 R: 전역 사거리인데 설명에 전역 표현 없음 → global 수동 추가 (표본 검증 기준)
   'Ashe.R': { add: ['global'] },
@@ -127,17 +186,16 @@ const OVERRIDES = {
   'Pantheon.R': { add: ['global'] },
   'Shen.R': { add: ['global'] },
   'Nocturne.R': { add: ['global'] },
-  // 제드 W: 그림자는 질주하지만 제드 본인 이동은 재사용 위치 교대(블링크).
-  // 실측에서 대시 게이트 증강 5종이 정확히 "말파이트 R·제드 W"에 바인딩됨 → 게임은 제드 W를
-  // 대시로 취급. dash로 판정한다 (근거: research/raw/11-empirical-pools.md §3-5)
-  'Zed.W': { add: ['dash'] },
-  // Tripleshot(targeted+projectile AND) 실측 적격 = 브랜드 R·말파이트 Q 뿐 —
-  // 두 스킬 다 대상 클릭형인데 설명에 "지정" 표현 없음 → targeted 수동 추가
-  // (근거: eligibility-notes abilityAugments SpellVolley, research/raw/11 §3-9)
-  'Brand.R': { add: ['targeted'] },
-  'Malphite.Q': { add: ['targeted'] },
-  // 소라카 W: 아군 클릭 대상 회복인데 "지정" 표현 없음 → targeted 수동 추가 (표본 검증 기준)
+  // v2.1 정리: Brand.R·Malphite.Q add targeted → 삭제 (bin mCastType=1이 데이터로 말함)
+  // 소라카 W: 아군 클릭 대상 회복인데 "지정" 표현 없고 bin에 mCastType도 미보유 →
+  // targeted 수동 추가 유지 (표본 검증 기준)
   'Soraka.W': { add: ['targeted'] },
+  // 애쉬 Q: 지속형 기본 공격 강화(연사 화살)인데 키워드("다음 기본 공격"류)가 침묵하고
+  // 태그도 Trait_AttackBuff_Duration뿐(→durationEffect) — empoweredAttack 수동 추가.
+  // Trait_AttackBuff_Duration→empoweredAttack 전역 번역은 Bonk/DoubleStrike 풀을 60여
+  // 슬롯 과잉 확장하므로 채택 안 함. 근거: ability-augment-map.json LittleExtraHelp×Ashe Q
+  // offered(empirical, mayhemmeta ≥100판) — real-mapping 계약 검증 기준 1
+  'Ashe.Q': { add: ['empoweredAttack'] },
   // Spin To Win 위키 적격 목록 중 "회전" 키워드가 설명에 없는 스킬 (근거: eligibility-notes
   // otherRestrictions ARAM_SpinToWin — 아리 W·R, 다리우스 Q, 제드 E 명시. 전체 목록은
   // augments.json championWhitelist가 담당하므로 여기는 명시된 것만)
@@ -149,18 +207,11 @@ const OVERRIDES = {
   'Rammus.Q': { add: ['spin'] }, // 대회전(구르기) — 회전 취급 (근사). R의 "대회전 상태" 언급은 Q 참조라 제거
   'Rammus.R': { remove: ['spin'] },
   'Draven.W': { remove: ['spin'] }, // "회전 도끼를 회수하면" — Q 참조 문구
-  // 야스오 W: "투사체를 막아주는 벽" — 이동 불가 지형이 아니므로 terrain 제거
-  'Yasuo.W': { remove: ['terrain'] },
-  // 통과 가능한 벽/피해 지대 — 이동 차단 지형이 아니므로 terrain 제거
-  'Karthus.W': { remove: ['terrain'] },   // "통행 가능한 벽" 명시
-  'Maokai.R': { remove: ['terrain'] },    // 전진하는 속박 벽 — 통과 가능
-  'Rumble.R': { remove: ['terrain'] },    // "화염의 벽" — 피해 지대
-  'Ornn.E': { remove: ['terrain'] },      // "용암 기둥…파괴합니다" — 지형 파괴 문구(Q 참조)
-  // 진 E: "은신 상태에 있다가"는 함정의 비가시성 서술 — 챔피언 은신이 아니므로 제거
-  'Jhin.E': { remove: ['stealth'] },
-  // 스킬 텍스트가 다른 스킬/소환수/구체를 서술해 dash로 오탐된 것들 제거
+  // 스킬 텍스트가 다른 스킬/소환수/구체를 서술해 dash로 오탐된 것들 제거 (dash는 병합 속성이라
+  // 키워드 오탐이 재유입됨 — v2에서도 유지)
   // 다리우스 R: "뛰어올라"로 dash 오탐 — 실측 대시 게이트 패턴 001100(말파이트 R·제드 W만)에서
-  // 다리우스 R은 부적격 (근거: research/raw/11-empirical-pools.md §3-5, test-fidelity 기준2)
+  // 다리우스 R은 부적격 (근거: research/raw/11-empirical-pools.md §3-5, test-fidelity 기준2).
+  // v2 확인: 실태그에도 대시류 태그 없음(MoveBlock뿐) — 실측·태그 결론 일치, 키워드 오탐만 차단
   'Darius.R': { remove: ['dash'] },
   'Jax.W': { remove: ['dash'] },      // "도약 공격 시" — Q 참조
   'Orianna.Q': { remove: ['dash'] },  // 구체가 돌진 — 챔피언 이동 아님
@@ -171,11 +222,17 @@ const OVERRIDES = {
 
 // ---------- 실행 ----------
 const full = JSON.parse(fs.readFileSync(TMP, 'utf8'));
+if (!fs.existsSync(TAGS)) {
+  console.error('scripts/_tmp/spelltags.json 없음 — 먼저 node scripts/fetch-spelltags.cjs 를 실행하세요.');
+  process.exit(1);
+}
+const spellTags = JSON.parse(fs.readFileSync(TAGS, 'utf8')).champions;
 const out = JSON.parse(fs.readFileSync(OUT, 'utf8'));
-const SPELL_KEYS = ['Q', 'W', 'E', 'R'];
 
 const auditRows = {}; // prop → ["Ashe R (마법의 수정화살)"...]
 VOCAB.forEach(function (p) { auditRows[p] = []; });
+const unknownTraits = {}; // 번역표 밖 태그 → 발생 수 (무시하되 로그)
+const sourceDist = { traits: 0, merged: 0, keywords: 0 };
 
 let missing = [];
 for (const champ of out.champions) {
@@ -183,20 +240,54 @@ for (const champ of out.champions) {
   if (!src) { missing.push(champ.id); continue; }
   champ.dmg = DMG_OVERRIDES[champ.id] || computeDmg(src.info);
   const union = [];
+  const tagEntry = spellTags[champ.id];
   champ.spells.forEach(function (spell, i) {
     const s = src.spells[i];
     const text = s ? strip(s.description) + ' ' + strip(s.tooltip) : '';
-    const props = [];
-    for (const prop of VOCAB) {
+    const slotTags = (tagEntry && tagEntry.slots && tagEntry.slots[spell.key]) || null;
+    const tagged = Array.isArray(slotTags) && slotTags.length > 0;
+
+    // 1층: 태그 번역
+    const traitProps = [];
+    if (tagged) {
+      for (const t of slotTags) {
+        const p = TRAIT_MAP[t];
+        if (p) { if (traitProps.indexOf(p) === -1) traitProps.push(p); }
+        else unknownTraits[t] = (unknownTraits[t] || 0) + 1;
+      }
+    }
+    // 1층 보강: bin mCastType=1 = 유닛 대상 지정 (게임 데이터 — 태그와 같은 층위로 취급.
+    // 캘리브레이션·근사 한계는 fetch-spelltags.cjs 주석 참조). 같은 스펠이 mMissileSpec을
+    // 보유하면 projectile도 — SpellVolley의 공식 정의("unit-targeted and fires a missile",
+    // raw/02 §Tripleshot)와 정확히 일치하는 게임 데이터 조합 (엘리스 Q·잔나 W가
+    // 키워드 침묵으로 누락됐던 것을 26.17 empirical offered가 반증 — real-mapping 기준 1)
+    const castType = tagEntry && tagEntry.castTypes ? tagEntry.castTypes[spell.key] : null;
+    const hasMissile = !!(tagEntry && tagEntry.missiles && tagEntry.missiles[spell.key]);
+    if (castType === 1) {
+      if (traitProps.indexOf('targeted') === -1) traitProps.push('targeted');
+      if (hasMissile && traitProps.indexOf('projectile') === -1) traitProps.push('projectile');
+    }
+
+    // 2층: 키워드 (태그 슬롯에선 TRAIT_AUTHORITATIVE 속성 판정을 버림)
+    const kwCandidates = tagged ? TRAIT_SILENT : VOCAB;
+    const kwProps = [];
+    for (const prop of kwCandidates) {
       let hit = false;
       if (prop === 'durationEffect') hit = hasDurationEffect(text);
       else hit = PATTERNS[prop].test(text);
-      if (hit) props.push(prop);
+      if (hit) kwProps.push(prop);
     }
+
+    const props = traitProps.slice();
+    kwProps.forEach(function (p) { if (props.indexOf(p) === -1) props.push(p); });
+
     // 수동 보정 적용
     const ov = OVERRIDES[champ.id + '.' + spell.key];
+    let ovAdded = false;
     if (ov) {
-      (ov.add || []).forEach(function (p) { if (props.indexOf(p) === -1) props.push(p); });
+      (ov.add || []).forEach(function (p) {
+        if (props.indexOf(p) === -1) { props.push(p); ovAdded = true; }
+      });
       (ov.remove || []).forEach(function (p) {
         const idx = props.indexOf(p);
         if (idx !== -1) props.splice(idx, 1);
@@ -204,6 +295,13 @@ for (const champ of out.champions) {
     }
     props.sort(function (a, b) { return VOCAB.indexOf(a) - VOCAB.indexOf(b); });
     spell.props = props;
+
+    // 출처 표기: 태그 없는 슬롯 = keywords / 태그 슬롯 = 전 props가 태그 유래면 traits,
+    // 키워드·수동 보정이 1개라도 보태졌으면 merged
+    const nonTrait = props.some(function (p) { return traitProps.indexOf(p) === -1; });
+    spell.propsSource = !tagged ? 'keywords' : ((nonTrait || ovAdded) ? 'merged' : 'traits');
+    sourceDist[spell.propsSource]++;
+
     props.forEach(function (p) {
       if (union.indexOf(p) === -1) union.push(p);
       auditRows[p].push(champ.id + ' ' + spell.key + ' (' + spell.nameKo + ')');
@@ -218,7 +316,7 @@ if (missing.length) {
   process.exit(1);
 }
 
-out._note = 'spells[i].props와 abilityProps(=전 스킬 props 합집합, 패시브 미포함)는 DDragon ko_KR 스킬 설명(description+tooltip) 한국어 키워드 매칭으로 판정한 근사치이며 실제 게임 메커니즘과 다를 수 있음(생성: scripts/enrich-champions.cjs — 판정 규칙·수동 보정 주석 참조). immobilize는 하드 CC만(둔화·침묵 제외)이며 조건부 CC(진 W 속박 등)도 포함. short/passiveKo는 설명 요약 발췌. dmg(ad/ap/mixed)는 DDragon info.attack/magic 격차 3 기준으로 산출한 주 피해 유형 근사치(수동 보정: 에코=ap).';
+out._note = 'spells[i].props는 CommunityDragon 챔피언 bin의 스킬 태그(mSpellTags — research/raw/14-champion-bins.md)와 mCastType=1(대상 지정 → targeted)을 1차 소스로 번역하고, 태그가 침묵하는 속성(global/spin 전부와 targeted/dash/knockback/projectile/empoweredAttack/durationEffect 일부)은 DDragon ko_KR 설명 키워드 매칭을 폴백 병합한 근사치(생성: scripts/enrich-champions.cjs ← scripts/fetch-spelltags.cjs. 번역표·병합 정책·수동 보정은 스크립트 주석 참조). 출처는 spells[i].propsSource(traits|merged|keywords)로 표기. abilityProps = 전 스킬 props 합집합(패시브 미포함). immobilize/terrain/shield/heal/aoe/stealth는 게임 태그 전담(태그 없는 7슬롯만 키워드). short/passiveKo는 설명 요약 발췌. dmg(ad/ap/mixed)는 DDragon info.attack/magic 격차 3 기준 근사치(수동 보정: 에코=ap).';
 
 if (AUDIT) {
   for (const p of VOCAB) {
@@ -240,7 +338,10 @@ const noProps = out.champions.filter(function (c) { return c.abilityProps.length
 console.log('champions: ' + out.champions.length);
 console.log('prop\tspells\tchampions');
 VOCAB.forEach(function (p) { console.log(p + '\t' + dist[p].spells + '\t' + dist[p].champions); });
+console.log('propsSource 분포: ' + JSON.stringify(sourceDist));
 console.log('abilityProps 빈 챔피언: ' + (noProps.length ? noProps.join(', ') : '없음'));
+const ut = Object.keys(unknownTraits).sort(function (a, b) { return unknownTraits[b] - unknownTraits[a]; });
+console.log('번역표 밖 태그(무시, ' + ut.length + '종): ' + ut.map(function (t) { return t + '×' + unknownTraits[t]; }).join(', '));
 const dmgDist = {};
 out.champions.forEach(function (c) { dmgDist[c.dmg] = (dmgDist[c.dmg] || 0) + 1; });
 console.log('dmg 분포: ' + JSON.stringify(dmgDist));

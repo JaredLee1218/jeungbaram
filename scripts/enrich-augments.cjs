@@ -1,14 +1,19 @@
 #!/usr/bin/env node
 /**
- * enrich-augments.cjs — research/data/eligibility-notes.json 의 조사 결과를
+ * enrich-augments.cjs — research/data/eligibility-notes.json (1차 스터디) 및
+ * research/data/ability-augment-map.json (3차 실매핑, 306건) 의 조사 결과를
  * docs/data/augments.json 에 이식하는 변환 스크립트 (재실행 가능·결정론).
  *
  * 실행: node scripts/enrich-augments.cjs   (Node v14 호환, 의존성 0)
  * 산출: docs/data/augments.json 갱신 + scripts/enrich-augments-log.md 로그
  *
- * 이식 원칙 (근거: research/AUGMENT-POOLS-STUDY.md §3):
+ * 이식 원칙 (근거: research/AUGMENT-POOLS-STUDY.md §3, real-mapping 계약):
  *  - confidence가 official/datamined/empirical 인 것만 이진 필터(restrictions)로,
  *    community 는 note/가중치까지만.
+ *  - 예외(계약 명시): restrictions.spellPin(강화 대상 스킬 확정 매핑)은 풀 필터가
+ *    아니라 지정(designation)이므로 community도 허용하되 note에 표기한다.
+ *  - map의 offered 기록은 필터에 쓰지 않음(표본일 뿐) — 단 "필터가 실제보다 좁은지"
+ *    검증 기준으로 사용: offered(official/empirical)와 충돌하는 기존 근사 게이트는 완화.
  *  - "완전 제외 실측"은 이진, "선호" 층위는 favoredClasses/disfavoredClasses 가중치로.
  *  - 근사: 모든 근사 항목에는 restrictions.note 또는 본 스크립트 주석에 "근사:" 표기.
  *
@@ -28,10 +33,12 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..');
 const AUG_PATH = path.join(ROOT, 'docs', 'data', 'augments.json');
 const NOTES_PATH = path.join(ROOT, 'research', 'data', 'eligibility-notes.json');
+const MAP_PATH = path.join(ROOT, 'research', 'data', 'ability-augment-map.json');
 const LOG_PATH = path.join(__dirname, 'enrich-augments-log.md');
 
 const augData = JSON.parse(fs.readFileSync(AUG_PATH, 'utf8'));
 const notes = JSON.parse(fs.readFileSync(NOTES_PATH, 'utf8'));
+const abilityMap = JSON.parse(fs.readFileSync(MAP_PATH, 'utf8'));
 
 /* ------------------------------------------------------------------ */
 /* 1. category                                                         */
@@ -59,13 +66,22 @@ const QUEST = new Set([
 /* 2. 이식 테이블                                                        */
 /* ------------------------------------------------------------------ */
 
-// Spin To Win 화이트리스트 — 위키 명시 적격 스킬 목록의 챔피언 (official).
-// 근거: research/raw/03-champion-augment-pools.md §1 (검증 대기분 아크샨·뽀삐 R 등은 미포함).
-const SPIN_WHITELIST = [
-  'Ahri', 'Ambessa', 'Amumu', 'Darius', 'Draven', 'Garen', 'Hecarim', 'Jax',
-  'Katarina', 'Kayn', 'Lillia', 'MonkeyKing', 'Nocturne', 'Rammus', 'Renekton',
-  'RekSai', 'Riven', 'Samira', 'Sylas', 'Tryndamere', 'XinZhao', 'Zed',
-];
+// Spin To Win 화이트리스트 — 위키 "Eligible Abilities" 실측 목록(검증 수정본: 22챔피언·28스킬)에서
+// 스크립트 파생 (research/raw/15-wiki-patch-mining.md §2-1 → ability-augment-map.json SpinToWin offered).
+// ⚠ 근거 등급은 community(위키 편집자 실측, {{Editors needed}} 미완성) — 하드 필터 규율의 예외지만
+// 계약이 화이트리스트 유지·갱신을 명시(기존 설계 결정 승계). "Pending for test"(아크샨·뽀삐 R 등)는 미포함.
+const SPIN_WHITELIST = [];
+{
+  const seen = {};
+  for (const e of abilityMap.mappings) {
+    if (e.augment !== 'ARAM_SpinToWin' || e.polarity !== 'offered') continue;
+    if (!seen[e.champion]) { seen[e.champion] = true; SPIN_WHITELIST.push(e.champion); }
+  }
+  SPIN_WHITELIST.sort();
+  if (SPIN_WHITELIST.length !== 22) {
+    throw new Error('SpinToWin 화이트리스트가 22명이 아님(raw/15 §2-1 검증 수정본 기준): ' + SPIN_WHITELIST.length);
+  }
+}
 
 // 근사: 가중치 계수 자체는 draft.js weightFor()가 보유 — 여기서는 대상 클래스만 기술.
 // adCrit/ap 계열을 이진(classExcluded)이 아닌 가중치로만 이식하는 이유:
@@ -102,15 +118,23 @@ const IMMOBILIZE_GATE = ['ARAM_Cruelty', 'ARAM_SlapAround', 'SoulEater', 'ARAM_I
 const SUPPORT_GATE = ['ARAM_SonicBoom', 'ARAM_WeeWooWeeWoo', 'ARAM_EmpoweredByTheFaithful',
   'MercysStrike', 'ARAM_AllForYou', 'ARAM_SpiritBomb', 'EmpyreanPromise'];
 
-// classBias(sniper, empirical) — 원거리 3인만 등재/근접 3인 부재 → rangedOnly로 근사
-const SNIPER_GATE = ['ARAM_SkilledSniper', 'ARAM_BangBang'];
+// classBias(sniper, empirical) — 원거리 3인만 등재/근접 3인 부재 → rangedOnly로 근사.
+// 근사 해제(2026-09-03, ability-augment-map): ARAM_SkilledSniper는 근접 Locke Q 공식 offered
+// (26.15 패치노트)가 rangedOnly를 반증 → 게이트 제거, 가중치로 강등. BangBang은 반례 없어 유지.
+const SNIPER_GATE = ['ARAM_BangBang'];
 
 // classBias(selfHealCircle, empirical) — 조건을 "킷 내 회복 보유"로 추정 → abilityProps=heal
 const SELFHEAL_GATE = ['ARAM_WindspeakersBlessing', 'ARAM_CircleofDeath'];
 
 // classBias(meleeCluster, empirical) — 근접 3인만 등재 확실분 → meleeOnly.
 // ARAM_StuckInHereWithMe 는 실측 불확실(징크스 op.gg 등재)이라 가중치로만.
-const MELEE_GATE = ['TitansPulse', 'ARAM_Quickstep', 'ARAM_Upgrade_Immolate'];
+// 근사 해제(2026-09-03, ability-augment-map):
+//  - TitansPulse: 원거리 아리·리산드라·블라디미르 empirical offered(mayhemmeta 16챔프, raw/16)가
+//    meleeOnly를 반증 → 게이트 제거, 가중치로 강등.
+//  - ARAM_Quickstep: 원거리 켄넨 R 공식 offered(26.12 "Garen E and Kennen R are very happy")가
+//    meleeOnly를 반증 → 게이트 제거, 가중치로 강등.
+//  - ARAM_Upgrade_Immolate: 반례 없어 유지.
+const MELEE_GATE = ['ARAM_Upgrade_Immolate'];
 
 // classBias(mana, empirical+datamined) — 소모 연동 3종만. 근사 아님(삼중 일치).
 // ⚠ ARAM_OceanSoul 은 실측 전원 등재(STUDY §3-1 "보류")라 이식하지 않는다.
@@ -120,6 +144,7 @@ const MANA_GATE = ['ARAM_Overflow', 'ARAM_Juiced', 'ARAM_MindtoMatter'];
  * 증강별 개별 이식 지시.
  * r: restrictions에 병합할 필드 / note: restrictions.note 전체 교체(결정론·재실행 안전)
  * fav/dis: 최상위 favoredClasses/disfavoredClasses / dropProps: restrictions.abilityProps 제거
+ * drop: 나열된 restrictions 키 제거 (종전 실행이 남긴 완화 대상 게이트의 잔존값 청소 — 재실행 결정론)
  * why: 로그용 근거 요약
  */
 const OPS = {
@@ -153,8 +178,8 @@ const OPS = {
   },
   ARAM_SpecializedRecursion: {
     r: { spellExclude: { Yasuo: ['E'], Akshan: ['E'] } },
-    note: '스킬 슬롯 단위 게이트: 야스오 E(26.14)·아크샨 E(26.15) 부적격 (공식 버그픽스). 근거: eligibility-notes.json championSpecific',
-    why: 'official — 26.14/26.15 버그픽스',
+    note: '스킬 슬롯 단위 게이트: 야스오 E(26.14)·아크샨 E(26.15) 부적격 (공식 버그픽스) + 야스오 Q·요네 Q/W·제리 Q 부적격 (datamined — Trait_NotBenefitFromHaste, 26.14 야스오 버그픽스가 태그 편집으로 실증). 근거: eligibility-notes.json championSpecific, ability-augment-map.json excluded',
+    why: 'official — 26.14/26.15 버그픽스 + datamined(Trait_NotBenefitFromHaste)',
   },
   Overloaded: {
     r: { spellExclude: { Katarina: ['E'], Shaco: ['E'] } },
@@ -180,19 +205,23 @@ const OPS = {
   },
   ARAM_SpinToWin: {
     r: { championWhitelist: SPIN_WHITELIST.slice() },
-    dropProps: true, // 종전 abilityProps:['spin'] 제거 — 위키 명시 목록이 더 정확 (champions.json spin 속성 누락 리스크 회피)
-    note: '위키 명시 적격 스킬 목록의 챔피언 화이트리스트 (공식 — 아리 W·R, 다리우스 Q, 가렌 E, 제드 E 등 22명). 검증 대기분(아크샨·뽀삐 R 등)은 미포함. 근거: STUDY §3-1, research/raw/03-champion-augment-pools.md §1',
-    why: 'official — 위키 적격 목록',
+    dropProps: true, // 종전 abilityProps:['spin'] 제거 — 위키 실측 목록이 더 정확 (champions.json spin 속성 누락 리스크 회피)
+    note: '위키 "Eligible Abilities" 실측 목록의 챔피언 화이트리스트 (community — 위키 편집자 실측, 검증 수정본 22챔피언·28스킬: 아리 W·R, 다리우스 Q, 가렌 E, 제드 E 등). 검증 대기분(아크샨·뽀삐 R 등)은 미포함. 하드 필터 규율의 예외 — 계약이 화이트리스트 유지·갱신 명시. 근거: research/raw/15-wiki-patch-mining.md §2-1, ability-augment-map.json',
+    why: 'community(위키 실측, 검증 수정본) — 계약 지시로 화이트리스트 유지',
   },
 
   /* --- 스킬 증강 requiredProps 외 개별 노트 --- */
   TitansPulse: {
-    note: '근사: 실측에서 근접 3인(말파이트·제드·다리우스)에게만 등재 — 근접 클래스 게이트로 추정해 meleeOnly로 이식. 근거: eligibility-notes.json classBias(meleeCluster), research/raw/11-empirical-pools.md §3-8',
-    why: 'empirical — 근접 3인만(11 §3-8)',
+    drop: ['meleeOnly'],
+    fav: ['Fighter', 'Tank'],
+    note: '근사 해제: 종전 meleeOnly(raw/11 근접 3인 표본)를 26.17 확대 실측이 반증 — 원거리 아리·리산드라·블라디미르 포함 16챔프 offered(mayhemmeta ≥100판). 게이트 제거, 근접 브루저 편중은 가중치(favoredClasses)로만. 근거: ability-augment-map.json offered(empirical), research/raw/16 §4~5',
+    why: 'empirical — 확대 실측(16챔프)이 meleeOnly 반증 → 가중치 강등',
   },
   ARAM_Quickstep: {
-    note: '근사: 실측에서 근접 3인에게만 등재 → meleeOnly로 이식. 26.12 발표 조건(자가 대상 AoE)은 현행 여부 미확인이라 미이식. 근거: eligibility-notes.json classBias(meleeCluster)·abilityAugments',
-    why: 'empirical — 근접 3인만(11 §3-8)',
+    drop: ['meleeOnly'],
+    fav: ['Fighter', 'Tank'],
+    note: '근사 해제: 종전 meleeOnly(raw/11 근접 3인 표본)를 공식 기록이 반증 — 원거리 켄넨 R offered(26.12 패치노트 "Garen E and Kennen R are very happy"). 게이트 제거, 근접 편중은 가중치로만. 26.12 발표 조건(자가 대상 AoE)은 현행 여부 미확인이라 미이식. 근거: ability-augment-map.json offered(official), eligibility-notes.json abilityAugments',
+    why: 'official — 켄넨 R offered(26.12)가 meleeOnly 반증 → 가중치 강등',
   },
   ARAM_Upgrade_Immolate: {
     note: '근사: 실측에서 근접 3인에게만 등재 → meleeOnly로 이식. 근거: eligibility-notes.json classBias(meleeCluster)',
@@ -214,7 +243,7 @@ const OPS = {
   KeepGoing: { note: '지속시간형 스킬 필요 (스킬 단위 AND). 미출시(내부 데이터 전용)', why: 'official — 위키 원문' },
   Overkill: { note: '지속시간형 효과가 있는 스킬 필요 (스킬 단위 AND). 근거: eligibility-notes.json abilityAugments', why: 'official — 위키 원문' },
   Missile_Split: { note: '투사체(미사일) 스킬 필요 (스킬 단위 AND). 실측: 6명 중 브랜드·제드만 등재. 근거: eligibility-notes.json abilityAugments', why: 'official + empirical' },
-  SpellVolley: { note: '대상 지정이면서 투사체인 같은 스킬 하나 필요 (스킬 단위 AND — spells[i].props 기반 판정, 구스키마면 합집합 폴백). 실측: 브랜드 R·말파이트 Q만(위키 적격 목록과 일치). 근거: eligibility-notes.json abilityAugments', why: 'official + empirical' },
+  SpellVolley: { note: '대상 지정이면서 투사체인 같은 스킬 하나 필요 (스킬 단위 AND — spells[i].props 기반 판정, 구스키마면 합집합 폴백). props는 bin mCastType=1+mMissileSpec(게임 데이터)과 키워드 병합 — 26.17 실측 offered 16챔피언(브랜드 R·베이가 R·애니비아 E 등, ability-augment-map empirical) 전부 커버. 근거: eligibility-notes.json abilityAugments, research/raw/16', why: 'official + empirical' },
 
   /* --- 그룹 게이트 노트 (그룹 필드는 아래 그룹 루프가 부여) --- */
   ARAM_Overflow: { note: '마나 게이트: 마나 미사용(기력·무자원) 챔피언에게 미제시 — 실측(제드 부재)·kiwi.bin mAugmentTags=8·아레나 공식 삼중 일치. 근거: STUDY §3-1, eligibility-notes.json classBias(mana)', why: 'empirical + datamined' },
@@ -236,21 +265,113 @@ const OPS = {
   ARAM_AllForYou: { note: '근사: 아군 힐/실드 계열 — 실측에서 소라카 전용 관측 → DDragon tags의 Support 필요로 근사. 근거: STUDY §3-1, eligibility-notes.json classBias(allyHealShield)', why: 'empirical' },
   ARAM_SpiritBomb: { note: '근사: 아군 힐/실드 계열 — 실측에서 소라카 전용 관측 → DDragon tags의 Support 필요로 근사. 근거: STUDY §3-1, eligibility-notes.json classBias(allyHealShield)', why: 'empirical' },
   EmpyreanPromise: { note: '근사: 아군 힐/실드 계열 — 실측에서 소라카 전용 관측 → DDragon tags의 Support 필요로 근사. 근거: STUDY §3-1, eligibility-notes.json classBias(allyHealShield)', why: 'empirical' },
-  ARAM_SkilledSniper: { note: '근사: 장거리(600+) 스킬샷 계열 — 실측에서 원거리 3인만 등재·근접 3인 부재 → rangedOnly로 근사. 근거: eligibility-notes.json classBias(sniper), research/raw/11-empirical-pools.md §3-7', why: 'empirical' },
+  ARAM_SkilledSniper: {
+    drop: ['rangedOnly'],
+    fav: ['Mage', 'Marksman'],
+    note: '근사 해제: 종전 rangedOnly(raw/11 원거리 3인 표본)를 공식 기록이 반증 — 근접 Locke Q offered(26.15 패치노트). 실제 조건은 장거리(600+) 스킬샷 보유로 추정되나 킷 속성 어휘 밖이라 게이트 없이 가중치로만. 근거: ability-augment-map.json offered(official), eligibility-notes.json classBias(sniper)',
+    why: 'official — Locke Q offered(26.15)가 rangedOnly 반증 → 가중치 강등',
+  },
   ARAM_BangBang: { note: '근사: 장거리(600+) 스킬샷 계열 — 실측에서 원거리 3인만 등재·근접 3인 부재 → rangedOnly로 근사. 근거: eligibility-notes.json classBias(sniper), research/raw/11-empirical-pools.md §3-7', why: 'empirical' },
   ARAM_WindspeakersBlessing: { note: '근사: 실측에서 소라카+다리우스(셀프힐 Q)만 등재 — 조건을 "킷 내 회복 보유"로 추정해 abilityProps=heal로 이식. 근거: eligibility-notes.json classBias(selfHealCircle), research/raw/11-empirical-pools.md §4-3', why: 'empirical(조건 해석은 추정)' },
   ARAM_CircleofDeath: { note: '근사: 실측에서 소라카+다리우스(셀프힐 Q)만 등재 — 조건을 "킷 내 회복 보유"로 추정해 abilityProps=heal로 이식. 근거: eligibility-notes.json classBias(selfHealCircle), research/raw/11-empirical-pools.md §4-3', why: 'empirical(조건 해석은 추정)' },
 };
 
 /* ------------------------------------------------------------------ */
+/* 2.5 ability-augment-map.json 이식 파생 (306건 실매핑 — real-mapping 계약) */
+/* ------------------------------------------------------------------ */
+
+// 하드 필터(excluded → championExclude/spellExclude) 허용 confidence — community 금지.
+const HARD_OK = { official: true, datamined: true, empirical: true };
+const SKILL_OK = { Q: true, W: true, E: true, R: true };
+
+// 하드 필터 보류 예외 — key: "augment|champion|skill(null이면 'null')". 사유는 로그에 남김.
+const MAP_EXCLUDE_SKIP = {
+  'SpecializedEmpowerment|Locke|null':
+    '효과 오적용 수정(패시브 P는 지정 비대상 — 26.16 원문 "affected Locke (P) damage")이지 제시 풀 제외가 아님. ' +
+    '동 챔피언 Locke E offered(official, 26.15)와의 모순 방지 — 하드 필터 미이식, 기록만',
+  'MercysStrike|Vladimir|null':
+    '기존 classRequired(Support) 게이트가 이미 커버(블라디미르는 비서포트) — 중복 이진 미이식. ' +
+    '이 항목 자체가 그 클래스 게이트의 공식 예시(26.15)',
+  'ARAM_BreadAndButter|Jinx|Q':
+    '기존 championExclude(Jinx)로 이미 커버(slot=Q 고정형이라 등가). raw/16 §9-4의 "부정 단정 아님" 주석 승계',
+  'Terraind|Yorick|W':
+    'community 근거(디시 실측) — 하드 필터 규율상 이진 금지, 기록만. 지형 6인 datamined 전수와도 무모순(요릭 W는 Trait_CreateTerrain 미보유)',
+};
+
+// 파생 산출물: apiName → { spellExclude, championExclude, pins:{champ:{skill,confidence}}, communityPins:[] }
+const MAP_DERIVED = {};
+const mapLog = { spellExclude: [], championExclude: [], pin: [], skip: [], conflict: [] };
+
+function derivedOf(api) {
+  if (!MAP_DERIVED[api]) MAP_DERIVED[api] = { spellExclude: {}, championExclude: [], pins: {}, pinSkills: {} };
+  return MAP_DERIVED[api];
+}
+
+for (const e of abilityMap.mappings) {
+  const skillKey = e.skill && SKILL_OK[e.skill] ? e.skill : null;
+
+  if (e.polarity === 'excluded') {
+    const skipKey = e.augment + '|' + e.champion + '|' + (e.skill || 'null');
+    if (MAP_EXCLUDE_SKIP[skipKey]) {
+      mapLog.skip.push({ key: skipKey, confidence: e.confidence, reason: MAP_EXCLUDE_SKIP[skipKey] });
+      continue;
+    }
+    if (!HARD_OK[e.confidence]) {
+      // 명시 예외 목록에 없는 community excluded — 규율상 자동 보류 (신규 데이터 유입 대비 방어)
+      mapLog.skip.push({ key: skipKey, confidence: e.confidence, reason: 'community 근거 — 하드 필터 규율상 이진 금지(자동 보류)' });
+      continue;
+    }
+    const d = derivedOf(e.augment);
+    if (skillKey) {
+      if (!d.spellExclude[e.champion]) d.spellExclude[e.champion] = [];
+      if (d.spellExclude[e.champion].indexOf(skillKey) === -1) d.spellExclude[e.champion].push(skillKey);
+      mapLog.spellExclude.push({ augment: e.augment, champion: e.champion, skill: skillKey, confidence: e.confidence, source: e.source });
+    } else {
+      if (d.championExclude.indexOf(e.champion) === -1) d.championExclude.push(e.champion);
+      mapLog.championExclude.push({ augment: e.augment, champion: e.champion, confidence: e.confidence, source: e.source });
+    }
+    continue;
+  }
+
+  // offered — 필터에 쓰지 않음(표본). 단 skill 명시분은 spellPin(지정 확정)으로 이식.
+  // community 도 허용(계약: "community는 note에 표기") — 풀 필터가 아닌 지정이기 때문.
+  if (e.polarity === 'offered' && skillKey) {
+    const d = derivedOf(e.augment);
+    if (!d.pinSkills[e.champion]) d.pinSkills[e.champion] = [];
+    if (d.pinSkills[e.champion].indexOf(skillKey) === -1) d.pinSkills[e.champion].push(skillKey);
+    if (!d.pins[e.champion]) d.pins[e.champion] = { skill: skillKey, confidence: e.confidence, source: e.source };
+  }
+}
+
+// 다중 스킬 적격(같은 챔피언×증강에 상이한 skill) → 지정 확정 불가: pin 제거, 로그.
+// 예: SpinToWin 아리 W·R, 드레이븐 Q·E·R — 단일 pin으로 표현 불가라 ③무작위(또는 미지정)에 맡긴다.
+for (const api of Object.keys(MAP_DERIVED)) {
+  const d = MAP_DERIVED[api];
+  for (const champ of Object.keys(d.pinSkills)) {
+    if (d.pinSkills[champ].length > 1) {
+      mapLog.conflict.push({ augment: api, champion: champ, skills: d.pinSkills[champ].slice() });
+      delete d.pins[champ];
+    }
+  }
+}
+
+for (const api of Object.keys(MAP_DERIVED)) {
+  const d = MAP_DERIVED[api];
+  for (const champ of Object.keys(d.pins).sort()) {
+    mapLog.pin.push({ augment: api, champion: champ, skill: d.pins[champ].skill, confidence: d.pins[champ].confidence });
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /* 3. 적용                                                              */
 /* ------------------------------------------------------------------ */
 
 const RESTR_KEY_ORDER = ['rangedOnly', 'meleeOnly', 'requiresMana', 'classRequired', 'classExcluded',
-  'championWhitelist', 'championExclude', 'abilityProps', 'abilityPropsAll', 'spellExclude', 'slot', 'note'];
+  'championWhitelist', 'championExclude', 'abilityProps', 'abilityPropsAll', 'spellExclude', 'spellPin', 'slot', 'note'];
 
 const logRows = []; // { apiName, nameKo, category, fields:[], why }
-const counts = { ability: 0, quest: 0, normal: 0, restrAdded: 0, weightAdded: 0 };
+const counts = { ability: 0, quest: 0, normal: 0, restrAdded: 0, weightAdded: 0,
+  mapSpellPin: 0, mapSpellExclude: 0, mapChampionExclude: 0 };
 
 function orderedRestrictions(r) {
   const out = {};
@@ -300,9 +421,60 @@ for (const aug of augData.augments) {
   if (op) {
     if (op.r) for (const k of Object.keys(op.r)) { r[k] = op.r[k]; changedFields.add(k); }
     if (op.dropProps) { delete r.abilityProps; changedFields.add('-abilityProps(화이트리스트로 대체)'); }
+    if (op.drop) for (const k of op.drop) { if (r[k] !== undefined) { delete r[k]; changedFields.add('-' + k + '(근사 해제)'); } }
     if (op.note) r.note = op.note;
     if (op.fav) fav = op.fav.slice();
     if (op.dis) dis = op.dis.slice();
+  }
+
+  // (5b) ability-augment-map 이식 병합 — OPS(1차 스터디) 위에 3차 실매핑을 얹는다 (합집합, 결정론).
+  const md = MAP_DERIVED[api];
+  if (md) {
+    // excluded(official/datamined/empirical) → spellExclude 합집합 (스킬 배열은 QWER 순 정렬)
+    const seChamps = Object.keys(md.spellExclude).sort();
+    if (seChamps.length > 0) {
+      const merged = {};
+      const base = (r.spellExclude && typeof r.spellExclude === 'object') ? r.spellExclude : {};
+      for (const c of Object.keys(base)) merged[c] = base[c].slice();
+      for (const c of seChamps) {
+        if (!merged[c]) merged[c] = [];
+        for (const k of md.spellExclude[c]) if (merged[c].indexOf(k) === -1) merged[c].push(k);
+      }
+      const SKILL_ORDER = ['Q', 'W', 'E', 'R'];
+      const ordered = {};
+      for (const c of Object.keys(merged).sort()) {
+        ordered[c] = merged[c].slice().sort(function (x, y) { return SKILL_ORDER.indexOf(x) - SKILL_ORDER.indexOf(y); });
+      }
+      r.spellExclude = ordered;
+      changedFields.add('spellExclude(map)');
+      counts.mapSpellExclude += seChamps.reduce(function (n, c) { return n + md.spellExclude[c].length; }, 0);
+    }
+    // excluded 챔피언 단위 → championExclude 합집합
+    if (md.championExclude.length > 0) {
+      const list = (r.championExclude || []).slice();
+      for (const c of md.championExclude) if (list.indexOf(c) === -1) { list.push(c); counts.mapChampionExclude++; }
+      r.championExclude = list;
+      changedFields.add('championExclude(map)');
+    }
+    // offered 스킬 명시분 → spellPin (지정 확정 — 풀 필터 아님. community 허용, note에 표기)
+    const pinChamps = Object.keys(md.pins).sort();
+    if (pinChamps.length > 0) {
+      const pin = {};
+      const communityPins = [];
+      for (const c of pinChamps) {
+        pin[c] = md.pins[c].skill;
+        if (md.pins[c].confidence === 'community') communityPins.push(c + '=' + md.pins[c].skill);
+      }
+      r.spellPin = pin;
+      changedFields.add('spellPin(' + pinChamps.length + '건)');
+      counts.mapSpellPin += pinChamps.length;
+      if (communityPins.length > 0) {
+        // 재실행 결정론: 종전 실행이 남긴 동일 마커 suffix를 제거한 뒤 다시 부착
+        const MARKER = ' ‖ spellPin 중 community 실측분';
+        const base = r.note ? String(r.note).split(MARKER)[0] : '스킬 지정 확정 매핑(spellPin) — 근거: ability-augment-map.json';
+        r.note = base + MARKER + '(위키·커뮤니티 — 전사 오차 가능): ' + communityPins.join(', ');
+      }
+    }
   }
 
   // (6) 재조립 — 키 순서: …tier 뒤 category, tags 뒤 favored/disfavored, restrictions는 마지막
@@ -333,7 +505,9 @@ for (const aug of augData.augments) {
   if (dis) fieldDesc.push('disfavoredClasses=' + dis.join('/'));
   if (op && op.note) fieldDesc.push('note');
   if (fieldDesc.length > 0) {
-    logRows.push({ apiName: api, nameKo: rebuilt.nameKo, fields: fieldDesc.join(', '), why: (op && op.why) || (gateFields.length ? 'empirical(그룹 게이트)' : (fav || dis ? 'empirical(가중치)' : 'category 분류')) });
+    let why = (op && op.why) || (gateFields.length ? 'empirical(그룹 게이트)' : (fav || dis ? 'empirical(가중치)' : 'category 분류'));
+    if (md && !(op && op.why)) why = 'ability-augment-map 이식' + (gateFields.length > 1 ? ' + ' + why : '');
+    logRows.push({ apiName: api, nameKo: rebuilt.nameKo, fields: fieldDesc.join(', '), why: why });
   }
 }
 
@@ -348,8 +522,8 @@ const lines = [];
 lines.push('# enrich-augments 이식 로그');
 lines.push('');
 lines.push('- 생성: `node scripts/enrich-augments.cjs` (재실행 가능 — 수작업 편집 금지)');
-lines.push('- 입력: `research/data/eligibility-notes.json` → 출력: `docs/data/augments.json`');
-lines.push('- 원칙: confidence official/datamined/empirical → 이진 필터(restrictions), community → note까지만, 선호 층위 → favoredClasses/disfavoredClasses (근거: research/AUGMENT-POOLS-STUDY.md §3)');
+lines.push('- 입력: `research/data/eligibility-notes.json` + `research/data/ability-augment-map.json` → 출력: `docs/data/augments.json`');
+lines.push('- 원칙: confidence official/datamined/empirical → 이진 필터(restrictions), community → note까지만, 선호 층위 → favoredClasses/disfavoredClasses (근거: research/AUGMENT-POOLS-STUDY.md §3). 예외: restrictions.spellPin(지정 확정 매핑)은 풀 필터가 아니라 community 허용 — note에 표기 (real-mapping 계약)');
 lines.push('');
 lines.push('## 요약');
 lines.push('');
@@ -360,13 +534,58 @@ lines.push('| category=quest | ' + counts.quest + ' |');
 lines.push('| category=normal | ' + counts.normal + ' |');
 lines.push('| 이진 restrictions 필드 보유(이번 이식으로 부여/갱신) | ' + counts.restrAdded + ' |');
 lines.push('| 가중치 필드(favored/disfavoredClasses) 보유 | ' + counts.weightAdded + ' |');
+lines.push('| map 이식: spellPin (챔피언×증강 지정 확정) | ' + counts.mapSpellPin + ' |');
+lines.push('| map 이식: spellExclude 항목(챔피언×스킬) | ' + counts.mapSpellExclude + ' |');
+lines.push('| map 이식: championExclude 신규 | ' + counts.mapChampionExclude + ' |');
+lines.push('| map 이식 보류(사유 있음) | ' + mapLog.skip.length + ' |');
+lines.push('| map pin 확정 불가(다중 스킬 적격) | ' + mapLog.conflict.length + ' |');
+lines.push('');
+lines.push('## ability-augment-map 이식 상세 (3차 실매핑, 306건 중)');
+lines.push('');
+lines.push('### excluded → 하드 필터 (' + (mapLog.spellExclude.length + mapLog.championExclude.length) + '건)');
+lines.push('');
+lines.push('| 증강 | 챔피언 | 스킬 | 필드 | confidence |');
+lines.push('|---|---|---|---|---|');
+for (const e of mapLog.championExclude) {
+  lines.push('| ' + e.augment + ' | ' + e.champion + ' | — | championExclude | ' + e.confidence + ' |');
+}
+for (const e of mapLog.spellExclude) {
+  lines.push('| ' + e.augment + ' | ' + e.champion + ' | ' + e.skill + ' | spellExclude | ' + e.confidence + ' |');
+}
+lines.push('');
+lines.push('### 하드 필터 보류 (' + mapLog.skip.length + '건 — 각 사유)');
+lines.push('');
+for (const s of mapLog.skip) {
+  lines.push('- `' + s.key + '` (' + s.confidence + '): ' + s.reason);
+}
+lines.push('');
+lines.push('### offered(skill 명시) → spellPin (' + mapLog.pin.length + '건)');
+lines.push('');
+lines.push('| 증강 | 챔피언 | 스킬 | confidence |');
+lines.push('|---|---|---|---|');
+for (const p of mapLog.pin) {
+  lines.push('| ' + p.augment + ' | ' + p.champion + ' | ' + p.skill + ' | ' + p.confidence + ' |');
+}
+lines.push('');
+lines.push('### pin 확정 불가 — 다중 스킬 적격 (' + mapLog.conflict.length + '건, 지정은 ③무작위에 위임)');
+lines.push('');
+for (const c of mapLog.conflict) {
+  lines.push('- ' + c.augment + ' × ' + c.champion + ': ' + c.skills.join('·'));
+}
+lines.push('');
+lines.push('### 근사 게이트 완화 (offered 검증 기준 — 계약 "필터가 실제보다 좁으면 완화")');
+lines.push('');
+lines.push('- **ARAM_Quickstep meleeOnly 제거**: 원거리 켄넨 R offered(official, 26.12) 반증 → favoredClasses(Fighter/Tank) 강등.');
+lines.push('- **TitansPulse meleeOnly 제거**: 원거리 아리·리산드라·블라디미르 offered(empirical, mayhemmeta 16챔프) 반증 → favoredClasses(Fighter/Tank) 강등.');
+lines.push('- **ARAM_SkilledSniper rangedOnly 제거**: 근접 Locke Q offered(official, 26.15) 반증 → favoredClasses(Mage/Marksman) 강등.');
+lines.push('- **Spin To Win 화이트리스트**: raw/15 §2-1 검증 수정본(22챔피언·28스킬)에서 스크립트 파생 — 챔피언 집합은 종전과 동일, 근거 등급을 community(위키 편집자 실측)로 정정하고 단일 QWER 스킬 확정 챔피언에는 spellPin 부여.');
 lines.push('');
 lines.push('## 판단 기록 (근사·보류)');
 lines.push('');
 lines.push('- **OceanSoul 미이식**: 마나 태그 계열이나 실측 6명 전원 등재 — STUDY §3-1 "보류" 지시대로 requiresMana 미부여.');
 lines.push('- **adCrit/AP 계열은 가중치로만**: 실측은 구조적 부재(브랜드·말파이트·소라카 등)를 시사하나 DDragon tags가 하이브리드(이즈리얼 Marksman+Mage, 카타리나 Assassin+Mage)라 클래스 이진 제외는 오탐을 만든다 → favored/disfavored 가중치로 근사 (STUDY §3-2 정합). ARAM_PhenomenalEvil은 징크스 포함 관측이라 disfavored 미부여.');
-lines.push('- **meleeCluster 중 Stuck in Here With Me**: 실측 불확실(징크스 op.gg 등재) → meleeOnly 대신 favoredClasses(Fighter/Tank/Assassin)만.');
-lines.push('- **sniper 계열(Skilled Sniper·From Downtown)**: 완전 제외 실측(원거리 3인만) → rangedOnly로 근사 (실제 조건은 장거리 스킬샷 보유로 추정).');
+lines.push('- **meleeCluster**: Upgrade_Immolate만 meleeOnly 유지 — TitansPulse·Quickstep은 신규 offered 반례로 게이트 완화(아래 "근사 게이트 완화"), Stuck in Here With Me는 실측 불확실(징크스 op.gg 등재)이라 종전대로 favoredClasses(Fighter/Tank/Assassin)만.');
+lines.push('- **sniper 계열**: From Downtown(BangBang)만 rangedOnly 유지 (실제 조건은 장거리 스킬샷 보유로 추정) — Skilled Sniper는 Locke Q 공식 반례로 게이트 완화(아래 참조).');
 lines.push('- **selfHealCircle 계열**: 조건을 "킷 내 회복 보유"로 추정 → abilityProps=heal.');
 lines.push('- **Spin To Win**: 종전 abilityProps=spin 제거, 위키 명시 22챔피언 화이트리스트로 대체 (champions.json spin 속성 누락 리스크 회피).');
 lines.push('- **excludeSpell 계열(야스오 E 등 7건)**: 챔피언 전체 제외가 아니라 스킬 슬롯 단위 부적격 → championExclude가 아닌 `restrictions.spellExclude`({챔피언id: [스킬키]})로 기록. draft.js의 enhancedSkill 지정에서 활용 가능(현재는 note 겸 기계가독 기록).');
@@ -387,4 +606,6 @@ fs.writeFileSync(LOG_PATH, lines.join('\n'), 'utf8');
 
 console.log('[enrich-augments] category: ability=' + counts.ability + ' quest=' + counts.quest + ' normal=' + counts.normal);
 console.log('[enrich-augments] 이진 restrictions 부여/갱신: ' + counts.restrAdded + '건, 가중치 필드: ' + counts.weightAdded + '건');
+console.log('[enrich-augments] map 이식: spellPin=' + counts.mapSpellPin + ' spellExclude=' + counts.mapSpellExclude
+  + ' championExclude(신규)=' + counts.mapChampionExclude + ' 보류=' + mapLog.skip.length + ' pin충돌=' + mapLog.conflict.length);
 console.log('[enrich-augments] 로그: scripts/enrich-augments-log.md (' + logRows.length + '행)');

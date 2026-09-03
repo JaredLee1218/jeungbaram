@@ -130,6 +130,35 @@ ok(badChamp === 0, '무결성: combos 챔피언 id 전부 champions.json에 존�
   }
 }
 
+// ---- 2.7) 실매핑 offered 전수 대조 (real-mapping 계약 검증 기준 1) ----
+// research/data/ability-augment-map.json 의 offered 287건 중 champion-level 근거
+// (official+empirical)는 "그 챔피언 풀에 실재한다"는 존재 증명 — 전수를 eligibleAugments
+// 풀과 대조해 위반 0 이어야 한다. (community/datamined offered는 표본 신뢰도상 제외.
+// 위반 시 필터가 실제보다 좁다는 뜻 — 원인 규명 후 필터 완화 또는 props 데이터 정정)
+{
+  const mapData = JSON.parse(readFileSync(join(ROOT, 'research', 'data', 'ability-augment-map.json'), 'utf8'));
+  const byId = new Map(champData.champions.map((c) => [c.id, c]));
+  const offered = mapData.mappings.filter(
+    (e) => e.polarity === 'offered' && (e.confidence === 'official' || e.confidence === 'empirical'));
+  ok(offered.length >= 200, '실매핑: offered(official+empirical) ' + offered.length + '건 로드 (>=200)');
+  const poolCache = new Map();
+  const violations = [];
+  for (const e of offered) {
+    const champ = byId.get(e.champion);
+    if (!champ) { violations.push(e.champion + ' × ' + e.augment + ' — 챔피언 id 미존재'); continue; }
+    if (!augNames.has(e.augment)) { violations.push(e.champion + ' × ' + e.augment + ' — 증강 apiName 미존재'); continue; }
+    if (!poolCache.has(e.champion)) {
+      poolCache.set(e.champion, new Set(eligibleAugments(augData.augments, champ).map((a) => a.apiName)));
+    }
+    if (!poolCache.get(e.champion).has(e.augment)) {
+      violations.push(e.champion + (e.skill ? ' ' + e.skill : '') + ' × ' + e.augment + ' (' + e.confidence + ') — 풀에 부재');
+    }
+  }
+  for (const v of violations) console.error('  offered 위반: ' + v);
+  ok(violations.length === 0,
+    '실매핑: offered ' + offered.length + '건 전부 해당 챔피언 풀에 존재 (위반 ' + violations.length + '건)');
+}
+
 // ---- 3) 에코로 4라운드 자동 진행 ----
 const ekko = champData.champions.find((c) => c.id === 'Ekko');
 ok(!!ekko, '챔피언: 에코(Ekko) 존재');
