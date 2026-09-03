@@ -99,6 +99,12 @@ button {
 }
 .app-footer p { margin: 4px 0; }
 .app-footer strong { color: var(--gold); }
+.app-footer a {
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.app-footer a:hover { color: var(--gold); }
 
 .screen { animation: fade-in 0.25s ease; }
 
@@ -1377,6 +1383,52 @@ button {
   margin-top: 20px;
 }
 .result-actions .btn { width: 100%; }
+
+/* ---------- 광고 슬롯 (research/ADS-PLAN.md — 지금은 자리만) ----------
+   기본 hidden — 상단의 [hidden]{display:none !important}가 아래 .ad-slot의
+   display:flex를 이긴다(!important 필수 — 제거하면 뒤에 오는 .ad-slot 규칙이
+   이겨서 빈 슬롯이 보인다). 광고단위 발급 전에는 렌더 자체가 없다.
+   app.js activateAdSlot()이 hidden을 해제하는 시점부터 min-height 예약이 걸려
+   CLS를 막는다. 활성 후에는 미채움(no-fill)이어도 다시 접지 말 것 —
+   공간 제거도 삽입만큼 CLS를 유발한다 (web.dev optimize-cls). */
+
+.ad-slot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 24px; /* 버튼 그룹과 이격 — 인접 오클릭 유발 배치 정책 대응 */
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: rgba(19, 36, 65, 0.45); /* 다크 테마 placeholder */
+  overflow: hidden;
+}
+
+/* min-height = 광고 규격 + "광고" 라벨 줄 여유 */
+.ad-slot-rect   { min-height: 270px; } /* 300x250 (중형 직사각형 — 결과 화면 주력) */
+.ad-slot-banner { min-height: 120px; } /* 320x100 (대형 모바일 배너) */
+
+.ad-slot-label {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+/* 320px 뷰포트: 콘텐츠 폭 296px < 고정 300px 광고 → 풀블리드로 넘침 방지 */
+@media (max-width: 340px) {
+  .ad-slot {
+    margin-left: -12px;
+    margin-right: -12px;
+    border-left: 0;
+    border-right: 0;
+    border-radius: 0;
+  }
+}
 
 /* ---------- 반응형 (태블릿 이상) ---------- */
 

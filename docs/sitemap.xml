@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 증바람 시뮬레이터 sitemap.
+     절대 URL 예외: sitemap 프로토콜이 절대 URL을 요구한다
+     ("docs/ 상대 경로만" 원칙은 리소스 참조 한정).
+     해시 라우트(#dex/...)는 URL 프래그먼트라 검색엔진이 별도 URL로 색인하지 않으므로 제외. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://jaredlee1218.github.io/jeungbaram/</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://jaredlee1218.github.io/jeungbaram/privacy.html</loc>
+    <lastmod>2026-09-03</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+</urlset>

@@ -1,0 +1,12 @@
+# 증바람 시뮬레이터 robots.txt
+# 참고: 프로젝트 페이지(하위 경로 /jeungbaram/) 배포에서는 이 파일이
+#   https://jaredlee1218.github.io/jeungbaram/robots.txt 로 서빙된다.
+#   robots.txt 표준은 도메인 루트에서만 읽으므로 현 주소에서는 참고용이며,
+#   추후 커스텀 도메인 연결 시 그대로 루트에서 유효해진다.
+#   Sitemap은 서치 콘솔에 직접 제출하면 위치와 무관하게 동작한다.
+# 절대 URL 예외: robots/sitemap 표준이 절대 URL을 요구 ("docs/ 상대 경로만" 원칙은 리소스 참조 한정).
+
+User-agent: *
+Allow: /
+
+Sitemap: https://jaredlee1218.github.io/jeungbaram/sitemap.xml

@@ -136,6 +136,9 @@ function showScreen(name) {
     if (el) el.hidden = s !== name;
   });
   window.scrollTo(0, 0);
+  /* 광고 슬롯은 화면이 "표시된 후"에만 활성화 — hidden 섹션 안에서 광고를
+   * 로드하면 폭 계산 실패(availableWidth=0)로 깨진다 (SPA 함정). */
+  activateAdSlot(name);
 }
 
 var toastTimer = null;
@@ -2440,6 +2443,78 @@ function renderResult() {
   $("#result-body").innerHTML = body;
   syncUrl();
   showScreen("result");
+}
+
+/* ---------------- 광고 슬롯 (골격 — 아직 광고 코드 없음) ----------------
+ *
+ * 배치 설계·활성화 절차: research/ADS-PLAN.md 참조.
+ * index.html의 슬롯 3곳: select(320x100) / dex(320x100) / result(300x250 주력).
+ * 드래프트 화면은 의도적 제외 — 카드 탭·리롤 버튼이 밀집한 연속 인터랙션
+ * 화면이라 오클릭 유발 배치(광고 정책 위반 소지). 같은 이유로 앵커(하단 고정)형·
+ * 자동 광고(Auto ads)도 쓰지 않는다: SPA 단일 URL이라 화면별로 끌 수 없음 —
+ * 수동 슬롯만 사용.
+ *
+ * 활성화 방법 (애드핏 광고단위 발급 후):
+ *   1) 아래 AD_UNITS의 해당 슬롯에 발급 정보 기입
+ *      예: result: { unit: "DAN-xxxxxxxxxxxx", width: 300, height: 250 }
+ *   2) activateAdSlot()·loadAdfitScript() 안의
+ *      "여기에 애드핏 스크립트" 주석 블록 해제
+ * AD_UNITS가 전부 null인 지금은 모든 슬롯이 hidden 그대로 — 화면 변화 0.
+ */
+
+/* 슬롯별 광고단위 — null이면 해당 슬롯 비활성 (키 = 화면 이름 = 슬롯 이름) */
+var AD_UNITS = {
+  select: null, // 320x100 권장 — 챔피언 그리드 아래
+  dex: null,    // 320x100 권장 — 사전 본문 끝
+  result: null, // 300x250 권장 — 결과 화면 버튼 아래 (주력)
+};
+
+/* 슬롯당 1회 로드 플래그 — 화면 재진입 시 재로드/재push 금지
+ * (페이지 로드 없는 광고 리프레시는 정책 위반 소지) */
+var adSlotLoaded = {};
+
+function activateAdSlot(screenName) {
+  var conf = AD_UNITS[screenName];
+  if (!conf || adSlotLoaded[screenName]) return;
+  var el = document.getElementById("ad-slot-" + screenName);
+  if (!el) return;
+  adSlotLoaded[screenName] = true;
+  /* hidden 해제 시점부터 CSS min-height 예약 적용 (CLS 방지).
+   * 이후 미채움(no-fill)이어도 다시 hidden으로 접지 말 것 — 공간 제거도 CLS. */
+  el.hidden = false;
+
+  /* ▼ 여기에 애드핏 스크립트 — 광고단위 발급 후 아래 블록 주석 해제.
+   * (공식 삽입 코드 형식 그대로 — <ins class="kakao_ad_area"> + ba.min.js)
+
+  var ins = document.createElement("ins");
+  ins.className = "kakao_ad_area";
+  ins.style.display = "none"; // 애드핏 스크립트가 로드 성공 시 직접 해제 (공식 형식)
+  ins.style.width = "100%";
+  ins.setAttribute("data-ad-unit", conf.unit);
+  ins.setAttribute("data-ad-width", String(conf.width));
+  ins.setAttribute("data-ad-height", String(conf.height));
+  el.appendChild(ins);
+  loadAdfitScript();
+
+  */
+}
+
+/* 애드핏 로더(ba.min.js)는 문서 전체에서 1회만 주입 —
+ * 첫 슬롯 활성화 때 호출되므로 초기 로드(LCP/TBT)에 영향 없음 */
+var adfitScriptInjected = false;
+function loadAdfitScript() {
+  if (adfitScriptInjected) return;
+  adfitScriptInjected = true;
+
+  /* ▼ 여기에 애드핏 스크립트 로더 — 광고단위 발급 후 아래 블록 주석 해제.
+
+  var s = document.createElement("script");
+  s.async = true;
+  s.type = "text/javascript";
+  s.src = "https://t1.kakaocdn.net/kas/static/ba.min.js";
+  document.body.appendChild(s);
+
+  */
 }
 
 /* ---------------- 초기화 ---------------- */

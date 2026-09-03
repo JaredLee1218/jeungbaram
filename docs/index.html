@@ -6,6 +6,15 @@
   <meta name="color-scheme" content="dark">
   <title>증바람 시뮬레이터</title>
   <meta name="description" content="무작위 총력전: 아수라장 — 증강 드래프트 시뮬레이터. 챔피언을 고르고 4라운드 증강을 뽑으면 꿀잼 플레이스타일을 추천합니다.">
+  <!-- SEO/OG 메타. og:url·og:image류는 표준상 절대 URL이 필수라
+       "docs/ 상대 경로만" 원칙(리소스 참조 한정)의 예외다 — robots.txt/sitemap.xml도 동일. -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="증바람 시뮬레이터">
+  <meta property="og:title" content="증바람 시뮬레이터 — 아수라장 증강 드래프트">
+  <meta property="og:description" content="무작위 총력전: 아수라장 증강 드래프트 시뮬레이터. 챔피언을 고르고 4라운드 증강을 뽑으면 꿀잼 플레이스타일·스킬·아이템을 추천합니다.">
+  <meta property="og:url" content="https://jaredlee1218.github.io/jeungbaram/">
+  <meta property="og:locale" content="ko_KR">
+  <link rel="canonical" href="https://jaredlee1218.github.io/jeungbaram/">
   <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='0.9em'%20font-size='90'%3E%F0%9F%8C%80%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="./css/app.css">
 </head>
@@ -49,15 +58,27 @@
       <div id="champ-preview" class="champ-preview" aria-live="polite" hidden></div>
       <div id="champ-grid" class="champ-grid"></div>
       <p id="champ-empty" class="empty-msg" hidden>검색 결과가 없습니다.</p>
+      <!-- 광고 슬롯 C (선택적): 그리드 아래·푸터 위, 320x100 권장 — research/ADS-PLAN.md.
+           광고단위 발급 전엔 hidden 유지(화면 변화 0) — app.js AD_UNITS 기입 시 활성화 -->
+      <div id="ad-slot-select" class="ad-slot ad-slot-banner" data-slot="select" hidden>
+        <span class="ad-slot-label">광고</span>
+      </div>
     </section>
 
     <!-- ①-b 챔피언 꿀잼 사전 (해시 라우팅 #dex/{챔피언id} — 미리보기 패널에서 진입) -->
     <section id="screen-dex" class="screen" hidden aria-label="챔피언 꿀잼 사전">
       <button id="btn-dex-back" class="btn btn-dex-back" type="button">← 뒤로</button>
       <div id="dex-body" class="dex-body"></div>
+      <!-- 광고 슬롯 B: 사전 본문 끝, 320x100 권장 — research/ADS-PLAN.md.
+           반드시 #dex-body 밖(형제)에 둘 것: 챔피언 전환 시 innerHTML 재생성으로
+           광고 DOM이 파괴되면 안 된다. 발급 전엔 hidden 유지 -->
+      <div id="ad-slot-dex" class="ad-slot ad-slot-banner" data-slot="dex" hidden>
+        <span class="ad-slot-label">광고</span>
+      </div>
     </section>
 
-    <!-- ② 드래프트 -->
+    <!-- ② 드래프트 — 광고 슬롯 없음 (의도적 제외): 카드 탭·리롤 버튼이 밀집한
+         연속 인터랙션 화면이라 오클릭 유발 배치로 정책 위반 소지 (research/ADS-PLAN.md) -->
     <section id="screen-draft" class="screen" hidden aria-label="증강 드래프트">
       <ol id="draft-progress" class="progress" aria-label="드래프트 진행"></ol>
       <div class="draft-head">
@@ -84,6 +105,12 @@
         <button id="btn-again" class="btn" type="button">같은 챔피언으로 다시</button>
         <button id="btn-restart" class="btn" type="button">처음부터</button>
       </div>
+      <!-- 광고 슬롯 A (주력): 과업 완료 지점·스크롤 종단, 300x250 권장 — research/ADS-PLAN.md.
+           버튼 그룹 아래 배치 + CSS margin-top 24px 이격(인접 오클릭 정책 대응).
+           발급 전엔 hidden 유지 -->
+      <div id="ad-slot-result" class="ad-slot ad-slot-rect" data-slot="result" hidden>
+        <span class="ad-slot-label">광고</span>
+      </div>
     </section>
 
   </main>
@@ -91,6 +118,7 @@
   <footer class="app-footer">
     <p>※ 챔피언별 증강 풀·가중치는 <strong>공식 확인 + 실측 통계 기반 근사</strong>입니다.</p>
     <p>팬 제작 시뮬레이터입니다. Riot Games와 무관하며, Riot Games는 본 프로젝트를 보증하지 않습니다.</p>
+    <p><a href="./privacy.html">개인정보처리방침</a></p>
   </footer>
 
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
